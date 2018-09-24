@@ -6,14 +6,14 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 import announce
 
 # ログ出力
-def outputLog(str):
+def outputLog(comment):
 
     # 時刻表示を作成
     timeStamp = datetime.datetime.today() + datetime.timedelta(hours=9)
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
 
     # 出力
-    print(str + " @ " + timeStamp)
+    print(comment + " @ " + timeStamp)
 
 # インスタンス化
 sched = BlockingScheduler()
