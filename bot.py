@@ -19,7 +19,7 @@ def outputLog(str):
 sched = BlockingScheduler()
 
 # 定期ツイート（毎時 0, 15, 30, 45 分）
-@sched.scheduled_job('cron', minutes = '0, 15, 30, 45', hour = '*/1')
+@sched.scheduled_job('cron', minute = '0, 15, 30, 45', hour = '*/1')
 def scheduled_job():
 
     # 実行
