@@ -21,12 +21,15 @@ sched = BlockingScheduler()
 # 定期ツイート（毎時 0, 15, 30, 45 分）
 @sched.scheduled_job('cron', minute = '0, 15, 30, 45', hour = '*/1')
 def scheduled_job():
+    
+    # 開始ログ出力
+    outputLog("--- 定期ツイート 開始 ---")
 
     # 実行
     announce.announce()
 
-    # ログ出力
-    outputLog("定期ツイート")
+    # 終了ログ出力
+    outputLog("--- 定期ツイート 終了 ---")
 
 # おまじない
 sched.start()
