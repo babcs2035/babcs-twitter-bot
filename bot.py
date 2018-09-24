@@ -4,6 +4,7 @@ import tweepy
 import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
 import announce
+import followBack
 
 # ログ出力
 def outputLog(comment):
@@ -30,6 +31,19 @@ def scheduled_job():
 
     # 終了ログ出力
     outputLog("--- 定期ツイート 終了 ---")
+
+# フォロバ（毎時 0, 30 分）
+@sched.scheduled_job('cron', minute = '0, 30', hour = '*/1')
+def scheduled_job():
+
+    # 開始ログ出力
+    outputLog("--- フォロバ 開始 ---")
+
+    # 実行
+    followBack.followBack()
+
+    # 終了ログ出力
+    outputLog("--- フォロバ 終了 ---")
 
 # おまじない
 sched.start()
