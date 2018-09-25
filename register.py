@@ -6,10 +6,12 @@ import json
 from requests_oauthlib import OAuth1Session
 
 # 最後に取得したツイート ID
-lastTweetID = -1
+lastTweetID = 0
 
 def register():
-
+    
+    global lastTweetID
+    
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
     CS = os.environ["CONSUMER_SECRET"]
@@ -35,7 +37,7 @@ def register():
     if timeline_json.status_code == 200:
         timeline = json.loads(timeline_json.text)
         for tweet in timeline:
-            if tweet["id"] <= lastTweetID:
+            if int(tweet["id_str"]) <= lastTweetID:
                 break
             tweetText = str(tweet["text"])
             tweetSplited = tweetText.split()
@@ -49,6 +51,6 @@ def register():
                         userData = json.loads(userData_json.text)
                         api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID の形式を満たしていません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("Reject to register new AtCoder ID : " + tweetSplited[2])
-        lastTweetID = timeline[0]["id"]
+        lastTweetID = int(timeline[0]["id_str"])
     else:
         print("Error: %d" % req.status_code)
