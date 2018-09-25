@@ -36,4 +36,5 @@ def followBack():
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
     
     # ツイート
-    api.update_status(followStr + "\n" + timeStamp)
+    if followedCnt > 0:
+        api.update_status(followStr + "\n" + timeStamp)
