@@ -53,4 +53,4 @@ def register():
                         print("Reject to register new AtCoder ID : " + tweetSplited[2])
         lastTweetID = int(timeline[0]["id_str"])
     else:
-        print("Error: %d" % req.status_code)
+        print("Error: %d" % timeline_json.status_code)
