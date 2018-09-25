@@ -5,6 +5,7 @@ import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
 import announce
 import followBack
+import register
 
 # ログ出力
 def outputLog(comment):
@@ -31,7 +32,7 @@ def scheduled_job():
 
     # 終了ログ出力
     outputLog("--- 定期ツイート 終了 ---")
-
+    
 # フォロバ（毎時 0, 30 分）
 @sched.scheduled_job('cron', minute = '0, 30', hour = '*/1')
 def scheduled_job():
@@ -44,6 +45,12 @@ def scheduled_job():
 
     # 終了ログ出力
     outputLog("--- フォロバ 終了 ---")
+
+# AtCoder ID 登録（5 秒ごと）
+@sched.scheduled_job('interval', seconds = 5)
+def scheduled_job():
+    # 実行
+    register.register()
 
 # おまじない
 sched.start()
