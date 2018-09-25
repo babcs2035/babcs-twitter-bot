@@ -25,7 +25,7 @@ def register():
     
     # OAuth でツイートを取得
     api_OAuth = OAuth1Session(CK, CS, AT, AS)
-    timeline_json = api_OAuth.get("https://api.twitter.com/1.1/statuses/home_timeline.json", params = {"count" : 200})
+    timeline_json = api_OAuth.get("https://api.twitter.com/1.1/statuses/user_timeline.json", params = {"count" : 200})
     
     # 時刻表示を作成
     timeStamp = datetime.datetime.today() + datetime.timedelta(hours=9)
