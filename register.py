@@ -3,13 +3,27 @@ import os
 import tweepy
 import datetime
 import json
+import urllib.request
 from requests_oauthlib import OAuth1Session
 
 # 最後に取得したツイート ID
 lastTweetID = 0
 
+# AtCoder ID が存在するか確認
+def checkID(atcoderID):
+
+    # AtCoder ユーザーページにアクセス
+    try:
+        html = urllib.request.urlopen("https://beta.atcoder.jp/users/" + atcoderID)
+        print(atcoderID + " is correct AtCoder ID")
+        return True
+    except:
+        print(atcoderID + " is not correct AtCoder ID")
+        return False
+
 def register():
     
+    # グローバル変数
     global lastTweetID
     
     # 各種キー設定
@@ -45,12 +59,12 @@ def register():
                 if tweetSplited[1] == "reg":
                     userData_json = api_OAuth.get("https://api.twitter.com/1.1/users/show.json?user_id=" + tweet["user"]["id_str"])
                     userData = json.loads(userData_json.text)
-                    if tweetSplited[2].encode('utf-8').isalpha():
+                    if checkID(tweetSplited[2]):
                         api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("Register new AtCoder ID : " + tweetSplited[2])
                     else:
-                        api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID の形式を満たしていません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                        api.update_status("@" + str(userData["screen_name"]) + " 正しい AtCoder ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("Reject to register new AtCoder ID : " + tweetSplited[2])
         lastTweetID = int(timeline[0]["id_str"])
     else:
-        print("Error: %d" % timeline_json.status_code)
+        print("Twitter API Error: %d" % timeline_json.status_code)
