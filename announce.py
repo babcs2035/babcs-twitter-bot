@@ -9,6 +9,7 @@ announceMessages = ["この Bot の名前を募集中です．リプライ・DM 
     "この Bot の作者は Bwambocos ( @babcs2035 ) です．意見・不満・批判はこちらへお願いします！"]
 
 def announce():
+
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
     CS = os.environ["CONSUMER_SECRET"]
@@ -27,3 +28,4 @@ def announce():
     # ツイート
     announceMessage = announceMessages[random.randrange(len(announceMessages))]
     api.update_status("＜定期＞\n" + announceMessage + "\n" + timeStamp)
+    print("announce: ツイート完了：" + announceMessage)
