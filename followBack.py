@@ -25,10 +25,10 @@ def followBack():
     for user in list_apr:
         try:
             api.create_friendship(user)
-            print("Created friendship with %s" %user) 
+            print("followBack: Created friendship with %s" % user) 
             followedCnt = followedCnt + 1
         except tweepy.error.TweepError:
-            print("Could not create friendship with %s" %user)
+            print("followBack: Could not create friendship with %s" % user)
     followStr = "新しく " + str(followedCnt) + " 人をフォローしました！"
 
     # 時刻表示を作成
@@ -38,3 +38,4 @@ def followBack():
     # ツイート
     if followedCnt > 0:
         api.update_status(followStr + "\n" + timeStamp)
+    print("followBack: 新規フォロー " + str(followedCnt) + " 人")
