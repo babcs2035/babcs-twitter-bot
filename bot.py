@@ -46,8 +46,8 @@ def scheduled_job():
     # 終了ログ出力
     outputLog("--- フォロバ 終了 ---")
 
-# AtCoder ID 登録（5 秒ごと）
-@sched.scheduled_job('interval', seconds = 5)
+# AtCoder ID 登録（12 秒ごと）
+@sched.scheduled_job('interval', seconds = 12)
 def scheduled_job():
     # 実行
     register.register()
