@@ -6,6 +6,7 @@ certifi==2018.8.24
 cffi==1.11.5
 chardet==3.0.4
 cryptography==2.3.1
+dropbox==9.0.0
 idna==2.7
 Jinja2==2.10
 MarkupSafe==1.0
