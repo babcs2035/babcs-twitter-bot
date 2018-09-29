@@ -27,7 +27,6 @@ def downloadFromDropbox():
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
     dbx.files_download_to_file('lastTweetID.txt', '/lastTweetID.txt')
-    print("register: Downloaded lastTweetID : ", str(lastTweetID))
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -40,6 +39,7 @@ def uploadToDropbox():
     dbx.files_delete('/lastTweetID.txt')
     dbx.files_upload(f.read(), '/lastTweetID.txt')
     f.close()
+    print("register: Uploaded lastTweetID : ", str(lastTweetID))
 
 def register():
     
@@ -70,7 +70,7 @@ def register():
     f = open('lastTweetID.txt','r')
     lastTweetID = f.readline()
     f.close()
-    print("register: Uploaded lastTweetID : ", str(lastTweetID))
+    print("register: Downloaded lastTweetID : ", str(lastTweetID))
 
     # ツイートを解析
     myTwitterID = "babcs_bot"
