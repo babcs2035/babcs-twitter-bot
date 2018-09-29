@@ -84,7 +84,7 @@ def register():
             tweetSplited = tweetText.split()
             if len(tweetSplited) >= 3:
                 if tweetSplited[1] == "reg":
-                    userData_json = api_OAuth.get("https://beta.atcoder.jp/users/" + tweet["user"]["id_str"])
+                    userData_json = api_OAuth.get("https://api.twitter.com/1.1/users/show.json?user_id=" + tweet["user"]["id_str"])
                     userData = json.loads(userData_json.text)
                     if checkID(tweetSplited[2]):
                         api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
