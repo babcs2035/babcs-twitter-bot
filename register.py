@@ -45,6 +45,7 @@ def downloadFromDropbox():
     # AtCoderID をダウンロード
     dbx.files_download_to_file("AtCoderID.txt", "/AtCoderID.txt")
     with open("AtCoderID.txt", "r") as f:
+        AtCoderID.clear()
         for id in f:
             AtCoderID.append(id.rstrip("\n"))
     print("register: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
@@ -52,6 +53,7 @@ def downloadFromDropbox():
     # TwitterID をダウンロード
     dbx.files_download_to_file("TwitterID.txt", "/TwitterID.txt")
     with open("TwitterID.txt", "r") as f:
+        TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
     print("register: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
