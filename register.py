@@ -9,6 +9,8 @@ from requests_oauthlib import OAuth1Session
 
 # 最後に取得したツイート ID
 lastTweetID = 0
+AtCoderID = []
+TwitterID = []
 
 # AtCoder ID が存在するか確認
 def checkID(atcoderID):
@@ -24,27 +26,75 @@ def checkID(atcoderID):
 
 # Dropbox からダウンロード
 def downloadFromDropbox():
+    
+    # グローバル変数
+    global lastTweetID
+    global AtCoderID
+    global TwitterID
+
+    # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
-    dbx.files_download_to_file('lastTweetID.txt', '/lastTweetID.txt')
+
+    # lastTweetID をダウンロード
+    dbx.files_download_to_file("lastTweetID.txt", "/lastTweetID.txt")
+    with open("lastTweetID.txt", "r") as f:
+        lastTweetID = f.readline()
+    print("register: Downloaded lastTweetID : ", str(lastTweetID))
+    
+    # AtCoderID をダウンロード
+    dbx.files_download_to_file("AtCoderID.txt", "/AtCoderID.txt")
+    with open("AtCoderID.txt", "r") as f:
+        for id in f:
+            AtCoderID.append(id.rstrip("\n"))
+    print("register: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
+
+    # TwitterID をダウンロード
+    dbx.files_download_to_file("TwitterID.txt", "/TwitterID.txt")
+    with open("TwitterID.txt", "r") as f:
+        for id in f:
+            TwitterID.append(id.rstrip("\n"))
+    print("register: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
-    f = open('lastTweetID.txt','w')
-    f.write(str(lastTweetID))
-    f.close()
-    f = open('lastTweetID.txt','rb')
+
+    # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
-    dbx.files_delete('/lastTweetID.txt')
-    dbx.files_upload(f.read(), '/lastTweetID.txt')
-    f.close()
+    
+    # lastTweetID をアップロード
+    with open("lastTweetID.txt", "w") as f:
+        f.write(str(lastTweetID))
+    with open("lastTweetID.txt", "rb") as f:
+        dbx.files_delete("/lastTweetID.txt")
+        dbx.files_upload(f.read(), "/lastTweetID.txt")
     print("register: Uploaded lastTweetID : ", str(lastTweetID))
+    
+    # AtCoderID をアップロード
+    with open("AtCoderID.txt", "w") as f:
+        for id in AtCoderID:
+            f.write(str(id) + "\n")
+    with open("AtCoderID.txt", "rb") as f:
+        dbx.files_delete("/AtCoderID.txt")
+        dbx.files_upload(f.read(), "/AtCoderID.txt")
+    print("register: Uploaded AtCoderID (size : ", str(len(AtCoderID)), ")")
+
+    # TwitterID をアップロード
+    with open("TwitterID.txt", "w") as f:
+        for id in TwitterID:
+            f.write(str(id) + "\n")
+    with open("TwitterID.txt", "rb") as f:
+        dbx.files_delete("/TwitterID.txt")
+        dbx.files_upload(f.read(), "/TwitterID.txt")
+    print("register: Uploaded TwitterID (size : ", str(len(TwitterID)), ")")
 
 def register():
     
     # グローバル変数
     global lastTweetID
+    global AtCoderID
+    global TwitterID
     
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
@@ -65,12 +115,8 @@ def register():
     timeStamp = datetime.datetime.today() + datetime.timedelta(hours=9)
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
     
-    # どのツイートまで処理したか取得
+    # データをダウンロード
     downloadFromDropbox()
-    f = open('lastTweetID.txt','r')
-    lastTweetID = f.readline()
-    f.close()
-    print("register: Downloaded lastTweetID : ", str(lastTweetID))
 
     # ツイートを解析
     myTwitterID = "babcs_bot"
@@ -87,12 +133,16 @@ def register():
                     userData_json = api_OAuth.get("https://api.twitter.com/1.1/users/show.json?user_id=" + tweet["user"]["id_str"])
                     userData = json.loads(userData_json.text)
                     if checkID(tweetSplited[2]):
+                        AtCoderID.append(tweetSplited[2])
+                        TwitterID.append(userData["screen_name"])
                         api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Register new AtCoder ID : " + tweetSplited[2])
                     else:
                         api.update_status("@" + str(userData["screen_name"]) + " 正しい AtCoder ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Reject to register new AtCoder ID : " + tweetSplited[2])
         lastTweetID = int(timeline[0]["id_str"])
+
+        # データをアップロード
         uploadToDropbox()
     else:
         print("register: Twitter API Error: %d" % timeline_json.status_code)
