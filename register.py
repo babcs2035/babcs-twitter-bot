@@ -160,16 +160,23 @@ def register():
                 userData = json.loads(userData_json.text)
                 if tweetSplited[1] == "reg":
                     if checkID(tweetSplited[2]):
+                        jsonURL = "https://kenkoooo.com/atcoder/atcoder-api/results?user=" + tweetSplited[2]
+                        jsonRes = urllib.request.urlopen(jsonURL)
+                        jsonData = json.loads(jsonRes.read().decode("utf-8"))
+                        jsonData.sort(key = lambda x: x["id"], reverse = True)
                         if myIndex(str(userData["screen_name"]), TwitterID) == -1:
-                            jsonURL = "https://kenkoooo.com/atcoder/atcoder-api/results?user=" + tweetSplited[2]
-                            jsonRes = urllib.request.urlopen(jsonURL)
-                            jsonData = json.loads(jsonRes.read().decode("utf-8"))
-                            jsonData.sort(key = lambda x: x["id"], reverse = True)
                             AtCoderID.append(tweetSplited[2])
                             TwitterID.append(userData["screen_name"])
-                            lastSubID.append(str(jsonData[0]["id"]))
+                            if len(jsonData) > 0:
+                                lastSubID.append(str(jsonData[0]["id"]))
+                            else:
+                                lastSubID.append(-1)
                         else:
                             AtCoderID[myIndex(str(userData["screen_name"]), TwitterID)] = tweetSplited[2]
+                            if len(jsonData) > 0:
+                                lastSubID[myIndex(str(userData["screen_name"]), TwitterID)] = str(jsonData[0]["id"])
+                            else:
+                                lastSubID[myIndex(str(userData["screen_name"]), TwitterID)] = -1
                         api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Register new AtCoder ID : " + tweetSplited[2])
                     else:

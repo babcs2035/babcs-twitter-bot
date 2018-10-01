@@ -116,7 +116,10 @@ def detection():
                 print("detection: " + userID + " ( @" + TwitterID[idx] + " ) made a new AC submission (contest_id : " + str(sub["contest_id"]) + ", problem_id : " + str(sub["problem_id"]) + ")")
         
         # 後処理
-        lastSubID[idx] = str(jsonData[0]["id"])
+        if len(jsonData) > 0:
+            lastSubID[idx] = str(jsonData[0]["id"])
+        else:
+            lastSubID[idx] = -1
         idx = idx + 1
 
     # データをアップロード
