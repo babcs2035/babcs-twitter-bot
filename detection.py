@@ -113,9 +113,11 @@ def detection():
                 lastSubID[idx] = str(jsonData[0]["id"])
                 break
             if str(sub["result"]) == "AC":
-                api.update_status(userID + " ( @" + TwitterID[idx] + " ) さんが " + str(sub["contest_id"]) + " の " + str(sub["problem_id"]) + " を AC しました！\n提出コード：" + "https://beta.atcoder.jp/contests/" + str(sub["contest_id"]) + "/submissions/" + str(sub["id"]) + "\n" + timeStamp)
-                print("detection: " + userID + " ( @" + TwitterID[idx] + " ) made a new AC submission (contest_id : " + str(sub["contest_id"]) + ", problem_id : " + str(sub["problem_id"]) + ")")
-        
+                try:
+                    api.update_status(userID + " ( @" + TwitterID[idx] + " ) さんが " + str(sub["contest_id"]) + " の " + str(sub["problem_id"]) + " を AC しました！\n提出コード：" + "https://beta.atcoder.jp/contests/" + str(sub["contest_id"]) + "/submissions/" + str(sub["id"]) + "\n" + timeStamp)
+                    print("detection: " + userID + " ( @" + TwitterID[idx] + " ) made a new AC submission (contest_id : " + str(sub["contest_id"]) + ", problem_id : " + str(sub["problem_id"]) + ")")
+                except:
+                    print("Tweet Error")
         # 後処理
         # if len(jsonData) > 0:
             # lastSubID[idx] = str(jsonData[0]["id"])
