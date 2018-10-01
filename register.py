@@ -11,6 +11,7 @@ from requests_oauthlib import OAuth1Session
 lastTweetID = 0
 AtCoderID = []
 TwitterID = []
+lastSubID = []
 
 # AtCoder ID が存在するか確認
 def checkID(atcoderID):
@@ -49,7 +50,7 @@ def downloadFromDropbox():
         for id in f:
             AtCoderID.append(id.rstrip("\n"))
     print("register: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
-
+    
     # TwitterID をダウンロード
     dbx.files_download_to_file("TwitterID.txt", "/TwitterID.txt")
     with open("TwitterID.txt", "r") as f:
@@ -57,6 +58,14 @@ def downloadFromDropbox():
         for id in f:
             TwitterID.append(id.rstrip("\n"))
     print("register: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+
+    # lastSubID をダウンロード
+    dbx.files_download_to_file("lastSubID.txt", "/lastSubID.txt")
+    with open("lastSubID.txt", "r") as f:
+        lastSubID.clear()
+        for id in f:
+            lastSubID.append(id.rstrip("\n"))
+    print("register: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -81,7 +90,7 @@ def uploadToDropbox():
         dbx.files_delete("/AtCoderID.txt")
         dbx.files_upload(f.read(), "/AtCoderID.txt")
     print("register: Uploaded AtCoderID (size : ", str(len(AtCoderID)), ")")
-
+    
     # TwitterID をアップロード
     with open("TwitterID.txt", "w") as f:
         for id in TwitterID:
@@ -90,6 +99,15 @@ def uploadToDropbox():
         dbx.files_delete("/TwitterID.txt")
         dbx.files_upload(f.read(), "/TwitterID.txt")
     print("register: Uploaded TwitterID (size : ", str(len(TwitterID)), ")")
+
+    # lastSubID をアップロード
+    with open("lastSubID.txt", "w") as f:
+        for id in lastSubID:
+            f.write(str(id) + "\n")
+    with open("lastSubID.txt", "rb") as f:
+        dbx.files_delete("/lastSubID.txt")
+        dbx.files_upload(f.read(), "/lastSubID.txt")
+    print("register: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
@@ -143,8 +161,13 @@ def register():
                 if tweetSplited[1] == "reg":
                     if checkID(tweetSplited[2]):
                         if myIndex(str(userData["screen_name"]), TwitterID) == -1:
+                            jsonURL = "https://kenkoooo.com/atcoder/atcoder-api/results?user=" + tweetSplited[2]
+                            jsonRes = urllib.request.urlopen(jsonURL)
+                            jsonData = json.loads(jsonRes.read().decode("utf-8"))
+                            jsonData.sort(key = lambda x: x["id"], reverse = True)
                             AtCoderID.append(tweetSplited[2])
                             TwitterID.append(userData["screen_name"])
+                            lastSubID.append(str(jsonData[0]["id"]))
                         else:
                             AtCoderID[myIndex(str(userData["screen_name"]), TwitterID)] = tweetSplited[2]
                         api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
@@ -156,6 +179,7 @@ def register():
                     if checkID(tweetSplited[2]):
                         if myIndex(tweetSplited[2], AtCoderID) != -1 and myIndex(str(userData["screen_name"]), TwitterID) != -1 and myIndex(tweetSplited[2], AtCoderID) == myIndex(str(userData["screen_name"]), TwitterID):
                             AtCoderID.pop(myIndex(str(userData["screen_name"]), TwitterID))
+                            lastSubID.pop(myIndex(str(userData["screen_name"]), TwitterID))
                             TwitterID.pop(myIndex(str(userData["screen_name"]), TwitterID))
                             api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録解除しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                             print("register: Unregister AtCoder ID : " + tweetSplited[2])
