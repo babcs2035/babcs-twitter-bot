@@ -7,7 +7,7 @@ import urllib.request
 import dropbox
 from requests_oauthlib import OAuth1Session
 
-# 最後に取得したツイート ID
+# グローバル変数
 lastTweetID = 0
 AtCoderID = []
 TwitterID = []
@@ -91,6 +91,13 @@ def uploadToDropbox():
         dbx.files_upload(f.read(), "/TwitterID.txt")
     print("register: Uploaded TwitterID (size : ", str(len(TwitterID)), ")")
 
+# list 内の要素の添え字を返す（無い場合は -1）
+def myIndex(x, l):
+    if x in l:
+        return l.index(x)
+    else:
+        return -1
+
 def register():
     
     # グローバル変数
@@ -131,17 +138,34 @@ def register():
             tweetText = str(tweet["text"])
             tweetSplited = tweetText.split()
             if len(tweetSplited) >= 3:
+                userData_json = api_OAuth.get("https://api.twitter.com/1.1/users/show.json?user_id=" + tweet["user"]["id_str"])
+                userData = json.loads(userData_json.text)
                 if tweetSplited[1] == "reg":
-                    userData_json = api_OAuth.get("https://api.twitter.com/1.1/users/show.json?user_id=" + tweet["user"]["id_str"])
-                    userData = json.loads(userData_json.text)
                     if checkID(tweetSplited[2]):
-                        AtCoderID.append(tweetSplited[2])
-                        TwitterID.append(userData["screen_name"])
+                        if myIndex(str(userData["screen_name"]), TwitterID) == -1:
+                            AtCoderID.append(tweetSplited[2])
+                            TwitterID.append(userData["screen_name"])
+                        else:
+                            AtCoderID[myIndex(str(userData["screen_name"]), TwitterID)] = tweetSplited[2]
                         api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Register new AtCoder ID : " + tweetSplited[2])
                     else:
                         api.update_status("@" + str(userData["screen_name"]) + " 正しい AtCoder ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Reject to register new AtCoder ID : " + tweetSplited[2])
+                if tweetSplited[1] == "del":
+                    if checkID(tweetSplited[2]):
+                        if myIndex(tweetSplited[2], AtCoderID) != -1 and myIndex(str(userData["screen_name"]), TwitterID) != -1 and myIndex(tweetSplited[2], AtCoderID) == myIndex(str(userData["screen_name"]), TwitterID):
+                            AtCoderID.pop(myIndex(str(userData["screen_name"]), TwitterID))
+                            TwitterID.pop(myIndex(str(userData["screen_name"]), TwitterID))
+                            api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録解除しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                            print("register: Unregister AtCoder ID : " + tweetSplited[2])
+                        else:
+                            api.update_status("@" + str(userData["screen_name"]) + "この AtCoder ID は登録されていません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                            print("register: Reject to unregister AtCoder ID : " + tweetSplited[2])
+                    else:
+                        api.update_status("@" + str(userData["screen_name"]) + " 正しい AtCoder ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                        print("register: Reject to unregister AtCoder ID : " + tweetSplited[2])
+
         lastTweetID = int(timeline[0]["id_str"])
 
         # データをアップロード
