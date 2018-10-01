@@ -110,6 +110,7 @@ def detection():
         # 提出を解析
         for sub in jsonData:
             if int(str(sub["id"])) <= int(lastSubID[idx]):
+                lastSubID[idx] = str(jsonData[0]["id"])
                 break
             if str(sub["result"]) == "AC":
                 api.update_status(userID + " ( @" + TwitterID[idx] + " ) さんが " + str(sub["contest_id"]) + " の " + str(sub["problem_id"]) + " を AC しました！\n提出コード：" + "https://beta.atcoder.jp/contests/" + str(sub["contest_id"]) + "/submissions/" + str(sub["id"]) + "\n" + timeStamp)
@@ -117,7 +118,7 @@ def detection():
         
         # 後処理
         if len(jsonData) > 0:
-            lastSubID[idx] = str(jsonData[0]["id"])
+            # lastSubID[idx] = str(jsonData[0]["id"])
         else:
             lastSubID[idx] = -1
         idx = idx + 1
