@@ -164,19 +164,12 @@ def register():
                         jsonRes = urllib.request.urlopen(jsonURL)
                         jsonData = json.loads(jsonRes.read().decode("utf-8"))
                         jsonData.sort(key = lambda x: x["id"], reverse = True)
-                        if myIndex(str(userData["screen_name"]), TwitterID) == -1:
-                            AtCoderID.append(tweetSplited[2])
-                            TwitterID.append(userData["screen_name"])
-                            if len(jsonData) > 0:
-                                lastSubID.append(str(jsonData[0]["id"]))
-                            else:
-                                lastSubID.append(-1)
+                        AtCoderID.append(tweetSplited[2])
+                        TwitterID.append(userData["screen_name"])
+                        if len(jsonData) > 0:
+                            lastSubID.append(str(jsonData[0]["id"]))
                         else:
-                            AtCoderID[myIndex(str(userData["screen_name"]), TwitterID)] = tweetSplited[2]
-                            if len(jsonData) > 0:
-                                lastSubID[myIndex(str(userData["screen_name"]), TwitterID)] = str(jsonData[0]["id"])
-                            else:
-                                lastSubID[myIndex(str(userData["screen_name"]), TwitterID)] = -1
+                            lastSubID.append(-1)
                         api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Register new AtCoder ID : " + tweetSplited[2])
                     else:
