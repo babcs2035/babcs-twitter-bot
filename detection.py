@@ -58,7 +58,6 @@ def uploadToDropbox():
     
     # lastSubID をアップロード
     with open("lastSubID.txt", "w") as f:
-        f.write(str(lastSubID))
         for id in lastSubID:
             f.write(str(id) + "\n")
     with open("lastSubID.txt", "rb") as f:
