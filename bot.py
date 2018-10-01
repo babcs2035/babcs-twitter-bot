@@ -6,6 +6,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 import announce
 import followBack
 import register
+import detection
 
 # ログ出力
 def outputLog(comment):
@@ -45,10 +46,18 @@ def scheduled_job():
 
     # 終了ログ出力
     outputLog("--- フォロバ 終了 ---")
+    
+# AtCoder AC 検出（10 秒ごと）
+@sched.scheduled_job('interval', seconds = 10)
+def scheduled_job():
+
+    # 実行
+    detection.detection()
 
 # AtCoder ID 登録（12 秒ごと）
 @sched.scheduled_job('interval', seconds = 12)
 def scheduled_job():
+
     # 実行
     register.register()
 
