@@ -47,14 +47,18 @@ def scheduled_job():
     # 終了ログ出力
     outputLog("--- フォロバ 終了 ---")
 
-# AtCoder ID 登録 & AC 検出（30 秒ごと）
+# AtCoder ID 登録（30 秒ごと）
 @sched.scheduled_job('interval', seconds = 30)
 def scheduled_job():
 
-    # AtCoder ID 登録 実行
+    # 実行
     register.register()
 
-    # AtCoder AC 検出 実行
+# AtCoder AC 検出 (5 分ごと)
+@sched.scheduled_job('interval', minutes = 5)
+def scheduled_job():
+
+    # 実行
     detection.detection()
 
 # おまじない
