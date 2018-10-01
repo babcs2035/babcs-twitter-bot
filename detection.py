@@ -51,6 +51,12 @@ def downloadFromDropbox():
 
 # Dropbox にアップロード
 def uploadToDropbox():
+    
+    # グローバル変数
+    global lastTweetID
+    global AtCoderID
+    global TwitterID
+    global lastSubID
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
@@ -63,7 +69,7 @@ def uploadToDropbox():
     with open("lastSubID.txt", "rb") as f:
         dbx.files_delete("/lastSubID.txt")
         dbx.files_upload(f.read(), "/lastSubID.txt")
-    print("detection: Uploaded lastSubID : ", str(len(lastSubID)))
+    print("detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 def detection():
     
