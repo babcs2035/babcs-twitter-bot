@@ -56,7 +56,6 @@ def uploadToDropbox():
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
     
-    # lastTweetID をアップロード
     # lastSubID をアップロード
     with open("lastSubID.txt", "w") as f:
         f.write(str(lastSubID))
@@ -112,7 +111,7 @@ def detection():
                 print("detection: " + userID + " ( @" + TwitterID[idx] + " ) made a new AC submission (contest_id : " + str(sub["contest_id"]) + ", problem_id : " + str(sub["problem_id"]) + ")")
         
         # 後処理
-        lastSubID[idx] = int(str(jsonData[0]["id"]))
+        lastSubID[idx] = str(jsonData[0]["id"])
         idx = idx + 1
 
     # データをアップロード
