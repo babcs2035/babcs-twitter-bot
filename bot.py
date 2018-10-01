@@ -19,7 +19,7 @@ def outputLog(comment):
     print(comment + " @ " + timeStamp)
 
 # インスタンス化
-sched = BlockingScheduler()
+sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
 
 # 定期ツイート（毎時 0, 15, 30, 45 分）
 @sched.scheduled_job('cron', minute = '0, 15, 30, 45', hour = '*/1')

@@ -108,7 +108,7 @@ def detection():
                 api.update_status(userID + " ( @" + TwitterID[idx] + " ) さんが " + str(sub["contest_id"]) + " の " + str(sub["problem_id"]) + " を AC しました！\n提出コード：" + "https://beta.atcoder.jp/contests/" + str(sub["contest_id"]) + "/submissions/" + str(sub["id"]) + "\n" + timeStamp)
                 print("detection: " + userID + " ( @" + TwitterID[idx] + " ) made a new AC submission (contest_id : " + str(sub["contest_id"]) + ", problem_id : " + str(sub["problem_id"]) + ")")
         # 後処理
-        lastSubID[idx] = jsonData[0]["id"]
+        lastSubID[idx] = str(jsonData[0]["id"])
         idx = idx + 1
 
     # データをアップロード
