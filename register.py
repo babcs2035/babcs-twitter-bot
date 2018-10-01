@@ -152,6 +152,9 @@ def register():
     for id in lastSubID:
         if defSubID < int(id):
             defSubID = int(id)
+    errorCnt = len(AtCoderID) - len(lastSubID)
+    for i in range(errorCnt):
+        lastSubID.append(defSubID)
     if timeline_json.status_code == 200:
         timeline = json.loads(timeline_json.text)
         for tweet in timeline:
