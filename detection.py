@@ -57,8 +57,11 @@ def uploadToDropbox():
     dbx.users_get_current_account()
     
     # lastTweetID をアップロード
+    # lastSubID をアップロード
     with open("lastSubID.txt", "w") as f:
         f.write(str(lastSubID))
+        for id in lastSubID:
+            f.write(str(id) + "\n")
     with open("lastSubID.txt", "rb") as f:
         dbx.files_delete("/lastSubID.txt")
         dbx.files_upload(f.read(), "/lastSubID.txt")
@@ -102,13 +105,14 @@ def detection():
 
         # 提出を解析
         for sub in jsonData:
-            if sub["id"] <= int(lastSubID[idx]):
+            if int(str(sub["id"])) <= int(lastSubID[idx]):
                 break
             if str(sub["result"]) == "AC":
                 api.update_status(userID + " ( @" + TwitterID[idx] + " ) さんが " + str(sub["contest_id"]) + " の " + str(sub["problem_id"]) + " を AC しました！\n提出コード：" + "https://beta.atcoder.jp/contests/" + str(sub["contest_id"]) + "/submissions/" + str(sub["id"]) + "\n" + timeStamp)
                 print("detection: " + userID + " ( @" + TwitterID[idx] + " ) made a new AC submission (contest_id : " + str(sub["contest_id"]) + ", problem_id : " + str(sub["problem_id"]) + ")")
+        
         # 後処理
-        lastSubID[idx] = str(jsonData[0]["id"])
+        lastSubID[idx] = int(str(jsonData[0]["id"]))
         idx = idx + 1
 
     # データをアップロード
