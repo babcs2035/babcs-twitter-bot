@@ -122,7 +122,8 @@ def register():
     global lastTweetID
     global AtCoderID
     global TwitterID
-    
+    global lastSubID
+
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
     CS = os.environ["CONSUMER_SECRET"]
@@ -147,7 +148,10 @@ def register():
 
     # ツイートを解析
     myTwitterID = "babcs_bot"
-    likedCnt = 0
+    defSubID = 0
+    for id in lastSubID:
+        if defSubID < int(id):
+            defSubID = int(id)
     if timeline_json.status_code == 200:
         timeline = json.loads(timeline_json.text)
         for tweet in timeline:
@@ -160,16 +164,9 @@ def register():
                 userData = json.loads(userData_json.text)
                 if tweetSplited[1] == "reg":
                     if checkID(tweetSplited[2]):
-                        jsonURL = "https://kenkoooo.com/atcoder/atcoder-api/results?user=" + tweetSplited[2]
-                        jsonRes = urllib.request.urlopen(jsonURL)
-                        jsonData = json.loads(jsonRes.read().decode("utf-8"))
-                        jsonData.sort(key = lambda x: x["id"], reverse = True)
                         AtCoderID.append(tweetSplited[2])
                         TwitterID.append(userData["screen_name"])
-                        if len(jsonData) > 0:
-                            lastSubID.append(str(jsonData[0]["id"]))
-                        else:
-                            lastSubID.append(-1)
+                        lastSubID.append(str(defSubID))
                         api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Register new AtCoder ID : " + tweetSplited[2])
                     else:
