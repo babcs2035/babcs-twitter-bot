@@ -1,10 +1,13 @@
-# import
+﻿# import
 import os
 import tweepy
 import datetime
 import json
 import dropbox
-import urllib.request
+import urllib
+from bs4 import BeautifulSoup
+import requests
+import pprint
 
 # グローバル変数
 lastTweetID = 0
@@ -97,33 +100,60 @@ def detection():
     # データをダウンロード
     downloadFromDropbox()
 
-    # AtCoder ID ごとに提出を確認
-    idx = 0
-    for userID in AtCoderID:
+    # 提出を解析
+    lastSubID = 3418773
+    newLastSubID = -1
 
-        # JSON ファイルを取得
-        jsonURL = "https://kenkoooo.com/atcoder/atcoder-api/results?user=" + userID
-        jsonRes = urllib.request.urlopen(jsonURL)
-        jsonData = json.loads(jsonRes.read().decode("utf-8"))
-        jsonData.sort(key = lambda x: x["id"], reverse = True)
+    # コンテストごとに解析
+    contestsJsonRes = urllib.request.urlopen("https://atcoder-api.appspot.com/contests")
+    contestsJsonData = json.loads(contestsJsonRes.read().decode("utf-8"))
+    for contest in contestsJsonData:
 
-        # 提出を解析
-        for sub in jsonData:
-            if int(str(sub["id"])) <= int(lastSubID[idx]):
-                lastSubID[idx] = str(jsonData[0]["id"])
+        # ページ送り
+        sublistPageNum = 1
+        while True:
+            sublistURL = "https://beta.atcoder.jp/contests/" + str(contest["id"]) + "/submissions?page=" + str(sublistPageNum)
+            sublistHTML = requests.get(sublistURL)
+            try:
+                sublistHTML.raise_for_status()
+                sublistData = BeautifulSoup(sublistHTML.text, "html.parser")
+            except:
+                print("detection: sublistHTML Error")
+            sublistTable = sublistData.find_all("table", class_ = "table table-bordered table-striped small th-center")
+            if len(sublistTable) == 0:
                 break
-            if str(sub["result"]) == "AC":
-                try:
-                    api.update_status(userID + " ( @" + TwitterID[idx] + " ) さんが " + str(sub["contest_id"]) + " の " + str(sub["problem_id"]) + " を AC しました！\n提出コード：" + "https://beta.atcoder.jp/contests/" + str(sub["contest_id"]) + "/submissions/" + str(sub["id"]) + "\n" + timeStamp)
-                    print("detection: " + userID + " ( @" + TwitterID[idx] + " ) made a new AC submission (contest_id : " + str(sub["contest_id"]) + ", problem_id : " + str(sub["problem_id"]) + ")")
-                except:
-                    print("Tweet Error")
-        # 後処理
-        # if len(jsonData) > 0:
-            # lastSubID[idx] = str(jsonData[0]["id"])
-        # else:
-            # lastSubID[idx] = -1
-        idx = idx + 1
+
+            # １行ずつ解析
+            sublistRows = sublistTable[0].find_all("tr")
+            del sublistRows[0]
+            skipFlag = False
+            for row in sublistRows:
+                links = row.find_all("a")
+                subID = int(str(links[3].get("href")).split("/")[4])
+                userID = str(links[1].get("href")).split("/")[2]
+                if subID <= lastSubID:
+                    skipFlag = True
+                    break
+                newLastSubID = max(newLastSubID, subID)
+
+                # ユーザーの AC 提出かどうか判定
+                subData = [cell.get_text() for cell in row.select("td")]
+                idx = 0
+                for ids in AtCoderID:
+                    if userID == ids:
+                        if subData[6] == "AC":
+                            try:
+                                api.update_status(userID + " ( @" + TwitterID[idx] + " ) さんが " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\n提出コード：" + "https://beta.atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
+                                print("detection: " + userID + " ( @" + TwitterID[idx] + " ) made a new AC submission (contest : " + str(contest["title"]) + ", problem : " + str(subData[1]) + ")")
+                            except:
+                                print("detection: Tweet Error")
+                    idx = idx + 1
+            if skipFlag:
+                break
+            sublistPageNum = sublistPageNum + 1
+
+    # 後処理
+    lastSubID = newLastSubID
 
     # データをアップロード
     uploadToDropbox()
