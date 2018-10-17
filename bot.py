@@ -1,4 +1,4 @@
-# import
+﻿# import
 import os
 import tweepy
 import datetime
@@ -60,8 +60,8 @@ def scheduled_job():
     # 終了ログ出力
     outputLog("--- AtCoder ID 登録 終了 ---")
 
-# AtCoder AC 検出 (10 分ごと)
-@sched.scheduled_job('interval', minutes = 10)
+# AtCoder AC 検出 (15 分ごと)
+@sched.scheduled_job('interval', minutes = 15)
 def scheduled_job():
     
     # 開始ログ出力
