@@ -11,7 +11,6 @@ from requests_oauthlib import OAuth1Session
 lastTweetID = 0
 AtCoderID = []
 TwitterID = []
-lastSubID = []
 
 # AtCoder ID が存在するか確認
 def checkID(atcoderID):
@@ -59,16 +58,13 @@ def downloadFromDropbox():
             TwitterID.append(id.rstrip("\n"))
     print("register: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
 
-    # lastSubID をダウンロード
-    dbx.files_download_to_file("lastSubID.txt", "/lastSubID.txt")
-    with open("lastSubID.txt", "r") as f:
-        lastSubID.clear()
-        for id in f:
-            lastSubID.append(id.rstrip("\n"))
-    print("register: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
-
 # Dropbox にアップロード
 def uploadToDropbox():
+    
+    # グローバル変数
+    global lastTweetID
+    global AtCoderID
+    global TwitterID
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
@@ -100,15 +96,6 @@ def uploadToDropbox():
         dbx.files_upload(f.read(), "/TwitterID.txt")
     print("register: Uploaded TwitterID (size : ", str(len(TwitterID)), ")")
 
-    # lastSubID をアップロード
-    with open("lastSubID.txt", "w") as f:
-        for id in lastSubID:
-            f.write(str(id) + "\n")
-    with open("lastSubID.txt", "rb") as f:
-        dbx.files_delete("/lastSubID.txt")
-        dbx.files_upload(f.read(), "/lastSubID.txt")
-    print("register: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
-
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
     if x in l:
@@ -122,7 +109,6 @@ def register():
     global lastTweetID
     global AtCoderID
     global TwitterID
-    global lastSubID
 
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
@@ -149,12 +135,6 @@ def register():
     # ツイートを解析
     myTwitterID = "babcs_bot"
     defSubID = 0
-    for id in lastSubID:
-        if defSubID < int(id):
-            defSubID = int(id)
-    errorCnt = len(AtCoderID) - len(lastSubID)
-    for i in range(errorCnt):
-        lastSubID.append(defSubID)
     if timeline_json.status_code == 200:
         timeline = json.loads(timeline_json.text)
         for tweet in timeline:
@@ -169,7 +149,6 @@ def register():
                     if checkID(tweetSplited[2]):
                         AtCoderID.append(tweetSplited[2])
                         TwitterID.append(userData["screen_name"])
-                        lastSubID.append(str(defSubID))
                         api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Register new AtCoder ID : " + tweetSplited[2])
                     else:
@@ -179,7 +158,6 @@ def register():
                     if checkID(tweetSplited[2]):
                         if myIndex(tweetSplited[2], AtCoderID) != -1 and myIndex(str(userData["screen_name"]), TwitterID) != -1 and myIndex(tweetSplited[2], AtCoderID) == myIndex(str(userData["screen_name"]), TwitterID):
                             AtCoderID.pop(myIndex(str(userData["screen_name"]), TwitterID))
-                            lastSubID.pop(myIndex(str(userData["screen_name"]), TwitterID))
                             TwitterID.pop(myIndex(str(userData["screen_name"]), TwitterID))
                             api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録解除しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                             print("register: Unregister AtCoder ID : " + tweetSplited[2])
