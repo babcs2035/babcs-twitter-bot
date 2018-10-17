@@ -60,8 +60,8 @@ def scheduled_job():
     # 終了ログ出力
     outputLog("--- AtCoder ID 登録 終了 ---")
 
-# AtCoder AC 検出 (5 分ごと)
-@sched.scheduled_job('interval', minutes = 5)
+# AtCoder AC 検出 (10 分ごと)
+@sched.scheduled_job('interval', minutes = 10)
 def scheduled_job():
     
     # 開始ログ出力
