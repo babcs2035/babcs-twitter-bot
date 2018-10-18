@@ -5,6 +5,7 @@ import datetime
 import json
 import dropbox
 import urllib
+from PIL import Image, ImageDraw, ImageFont
 
 # グローバル変数
 AtCoderID = []
@@ -81,15 +82,11 @@ def ranking():
     auth = tweepy.OAuthHandler(CK, CS)
     auth.set_access_token(AT, AS)
     api = tweepy.API(auth)
-
-    # 時刻表示を作成
-    timeStamp = datetime.datetime.today() + datetime.timedelta(hours=9)
-    timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
     
     # データをダウンロード
     downloadFromDropbox()
 
-    # AC 数を取得する
+    # AC 数を取得
     acCountJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/atcoder-api/info/ac")
     acCountData = json.loads(acCountJson.read().decode("utf-8"))
     resCount = []
@@ -107,6 +104,31 @@ def ranking():
         newACCount.append(({"user_id" : AtCoderID[idx], "count" : nowACCount[idx] - acCount[idx]}))
     newACCount.sort(key = lambda x: x["count"], reverse = True)
 
+    # ランキングを作成
+    rankNum = 1
+    rankingFont = ImageFont.truetype("data/YuGothM.ttc", 32)
+    rankingFirstImg = Image.open("data/rankingImg (first).jpg")
+    resImg = Image.new("RGB", (738, 65 + 63 * len(newACCount)))
+    resImg.paste(rankingFirstImg, (0, 0))
+    for idx in range(len(newACCount)):
+        rankingImg = Image.open("data/rankingImg (cell).jpg")
+        rankingDraw = ImageDraw.Draw(rankingImg)
+        if idx > 0 and int(newACCount[idx - 1]["count"]) > int(newACCount[idx]["count"]):
+            rankNum = rankNum + 1
+        rankingDraw.text((10, 19), str(rankNum), fill = (0, 0, 0), font = rankingFont)
+        rankingDraw.text((120, 19), newACCount[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
+        rankingDraw.text((560, 19), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
+        resImg.paste(rankingImg, (0, 65 + 63 * idx))
+    resImg.save("data/rankingImg_fixed.jpg")
+
     # データをアップロード
     acCount = nowACCount
     uploadToDropbox()
+
+    # 時刻表示を作成
+    timeStamp = datetime.datetime.today() + datetime.timedelta(hours=9)
+    timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
+
+    # ランキングをツイート
+    tweetText = "Unique AC 数ランキング TOP " + str(rankNum) + " !!\n"
+    api.update_with_media(filename = "data/rankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
