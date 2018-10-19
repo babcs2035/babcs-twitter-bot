@@ -7,6 +7,7 @@ import announce
 import followBack
 import register
 import detection
+import ranking
 
 # ログ出力
 def outputLog(comment):
@@ -68,6 +69,19 @@ def scheduled_job():
     
     # 終了ログ出力
     outputLog("--- AtCoder ID 登録 終了 ---")
+    
+# Unique AC ランキング（毎日 0:00）
+@sched.scheduled_job('cron', minute = '0', hour = '15')
+def scheduled_job():
+
+    # 開始ログ出力
+    outputLog("--- Unique AC ランキング 開始 ---")
+
+    # 実行
+    ranking.ranking()
+
+    # 終了ログ出力
+    outputLog("--- Unique AC ランキング 終了 ---")
 
 # おまじない
 sched.start()
