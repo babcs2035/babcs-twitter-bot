@@ -100,12 +100,13 @@ def ranking():
                 nowACCount.append(user["count"])
                 break
     newACCount = []
-    for idx in range(len(AtCoderID)):
+    for idx in range(len(acCount)):
         newACCount.append(({"user_id" : AtCoderID[idx], "count" : nowACCount[idx] - acCount[idx]}))
     newACCount.sort(key = lambda x: x["count"], reverse = True)
 
     # ランキングを作成
     rankNum = 1
+    countNum = 1
     rankingFont = ImageFont.truetype("data/YuGothM.ttc", 32)
     rankingFirstImg = Image.open("data/rankingImg (first).jpg")
     resImg = Image.new("RGB", (738, 65 + 63 * len(newACCount)))
@@ -113,8 +114,12 @@ def ranking():
     for idx in range(len(newACCount)):
         rankingImg = Image.open("data/rankingImg (cell).jpg")
         rankingDraw = ImageDraw.Draw(rankingImg)
-        if idx > 0 and int(newACCount[idx - 1]["count"]) > int(newACCount[idx]["count"]):
-            rankNum = rankNum + 1
+        if idx > 0:
+            if int(newACCount[idx - 1]["count"]) > int(newACCount[idx]["count"]):
+                rankNum = rankNum + countNum
+                countNum = 1
+            else:
+                countNum = countNum + 1
         rankingDraw.text((10, 19), str(rankNum), fill = (0, 0, 0), font = rankingFont)
         rankingDraw.text((120, 19), newACCount[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
         rankingDraw.text((560, 19), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
@@ -126,7 +131,7 @@ def ranking():
     uploadToDropbox()
 
     # 時刻表示を作成
-    timeStamp = datetime.datetime.today() + datetime.timedelta(hours=9)
+    timeStamp = datetime.datetime.today()
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
 
     # ランキングをツイート
