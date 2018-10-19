@@ -126,7 +126,7 @@ def ranking():
     uploadToDropbox()
 
     # 時刻表示を作成
-    timeStamp = datetime.datetime.today() + datetime.timedelta(hours=9)
+    timeStamp = datetime.datetime.today()
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
 
     # ランキングをツイート

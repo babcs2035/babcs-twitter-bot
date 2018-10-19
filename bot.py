@@ -13,7 +13,7 @@ import ranking
 def outputLog(comment):
 
     # 時刻表示を作成
-    timeStamp = datetime.datetime.today() + datetime.timedelta(hours=9)
+    timeStamp = datetime.datetime.today()
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
 
     # 出力
@@ -71,7 +71,7 @@ def scheduled_job():
     outputLog("--- AtCoder ID 登録 終了 ---")
     
 # Unique AC ランキング（毎日 0:00）
-@sched.scheduled_job('cron', minute = '0', hour = '15')
+@sched.scheduled_job('cron', minute = '0', hour = '0')
 def scheduled_job():
 
     # 開始ログ出力

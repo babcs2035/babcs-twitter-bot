@@ -126,7 +126,7 @@ def register():
     timeline_json = api_OAuth.get("https://api.twitter.com/1.1/statuses/mentions_timeline.json")
     
     # 時刻表示を作成
-    timeStamp = datetime.datetime.today() + datetime.timedelta(hours=9)
+    timeStamp = datetime.datetime.today()
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
     
     # データをダウンロード
