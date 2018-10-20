@@ -101,7 +101,8 @@ def ranking():
                 break
     newACCount = []
     for idx in range(len(acCount)):
-        newACCount.append(({"user_id" : AtCoderID[idx], "count" : nowACCount[idx] - acCount[idx]}))
+        if nowACCount[idx] - acCount[idx] > 0:
+            newACCount.append(({"user_id" : AtCoderID[idx], "count" : nowACCount[idx] - acCount[idx]}))
     newACCount.sort(key = lambda x: x["count"], reverse = True)
 
     # ランキングを作成
