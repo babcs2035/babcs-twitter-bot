@@ -87,6 +87,13 @@ def uploadToDropbox():
         dbx.files_upload(f.read(), "/acPoint.txt")
     print("ranking: Uploaded acPoint (size : ", str(len(acPoint)), ")")
 
+# list 内の要素の添え字を返す（無い場合は -1）
+def myIndex(x, l):
+    if x in l:
+        return l.index(x)
+    else:
+        return -1
+
 def ranking():
     
     # グローバル変数
@@ -164,7 +171,7 @@ def ranking():
         countRankingDraw.text((560, 19), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
         countResImg.paste(countRankingImg, (0, 65 + 63 * idx))
     countResImg.save("data/countRankingImg_fixed.jpg")
-    
+
     # Point Sum ランキングを作成
     pointRankNum = 1
     pointNum = 1
@@ -197,6 +204,32 @@ def ranking():
 
     # ランキングをツイート
     countTweetText = "Unique AC 数ランキング TOP " + str(countRankNum) + " !!\n"
+    countRankNum = 1
+    countNum = 1
+    for idx in range(len(newACCount)):
+        if idx > 0:
+            if int(newACCount[idx - 1]["count"]) > int(newACCount[idx]["count"]):
+                countRankNum = countRankNum + countNum
+                countNum = 1
+            else:
+                countNum = countNum + 1
+        if len(countTweetText) + len(timeStamp) + len(str(countRankNum) + " 位 " + newACCount[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACCount[idx]["user_id"],AtCoderID)]) + " ) " + str(newACCount[idx]["count"]) + " Unique AC\n") <= 140:
+            countTweetText += str(countRankNum) + " 位 " + newACCount[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACCount[idx]["user_id"],AtCoderID)]) + " ) " + str(newACCount[idx]["count"]) + " Unique AC\n"
+        else:
+            break
     api.update_with_media(filename = "data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
     pointTweetText = "Point Sum ランキング TOP " + str(pointRankNum) + " !!\n"
+    pointRankNum = 1
+    pointNum = 1
+    for idx in range(len(newACPoint)):
+        if idx > 0:
+            if int(newACPoint[idx - 1]["point"]) > int(newACPoint[idx]["point"]):
+                pointRankNum = pointRankNum + pointNum
+                pointNum = 1
+            else:
+                pointNum = pointNum + 1
+        if len(pointTweetText) + len(timeStamp) + len(str(pointRankNum) + " 位 " + newACPoint[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACPoint[idx]["user_id"],AtCoderID)]) + " ) " + str(newACPoint[idx]["point"]) + " Point\n") <= 140:
+            pointTweetText += str(pointRankNum) + " 位 " + newACPoint[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACPoint[idx]["user_id"],AtCoderID)]) + " ) " + str(newACPoint[idx]["point"]) + " Point\n"
+        else:
+            break
     api.update_with_media(filename = "data/pointRankingImg_fixed.jpg", status = pointTweetText + "\n" + timeStamp)
