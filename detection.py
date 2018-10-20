@@ -98,7 +98,7 @@ def detection():
 
         # ページ送り
         sublistPageNum = 1
-        print("detection: Checking " + contest["title"] + " submissions...")
+        subCount = 0
         while True:
             sublistURL = "https://beta.atcoder.jp/contests/" + str(contest["id"]) + "/submissions?page=" + str(sublistPageNum)
             sublistHTML = requests.get(sublistURL)
@@ -107,6 +107,7 @@ def detection():
                 sublistData = BeautifulSoup(sublistHTML.text, "html.parser")
             except:
                 print("detection: sublistHTML Error")
+                break
             sublistTable = sublistData.find_all("table", class_ = "table table-bordered table-striped small th-center")
             if len(sublistTable) == 0:
                 break
@@ -123,6 +124,7 @@ def detection():
                     skipFlag = True
                     break
                 newLastSubID = max(newLastSubID, subID)
+                subCount = subCount + 1
 
                 # ユーザーの AC 提出かどうか判定
                 subData = [cell.get_text() for cell in row.select("td")]
@@ -138,6 +140,7 @@ def detection():
             if skipFlag:
                 break
             sublistPageNum = sublistPageNum + 1
+        print("detection: Checked " + contest["title"] + " submissions (subCount : " + str(subCount) + " )")
 
     # 後処理
     lastSubID = newLastSubID
