@@ -8,6 +8,7 @@ import followBack
 import register
 import detection
 import ranking
+import contest
 
 # ログ出力
 def outputLog(comment):
@@ -82,6 +83,19 @@ def scheduled_job():
 
     # 終了ログ出力
     outputLog("--- Unique AC ランキング 終了 ---")
+
+# コンテスト一覧（毎日 6:00, 18:00）
+@sched.scheduled_job('cron', minute = '0', hour = '6, 18')
+def scheduled_job():
+
+    # 開始ログ出力
+    outputLog("--- コンテスト一覧 開始 ---")
+
+    # 実行
+    contest.contest()
+
+    # 終了ログ出力
+    outputLog("--- コンテスト一覧 終了 ---")
 
 # おまじない
 sched.start()
