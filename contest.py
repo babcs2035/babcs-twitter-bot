@@ -6,9 +6,13 @@ import time
 import json
 import urllib
 from PIL import Image, ImageDraw, ImageFont
+from dateutil.relativedelta import relativedelta
 
 def epoch_to_datetime(epoch):
     return datetime.datetime(*time.localtime(epoch)[:6])
+
+def sec_to_time(sec):
+    return "{0.hours:02}:{0.minutes:02}".format(relativedelta(seconds=sec))
 
 def contest():
     
@@ -39,15 +43,20 @@ def contest():
     # 画像生成
     listFont = ImageFont.truetype("data/YuGothM.ttc", 32)
     contestsListFirstImg = Image.open("data/contestsListImg (first).jpg")
-    contestsListImg = Image.new("RGB", (850, 65 + 63 * len(contestsList)))
+    contestsListImg = Image.new("RGB", (1852, 68 + 64 * len(contestsList)))
     contestsListImg.paste(contestsListFirstImg, (0, 0))
     idx = 0
     for contest in contestsList:
         contestListImg = Image.open("data/contestsListImg (cell).jpg")
         contestListDraw = ImageDraw.Draw(contestListImg)
-        contestListDraw.text((10, 19), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (0, 0, 0), font = listFont)
-        contestListDraw.text((220, 19), str(contest["title"]), fill = (0, 0, 0), font = listFont)
-        contestListDraw.text((640, 19), str(contest["ratedRange"]), fill = (0, 0, 0), font = listFont)
-        contestsListImg.paste(contestListImg, (0, 65 + 63 * idx))
+        contestListDraw.text((10, 15), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (0, 0, 0), font = listFont)
+        contestListDraw.text((360, 15), str(contest["title"]), fill = (0, 0, 0), font = listFont)
+        contestListDraw.text((1460, 15), str(sec_to_time(contest["durationSeconds"])), fill = (0, 0, 0), font = listFont)
+        contestListDraw.text((1660, 15), str(contest["ratedRange"]), fill = (0, 0, 0), font = listFont)
+        contestsListImg.paste(contestListImg, (0, 68 + 64 * idx))
         idx = idx + 1
     contestsListImg.save("data/contestsListImg_fixed.jpg")
+
+    # リストをツイート
+    listTweetText = "現在，" + str(len(contestsList)) + " つのコンテストが予定されています．\nhttps://beta.atcoder.jp/contests/\n"
+    api.update_with_media(filename = "data/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
