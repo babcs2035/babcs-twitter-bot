@@ -91,8 +91,8 @@ def uploadToDropbox():
             dbx.files_upload(f.read(), "/AtCoderID.txt")
             print("register: Uploaded AtCoderID (size : ", str(len(AtCoderID)), ")")
         with open("AtCoderID.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/_backup/AtCoderID/" + str(datetime.datetime.today().strftime("%Y %m %d %H:%M:%S")) + ".txt")
-            print("register: Uploaded AtCoderID (for backup " + str(datetime.datetime.today().strftime("%Y %m %d %H:%M:%S")) + ") (size : ", str(len(AtCoderID)), ")")
+            dbx.files_upload(f.read(), "/_backup/AtCoderID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
+            print("register: Uploaded AtCoderID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(AtCoderID)), ")")
 
         # TwitterID をアップロード
         with open("TwitterID.txt", "w") as f:
@@ -103,8 +103,8 @@ def uploadToDropbox():
             dbx.files_upload(f.read(), "/TwitterID.txt")
             print("register: Uploaded TwitterID (size : ", str(len(TwitterID)), ")")
         with open("TwitterID.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/_backup/TwitterID/" + str(datetime.datetime.today().strftime("%Y %m %d %H:%M:%S")) + ".txt")
-            print("register: Uploaded TwitterID (for backup " + str(datetime.datetime.today().strftime("%Y %m %d %H:%M:%S")) + ") (size : ", str(len(TwitterID)), ")")
+            dbx.files_upload(f.read(), "/_backup/TwitterID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
+            print("register: Uploaded TwitterID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(TwitterID)), ")")
 
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
