@@ -4,6 +4,7 @@ import tweepy
 import datetime
 import time
 import json
+import dropbox
 import urllib
 from PIL import Image, ImageDraw, ImageFont
 from dateutil.relativedelta import relativedelta
@@ -13,6 +14,18 @@ def epoch_to_datetime(epoch):
 
 def sec_to_time(sec):
     return "{0.hours:02}:{0.minutes:02}".format(relativedelta(seconds=sec))
+
+# Dropbox にアップロード
+def uploadToDropbox():
+
+    # Dropbox オブジェクトの生成
+    dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
+    dbx.users_get_current_account()
+    
+    # contestsListImg_fixed をアップロード
+    with open("data/contestsListImg_fixed.jpg", "rb") as f:
+        dbx.files_upload(f.read(), "/_backup/contestsListImg_fixed/"+str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S"))+".jpg")
+        print("contest: Uploaded contestsListImg_fixed")
 
 def contest():
     
@@ -60,3 +73,6 @@ def contest():
     # リストをツイート
     listTweetText = "現在，" + str(len(contestsList)) + " つのコンテストが予定されています．\nhttps://beta.atcoder.jp/contests/\n"
     api.update_with_media(filename = "data/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
+
+    # 画像をアップロード
+    uploadToDropbox()
