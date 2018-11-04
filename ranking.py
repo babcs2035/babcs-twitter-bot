@@ -86,6 +86,16 @@ def uploadToDropbox():
         dbx.files_delete("/acPoint.txt")
         dbx.files_upload(f.read(), "/acPoint.txt")
     print("ranking: Uploaded acPoint (size : ", str(len(acPoint)), ")")
+    
+    # countRankingImg_fixed をアップロード
+    with open("data/countRankingImg_fixed.jpg", "rb") as f:
+        dbx.files_upload(f.read(), "/_backup/countRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
+        print("ranking: Uploaded countRankingImg_fixed")
+
+    # pointRankingImg_fixed をアップロード
+    with open("data/pointRankingImg_fixed.jpg", "rb") as f:
+        dbx.files_upload(f.read(), "/_backup/pointRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
+        print("ranking: Uploaded pointRankingImg_fixed")
 
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
