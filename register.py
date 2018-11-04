@@ -11,6 +11,7 @@ from requests_oauthlib import OAuth1Session
 lastTweetID = 0
 AtCoderID = []
 TwitterID = []
+fixedFlag = False
 
 # AtCoder ID が存在するか確認
 def checkID(atcoderID):
@@ -31,6 +32,7 @@ def downloadFromDropbox():
     global lastTweetID
     global AtCoderID
     global TwitterID
+    global fixedFlag
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
@@ -65,6 +67,7 @@ def uploadToDropbox():
     global lastTweetID
     global AtCoderID
     global TwitterID
+    global fixedFlag
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
@@ -78,23 +81,30 @@ def uploadToDropbox():
         dbx.files_upload(f.read(), "/lastTweetID.txt")
     print("register: Uploaded lastTweetID : ", str(lastTweetID))
     
-    # AtCoderID をアップロード
-    with open("AtCoderID.txt", "w") as f:
-        for id in AtCoderID:
-            f.write(str(id) + "\n")
-    with open("AtCoderID.txt", "rb") as f:
-        dbx.files_delete("/AtCoderID.txt")
-        dbx.files_upload(f.read(), "/AtCoderID.txt")
-    print("register: Uploaded AtCoderID (size : ", str(len(AtCoderID)), ")")
-    
-    # TwitterID をアップロード
-    with open("TwitterID.txt", "w") as f:
-        for id in TwitterID:
-            f.write(str(id) + "\n")
-    with open("TwitterID.txt", "rb") as f:
-        dbx.files_delete("/TwitterID.txt")
-        dbx.files_upload(f.read(), "/TwitterID.txt")
-    print("register: Uploaded TwitterID (size : ", str(len(TwitterID)), ")")
+    if fixedFlag:
+        # AtCoderID をアップロード
+        with open("AtCoderID.txt", "w") as f:
+            for id in AtCoderID:
+                f.write(str(id) + "\n")
+        with open("AtCoderID.txt", "rb") as f:
+            dbx.files_delete("/AtCoderID.txt")
+            dbx.files_upload(f.read(), "/AtCoderID.txt")
+            print("register: Uploaded AtCoderID (size : ", str(len(AtCoderID)), ")")
+        with open("AtCoderID.txt", "rb") as f:
+            dbx.files_upload(f.read(), "/_backup/AtCoderID/" + str(datetime.datetime.today().strftime("%Y %m %d %H:%M:%S")) + ".txt")
+            print("register: Uploaded AtCoderID (for backup " + str(datetime.datetime.today().strftime("%Y %m %d %H:%M:%S")) + ") (size : ", str(len(AtCoderID)), ")")
+
+        # TwitterID をアップロード
+        with open("TwitterID.txt", "w") as f:
+            for id in TwitterID:
+                f.write(str(id) + "\n")
+        with open("TwitterID.txt", "rb") as f:
+            dbx.files_delete("/TwitterID.txt")
+            dbx.files_upload(f.read(), "/TwitterID.txt")
+            print("register: Uploaded TwitterID (size : ", str(len(TwitterID)), ")")
+        with open("TwitterID.txt", "rb") as f:
+            dbx.files_upload(f.read(), "/_backup/TwitterID/" + str(datetime.datetime.today().strftime("%Y %m %d %H:%M:%S")) + ".txt")
+            print("register: Uploaded TwitterID (for backup " + str(datetime.datetime.today().strftime("%Y %m %d %H:%M:%S")) + ") (size : ", str(len(TwitterID)), ")")
 
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
@@ -109,6 +119,7 @@ def register():
     global lastTweetID
     global AtCoderID
     global TwitterID
+    global fixedFlag
 
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
@@ -173,8 +184,8 @@ def register():
 
         lastTweetID = int(timeline[0]["id_str"])
 
-        # 変更されたならデータをアップロード
-        if fixedFlag:
-            uploadToDropbox()
+        # 変更されたデータをアップロード
+        uploadToDropbox()
+
     else:
         print("register: Twitter API Error: %d" % timeline_json.status_code)
