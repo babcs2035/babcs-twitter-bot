@@ -126,7 +126,7 @@ def register():
     timeline_json = api_OAuth.get("https://api.twitter.com/1.1/statuses/mentions_timeline.json")
     
     # 時刻表示を作成
-    timeStamp = datetime.datetime.today() + datetime.timedelta(hours=9)
+    timeStamp = datetime.datetime.today()
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
     
     # データをダウンロード
@@ -137,6 +137,7 @@ def register():
     defSubID = 0
     if timeline_json.status_code == 200:
         timeline = json.loads(timeline_json.text)
+        fixedFlag = False
         for tweet in timeline:
             if int(tweet["id_str"]) <= int(lastTweetID):
                 break
@@ -151,6 +152,7 @@ def register():
                         TwitterID.append(userData["screen_name"])
                         api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Register new AtCoder ID : " + tweetSplited[2])
+                        fixedFlag = True
                     else:
                         api.update_status("@" + str(userData["screen_name"]) + " 正しい AtCoder ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Reject to register new AtCoder ID : " + tweetSplited[2])
@@ -161,6 +163,7 @@ def register():
                             TwitterID.pop(myIndex(str(userData["screen_name"]), TwitterID))
                             api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録解除しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                             print("register: Unregister AtCoder ID : " + tweetSplited[2])
+                            fixedFlag = True
                         else:
                             api.update_status("@" + str(userData["screen_name"]) + "この AtCoder ID は登録されていません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                             print("register: Reject to unregister AtCoder ID : " + tweetSplited[2])
@@ -170,7 +173,8 @@ def register():
 
         lastTweetID = int(timeline[0]["id_str"])
 
-        # データをアップロード
-        uploadToDropbox()
+        # 変更されたならデータをアップロード
+        if fixedFlag:
+            uploadToDropbox()
     else:
         print("register: Twitter API Error: %d" % timeline_json.status_code)
