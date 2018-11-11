@@ -6,12 +6,13 @@ import json
 import dropbox
 import urllib
 from PIL import Image, ImageDraw, ImageFont
+import pickle
 
 # グローバル変数
 AtCoderID = []
 TwitterID = []
-acCount = []
-acPoint = []
+acCount = {}
+acPoint = {}
 
 # Dropbox からダウンロード
 def downloadFromDropbox():
@@ -44,18 +45,14 @@ def downloadFromDropbox():
     
     # acCount をダウンロード
     dbx.files_download_to_file("acCount.txt", "/acCount.txt")
-    with open("acCount.txt", "r") as f:
-        acCount.clear()
-        for acs in f:
-            acCount.append(int(acs.rstrip("\n")))
+    with open("acCount.txt", "rb") as f:
+        acCount = pickle.load(f)
     print("ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
 
     # acPoint をダウンロード
     dbx.files_download_to_file("acPoint.txt", "/acPoint.txt")
-    with open("acPoint.txt", "r") as f:
-        acPoint.clear()
-        for acs in f:
-            acPoint.append(int(acs.rstrip("\n")))
+    with open("acPoint.txt", "rb") as f:
+        acPoint = pickle.load(f)
     print("ranking: Downloaded acPoint (size : ", str(len(acPoint)), ")")
 
 # Dropbox にアップロード
@@ -70,18 +67,16 @@ def uploadToDropbox():
     dbx.users_get_current_account()
     
     # acCount をアップロード
-    with open("acCount.txt", "w") as f:
-        for acs in acCount:
-            f.write(str(acs) + "\n")
+    with open("acCount.txt", "wb") as f:
+        pickle.dump(acCount, f)
     with open("acCount.txt", "rb") as f:
         dbx.files_delete("/acCount.txt")
         dbx.files_upload(f.read(), "/acCount.txt")
     print("ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
 
     # acPoint をアップロード
-    with open("acPoint.txt", "w") as f:
-        for acs in acPoint:
-            f.write(str(acs) + "\n")
+    with open("acPoint.txt", "wb") as f:
+        pickle.dump(acPoint, f)
     with open("acPoint.txt", "rb") as f:
         dbx.files_delete("/acPoint.txt")
         dbx.files_upload(f.read(), "/acPoint.txt")
@@ -129,34 +124,23 @@ def ranking():
     acPointJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/atcoder-api/info/sums")
     acCountData = json.loads(acCountJson.read().decode("utf-8"))
     acPointData = json.loads(acPointJson.read().decode("utf-8"))
-    resCount = []
-    resPoint = []
+    nowACCount = {}
+    nowACPoint = {}
     for user in acCountData:
         if user["user_id"] in AtCoderID:
-            resCount.append(({"user_id" : str(user["user_id"]), "count" : int(user["problem_count"])}))
+            nowACCount[str(user["user_id"])] = int(user["problem_count"])
     for user in acPointData:
         if user["user_id"] in AtCoderID:
-            resPoint.append(({"user_id" : str(user["user_id"]), "point" : int(user["point_sum"])}))
-    nowACCount = []
-    nowACPoint = []
-    for id in AtCoderID:
-        for user in resCount:
-            if id == user["user_id"]:
-                nowACCount.append(user["count"])
-                break
-    for id in AtCoderID:
-        for user in resPoint:
-            if id == user["user_id"]:
-                nowACPoint.append(user["point"])
-                break
+            nowACPoint[str(user["user_id"])] = int(user["point_sum"])
     newACCount = []
     newACPoint = []
-    for idx in range(len(acCount)):
-        if nowACCount[idx] - acCount[idx] > 0:
-            newACCount.append(({"user_id" : AtCoderID[idx], "count" : nowACCount[idx] - acCount[idx]}))
-    for idx in range(len(acPoint)):
-        if nowACPoint[idx] - acPoint[idx] > 0:
-            newACPoint.append(({"user_id" : AtCoderID[idx], "point" : nowACPoint[idx] - acPoint[idx]}))
+    for user in AtCoderID:
+        if user in acCount:
+            if nowACCount[user] - acCount[user] > 0:
+                newACCount.append(({"user_id" : user, "count" : nowACCount[user] - acCount[user]}))
+        if user in acPoint:
+            if nowACPoint[user] - acPoint[user] > 0:
+                newACPoint.append(({"user_id" : user, "point" : nowACPoint[user] - acPoint[user]}))
     newACCount.sort(key = lambda x: x["count"], reverse = True)
     newACPoint.sort(key = lambda x: x["point"], reverse = True)
 
@@ -203,11 +187,6 @@ def ranking():
         pointResImg.paste(pointRankingImg, (0, 65 + 63 * idx))
     pointResImg.save("data/pointRankingImg_fixed.jpg")
 
-    # データをアップロード
-    acCount = nowACCount
-    acPoint = nowACPoint
-    uploadToDropbox()
-
     # 時刻表示を作成
     timeStamp = datetime.datetime.today()
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
@@ -243,3 +222,8 @@ def ranking():
         else:
             break
     api.update_with_media(filename = "data/pointRankingImg_fixed.jpg", status = pointTweetText + "\n" + timeStamp)
+    
+    # データをアップロード
+    acCount = nowACCount
+    acPoint = nowACPoint
+    uploadToDropbox()
