@@ -7,11 +7,12 @@ import dropbox
 import urllib
 from bs4 import BeautifulSoup
 import requests
+import pickle
 
 # グローバル変数
 AtCoderID = []
 TwitterID = []
-lastSubID = 0
+lastSubID = {}
 
 # Dropbox からダウンロード
 def downloadFromDropbox():
@@ -41,11 +42,11 @@ def downloadFromDropbox():
             TwitterID.append(id.rstrip("\n"))
     print("detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
-    # lastSubID をダウンロード
+    #lastSubID をダウンロード
     dbx.files_download_to_file("lastSubID.txt", "/lastSubID.txt")
-    with open("lastSubID.txt", "r") as f:
-        lastSubID = f.readline()
-    print("detection: Downloaded lastSubID : ", str(lastSubID))
+    with open("lastSubID.txt", "rb") as f:
+        lastSubID = pickle.load(f)
+    print("detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -57,13 +58,13 @@ def uploadToDropbox():
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
     
-    # lastTweetID をアップロード
-    with open("lastSubID.txt", "w") as f:
-        f.write(str(lastSubID))
+    # lastSubID をアップロード
+    with open("lastSubID.txt", "wb") as f:
+        pickle.dump(lastSubID, f)
     with open("lastSubID.txt", "rb") as f:
         dbx.files_delete("/lastSubID.txt")
         dbx.files_upload(f.read(), "/lastSubID.txt")
-    print("detection: Uploaded lastSubID : ", str(lastSubID))
+    print("detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 def detection():
     
@@ -91,7 +92,6 @@ def detection():
     downloadFromDropbox()
 
     # コンテストごとに提出を解析
-    newLastSubID = int(lastSubID)
     contestsJsonRes = urllib.request.urlopen("https://atcoder-api.appspot.com/contests")
     contestsJsonData = json.loads(contestsJsonRes.read().decode("utf-8"))
     for contest in contestsJsonData:
@@ -99,6 +99,7 @@ def detection():
         # ページ送り
         sublistPageNum = 1
         subCount = 0
+
         while True:
             sublistURL = "https://beta.atcoder.jp/contests/" + str(contest["id"]) + "/submissions?page=" + str(sublistPageNum)
             sublistHTML = requests.get(sublistURL)
@@ -116,11 +117,12 @@ def detection():
             sublistRows = sublistTable[0].find_all("tr")
             del sublistRows[0]
             skipFlag = False
+            newLastSubID = lastSubID[str(contest["id"])]
             for row in sublistRows:
                 links = row.find_all("a")
                 subID = int(str(links[3].get("href")).split("/")[4])
                 userID = str(links[1].get("href")).split("/")[2]
-                if subID <= int(lastSubID):
+                if subID <= int(lastSubID[str(contest["id"])]):
                     skipFlag = True
                     break
                 newLastSubID = max(newLastSubID, subID)
@@ -140,10 +142,9 @@ def detection():
             if skipFlag:
                 break
             sublistPageNum = sublistPageNum + 1
-        print("detection: Checked " + contest["title"] + " submissions (subCount : " + str(subCount) + " )")
 
-    # 後処理
-    lastSubID = newLastSubID
+        print("detection: Checked " + contest["title"] + " submissions (subCount : " + str(subCount) + ", newlastSubID : " + str(newLastSubID) + ")")
+        lastSubID[str(contest["id"])] = newLastSubID
 
     # データをアップロード
     uploadToDropbox()
