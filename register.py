@@ -11,7 +11,8 @@ from requests_oauthlib import OAuth1Session
 lastTweetID = 0
 AtCoderID = []
 TwitterID = []
-fixedFlag = False
+listFixedFlag = False
+idFixedFlag = False
 
 # AtCoder ID が存在するか確認
 def checkID(atcoderID):
@@ -32,7 +33,6 @@ def downloadFromDropbox():
     global lastTweetID
     global AtCoderID
     global TwitterID
-    global fixedFlag
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
@@ -67,21 +67,23 @@ def uploadToDropbox():
     global lastTweetID
     global AtCoderID
     global TwitterID
-    global fixedFlag
+    global listFixedFlag
+    global idFixedFlag
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
     
     # lastTweetID をアップロード
-    with open("lastTweetID.txt", "w") as f:
-        f.write(str(lastTweetID))
-    with open("lastTweetID.txt", "rb") as f:
-        dbx.files_delete("/lastTweetID.txt")
-        dbx.files_upload(f.read(), "/lastTweetID.txt")
-    print("register: Uploaded lastTweetID : ", str(lastTweetID))
+    if idFixedFlag:
+        with open("lastTweetID.txt", "w") as f:
+            f.write(str(lastTweetID))
+        with open("lastTweetID.txt", "rb") as f:
+            dbx.files_delete("/lastTweetID.txt")
+            dbx.files_upload(f.read(), "/lastTweetID.txt")
+        print("register: Uploaded lastTweetID : ", str(lastTweetID))
     
-    if fixedFlag:
+    if listFixedFlag:
         # AtCoderID をアップロード
         with open("AtCoderID.txt", "w") as f:
             for id in AtCoderID:
@@ -119,7 +121,8 @@ def register():
     global lastTweetID
     global AtCoderID
     global TwitterID
-    global fixedFlag
+    global listFixedFlag
+    global idFixedFlag
 
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
@@ -148,10 +151,12 @@ def register():
     defSubID = 0
     if timeline_json.status_code == 200:
         timeline = json.loads(timeline_json.text)
-        fixedFlag = False
+        listFixedFlag = False
+        idFixedFlag = False
         for tweet in timeline:
             if int(tweet["id_str"]) <= int(lastTweetID):
                 break
+            idFixedFlag = True
             tweetText = str(tweet["text"])
             tweetSplited = tweetText.split()
             if len(tweetSplited) >= 3:
@@ -163,7 +168,7 @@ def register():
                         TwitterID.append(userData["screen_name"])
                         api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Register new AtCoder ID : " + tweetSplited[2])
-                        fixedFlag = True
+                        listFixedFlag = True
                     else:
                         api.update_status("@" + str(userData["screen_name"]) + " 正しい AtCoder ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Reject to register new AtCoder ID : " + tweetSplited[2])
@@ -174,9 +179,9 @@ def register():
                             TwitterID.pop(myIndex(str(userData["screen_name"]), TwitterID))
                             api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録解除しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                             print("register: Unregister AtCoder ID : " + tweetSplited[2])
-                            fixedFlag = True
+                            listFixedFlag = True
                         else:
-                            api.update_status("@" + str(userData["screen_name"]) + "この AtCoder ID は登録されていません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                            api.update_status("@" + str(userData["screen_name"]) + " この AtCoder ID は登録されていません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                             print("register: Reject to unregister AtCoder ID : " + tweetSplited[2])
                     else:
                         api.update_status("@" + str(userData["screen_name"]) + " 正しい AtCoder ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
