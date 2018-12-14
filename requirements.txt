@@ -24,7 +24,7 @@ PySocks==1.6.8
 python-dateutil==2.7.3
 pytz==2018.5
 PyYAML==3.13
-requests==2.19.1
+requests==2.20.0
 requests-oauthlib==1.0.0
 setuptools==39.0.1
 six==1.11.0
