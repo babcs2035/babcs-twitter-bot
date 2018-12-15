@@ -1,2 +1,2 @@
 bot: python bot//bot.py
-web: touch index.php
+web: serve web
