@@ -1,2 +1,1 @@
-bot: python bot//bot.py
-web: node server
+bot: python bot.py
