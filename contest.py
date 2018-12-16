@@ -71,8 +71,13 @@ def contest():
     contestsListImg.save("data/contestsListImg_fixed.jpg")
 
     # リストをツイート
-    listTweetText = "現在，" + str(len(contestsList)) + " つのコンテストが予定されています．\nhttps://beta.atcoder.jp/contests/\n"
+    listTweetText = "現在，" + str(len(contestsList)) + " のコンテストが予定されています．\nhttps://beta.atcoder.jp/contests/\n"
     api.update_with_media(filename = "data/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
 
     # 画像をアップロード
     uploadToDropbox()
+
+if __name__ == '__main__':
+    print("contest: Running as debug...")
+    contest()
+    print("contest: Debug finished")
