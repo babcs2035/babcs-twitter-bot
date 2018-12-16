@@ -94,11 +94,13 @@ def detection():
     # コンテストごとに提出を解析
     contestsJsonRes = urllib.request.urlopen("https://atcoder-api.appspot.com/contests")
     contestsJsonData = json.loads(contestsJsonRes.read().decode("utf-8"))
+    lastNewLastSubID = -1
     for contest in contestsJsonData:
 
         # ページ送り
         sublistPageNum = 1
         subCount = 0
+        newLastSubID = -1
 
         while True:
             sublistURL = "https://beta.atcoder.jp/contests/" + str(contest["id"]) + "/submissions?page=" + str(sublistPageNum)
@@ -117,34 +119,41 @@ def detection():
             sublistRows = sublistTable[0].find_all("tr")
             del sublistRows[0]
             skipFlag = False
-            newLastSubID = lastSubID[str(contest["id"])]
             for row in sublistRows:
                 links = row.find_all("a")
                 subID = int(str(links[3].get("href")).split("/")[4])
                 userID = str(links[1].get("href")).split("/")[2]
+                if newLastSubID == -1:
+                    newLastSubID = subID
                 if subID <= int(lastSubID[str(contest["id"])]):
                     skipFlag = True
                     break
-                newLastSubID = max(newLastSubID, subID)
                 subCount = subCount + 1
 
                 # ユーザーの AC 提出かどうか判定
                 subData = [cell.get_text() for cell in row.select("td")]
-                idx = 0
-                for ids in AtCoderID:
-                    if userID == ids and subData[6] == "AC":
-                        try:
-                            api.update_status(userID + " ( @" + TwitterID[idx] + " ) さんが " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\n提出コード：" + "https://beta.atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
-                            print("detection: " + userID + " ( @" + TwitterID[idx] + " ) 's new AC submission (contest : " + str(contest["title"]) + ", problem : " + str(subData[1]) + ")")
-                        except:
-                            print("detection: Tweet Error")
-                    idx = idx + 1
+                if subData[6] == "AC":
+                    idx = 0
+                    for ids in AtCoderID:
+                        if userID == ids:
+                            try:
+                                api.update_status(userID + " ( @" + TwitterID[idx] + " ) さんが " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\n提出コード：" + "https://beta.atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
+                                print("detection: " + userID + " ( @" + TwitterID[idx] + " ) 's new AC submission (contest : " + str(contest["title"]) + ", problem : " + str(subData[1]) + ")")
+                            except:
+                                print("detection: Tweet Error")
+                        idx = idx + 1
             if skipFlag:
                 break
             sublistPageNum = sublistPageNum + 1
 
-        print("detection: Checked " + contest["title"] + " submissions (subCount : " + str(subCount) + ", newlastSubID : " + str(newLastSubID) + ")")
+        # lastSubID を更新
+        if newLastSubID != -1:
+            lastNewLastSubID = newLastSubID
+        else:
+            newLastSubID = lastNewLastSubID
         lastSubID[str(contest["id"])] = newLastSubID
+        print("detection: Checked " + contest["title"] + " submissions (subCount : " + str(subCount) + ", newlastSubID : " + str(lastSubID[str(contest["id"])]) + ")")
+        
 
     # データをアップロード
     uploadToDropbox()
