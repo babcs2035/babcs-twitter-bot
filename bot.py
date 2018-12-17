@@ -4,11 +4,11 @@ import tweepy
 import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
 import announce
-import followBack
-import register
-import detection
-import ranking
-import contest
+from AtCoder import followBack
+from AtCoder import register
+from AtCoder import detection
+from AtCoder import ranking
+from AtCoder import contest
 
 # ログ出力
 def outputLog(comment):
