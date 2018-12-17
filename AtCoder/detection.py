@@ -103,7 +103,7 @@ def detection():
         newLastSubID = -1
 
         while True:
-            sublistURL = "https://beta.atcoder.jp/contests/" + str(contest["id"]) + "/submissions?page=" + str(sublistPageNum)
+            sublistURL = "https://atcoder.jp/contests/" + str(contest["id"]) + "/submissions?page=" + str(sublistPageNum)
             sublistHTML = requests.get(sublistURL)
             try:
                 sublistHTML.raise_for_status()
@@ -160,7 +160,7 @@ def detection():
                                 imagePath = imagePath + "2000"
                             imagePath = imagePath + ".png"
                             try:
-                                api.update_with_media(filename = imagePath, status = userID + " ( @" + TwitterID[idx] + " ) さんが " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\n提出コード：" + "https://beta.atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
+                                api.update_with_media(filename = imagePath, status = userID + " ( @" + TwitterID[idx] + " ) さんが " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\n提出ソースコード：" + "https://atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
                                 print("detection: " + userID + " ( @" + TwitterID[idx] + " ) 's new AC submission (contest : " + str(contest["title"]) + ", problem : " + str(subData[1]) + ")")
                             except:
                                 print("detection: Tweet Error")
