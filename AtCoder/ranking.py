@@ -28,7 +28,7 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # AtCoderID をダウンロード
-    dbx.files_download_to_file("AtCoderID.txt", "/AtCoderID.txt")
+    dbx.files_download_to_file("AtCoderID.txt", "/AtCoder/AtCoderID.txt")
     with open("AtCoderID.txt", "r") as f:
         AtCoderID.clear()
         for id in f:
@@ -36,7 +36,7 @@ def downloadFromDropbox():
     print("ranking: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
     
     # TwitterID をダウンロード
-    dbx.files_download_to_file("TwitterID.txt", "/TwitterID.txt")
+    dbx.files_download_to_file("TwitterID.txt", "/AtCoder/TwitterID.txt")
     with open("TwitterID.txt", "r") as f:
         TwitterID.clear()
         for id in f:
@@ -44,13 +44,13 @@ def downloadFromDropbox():
     print("ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     # acCount をダウンロード
-    dbx.files_download_to_file("acCount.txt", "/acCount.txt")
+    dbx.files_download_to_file("acCount.txt", "/AtCoder/acCount.txt")
     with open("acCount.txt", "rb") as f:
         acCount = pickle.load(f)
     print("ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
 
     # acPoint をダウンロード
-    dbx.files_download_to_file("acPoint.txt", "/acPoint.txt")
+    dbx.files_download_to_file("acPoint.txt", "/AtCoder/acPoint.txt")
     with open("acPoint.txt", "rb") as f:
         acPoint = pickle.load(f)
     print("ranking: Downloaded acPoint (size : ", str(len(acPoint)), ")")
@@ -70,26 +70,26 @@ def uploadToDropbox():
     with open("acCount.txt", "wb") as f:
         pickle.dump(acCount, f)
     with open("acCount.txt", "rb") as f:
-        dbx.files_delete("/acCount.txt")
-        dbx.files_upload(f.read(), "/acCount.txt")
+        dbx.files_delete("/AtCoder/acCount.txt")
+        dbx.files_upload(f.read(), "/AtCoder/acCount.txt")
     print("ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
 
     # acPoint をアップロード
     with open("acPoint.txt", "wb") as f:
         pickle.dump(acPoint, f)
     with open("acPoint.txt", "rb") as f:
-        dbx.files_delete("/acPoint.txt")
-        dbx.files_upload(f.read(), "/acPoint.txt")
+        dbx.files_delete("/AtCoder/acPoint.txt")
+        dbx.files_upload(f.read(), "/AtCoder/acPoint.txt")
     print("ranking: Uploaded acPoint (size : ", str(len(acPoint)), ")")
     
     # countRankingImg_fixed をアップロード
     with open("data/countRankingImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/countRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
+        dbx.files_upload(f.read(), "/_backup/AtCoder/countRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
         print("ranking: Uploaded countRankingImg_fixed")
 
     # pointRankingImg_fixed をアップロード
     with open("data/pointRankingImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/pointRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
+        dbx.files_upload(f.read(), "/_backup/AtCoder/pointRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
         print("ranking: Uploaded pointRankingImg_fixed")
 
 # list 内の要素の添え字を返す（無い場合は -1）
