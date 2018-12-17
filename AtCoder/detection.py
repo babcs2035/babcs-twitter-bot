@@ -137,7 +137,7 @@ def detection():
                     for ids in AtCoderID:
                         if userID == ids:
                             score = int(subData[4])
-                            imagePath = "data/detection/"
+                            imagePath = "AtCoder/data/detection/"
                             if score <= 100:
                                 imagePath = imagePath + "100"
                             elif score <= 200:
