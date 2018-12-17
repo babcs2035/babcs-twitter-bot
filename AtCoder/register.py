@@ -19,7 +19,7 @@ def checkID(atcoderID):
 
     # AtCoder ユーザーページにアクセス
     try:
-        html = urllib.request.urlopen("https://beta.atcoder.jp/users/" + atcoderID)
+        html = urllib.request.urlopen("https://atcoder.jp/users/" + atcoderID)
         print("register: " + atcoderID + " is correct AtCoder ID")
         return True
     except:
