@@ -24,7 +24,7 @@ def uploadToDropbox():
     
     # contestsListImg_fixed をアップロード
     with open("data/contestsListImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/contestsListImg_fixed/"+str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S"))+".jpg")
+        dbx.files_upload(f.read(), "/_backup/AtCoder/contestsListImg_fixed/"+str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S"))+".jpg")
         print("contest: Uploaded contestsListImg_fixed")
 
 def contest():
