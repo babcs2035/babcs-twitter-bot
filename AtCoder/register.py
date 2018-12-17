@@ -194,3 +194,8 @@ def register():
 
     else:
         print("register: Twitter API Error: %d" % timeline_json.status_code)
+
+if __name__ == '__main__':
+    print("register: Running as debug...")
+    register()
+    print("register: Debug finished")

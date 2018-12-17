@@ -180,3 +180,8 @@ def detection():
 
     # データをアップロード
     uploadToDropbox()
+
+if __name__ == '__main__':
+    print("detection: Running as debug...")
+    detection()
+    print("detection: Debug finished")
