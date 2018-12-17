@@ -227,3 +227,8 @@ def ranking():
     acCount = nowACCount
     acPoint = nowACPoint
     uploadToDropbox()
+
+if __name__ == '__main__':
+    print("ranking: Running as debug...")
+    ranking()
+    print("ranking: Debug finished")
