@@ -23,8 +23,8 @@ def outputLog(comment):
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
 
-# 定期ツイート（毎時 0, 30 分）
-@sched.scheduled_job('cron', minute = '0, 30', hour = '*/1')
+# 定期ツイート（毎時 30 分）
+@sched.scheduled_job('cron', minute = '30', hour = '*/1')
 def scheduled_job():
     
     # 開始ログ出力
