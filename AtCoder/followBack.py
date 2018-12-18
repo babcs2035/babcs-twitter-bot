@@ -39,3 +39,8 @@ def followBack():
     if followedCnt > 0:
         api.update_status(followStr + "\n" + timeStamp)
     print("followBack: 新規フォロー " + str(followedCnt) + " 人")
+
+if __name__ == '__main__':
+    print("followBack: Running as debug...")
+    followBack()
+    print("followBack: Debug finished")

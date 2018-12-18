@@ -23,8 +23,8 @@ def uploadToDropbox():
     dbx.users_get_current_account()
     
     # contestsListImg_fixed をアップロード
-    with open("data/contestsListImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/contestsListImg_fixed/"+str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S"))+".jpg")
+    with open("AtCoder/data/contestsListImg_fixed.jpg", "rb") as f:
+        dbx.files_upload(f.read(), "/_backup/AtCoder/contestsListImg_fixed/"+str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S"))+".jpg")
         print("contest: Uploaded contestsListImg_fixed")
 
 def contest():
@@ -54,13 +54,13 @@ def contest():
             contestsList.append(contest)
 
     # 画像生成
-    listFont = ImageFont.truetype("data/YuGothM.ttc", 32)
-    contestsListFirstImg = Image.open("data/contestsListImg (first).jpg")
+    listFont = ImageFont.truetype("AtCoder/data/YuGothM.ttc", 32)
+    contestsListFirstImg = Image.open("AtCoder/data/contestsListImg (first).jpg")
     contestsListImg = Image.new("RGB", (1852, 68 + 64 * len(contestsList)))
     contestsListImg.paste(contestsListFirstImg, (0, 0))
     idx = 0
     for contest in contestsList:
-        contestListImg = Image.open("data/contestsListImg (cell).jpg")
+        contestListImg = Image.open("AtCoder/data/contestsListImg (cell).jpg")
         contestListDraw = ImageDraw.Draw(contestListImg)
         contestListDraw.text((10, 15), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (0, 0, 0), font = listFont)
         contestListDraw.text((360, 15), str(contest["title"]), fill = (0, 0, 0), font = listFont)
@@ -68,11 +68,11 @@ def contest():
         contestListDraw.text((1660, 15), str(contest["ratedRange"]), fill = (0, 0, 0), font = listFont)
         contestsListImg.paste(contestListImg, (0, 68 + 64 * idx))
         idx = idx + 1
-    contestsListImg.save("data/contestsListImg_fixed.jpg")
+    contestsListImg.save("AtCoder/data/contestsListImg_fixed.jpg")
 
     # リストをツイート
-    listTweetText = "現在，" + str(len(contestsList)) + " のコンテストが予定されています．\nhttps://beta.atcoder.jp/contests/\n"
-    api.update_with_media(filename = "data/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
+    listTweetText = "現在，" + str(len(contestsList)) + " のコンテストが予定されています．\nhttps://atcoder.jp/contests/\n"
+    api.update_with_media(filename = "AtCoder/data/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
 
     # 画像をアップロード
     uploadToDropbox()

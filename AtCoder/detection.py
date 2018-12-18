@@ -27,7 +27,7 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # AtCoderID をダウンロード
-    dbx.files_download_to_file("AtCoderID.txt", "/AtCoderID.txt")
+    dbx.files_download_to_file("AtCoderID.txt", "/AtCoder/AtCoderID.txt")
     with open("AtCoderID.txt", "r") as f:
         AtCoderID.clear()
         for id in f:
@@ -35,7 +35,7 @@ def downloadFromDropbox():
     print("detection: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
     
     # TwitterID をダウンロード
-    dbx.files_download_to_file("TwitterID.txt", "/TwitterID.txt")
+    dbx.files_download_to_file("TwitterID.txt", "/AtCoder/TwitterID.txt")
     with open("TwitterID.txt", "r") as f:
         TwitterID.clear()
         for id in f:
@@ -43,7 +43,7 @@ def downloadFromDropbox():
     print("detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     #lastSubID をダウンロード
-    dbx.files_download_to_file("lastSubID.txt", "/lastSubID.txt")
+    dbx.files_download_to_file("lastSubID.txt", "/AtCoder/lastSubID.txt")
     with open("lastSubID.txt", "rb") as f:
         lastSubID = pickle.load(f)
     print("detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
@@ -62,8 +62,8 @@ def uploadToDropbox():
     with open("lastSubID.txt", "wb") as f:
         pickle.dump(lastSubID, f)
     with open("lastSubID.txt", "rb") as f:
-        dbx.files_delete("/lastSubID.txt")
-        dbx.files_upload(f.read(), "/lastSubID.txt")
+        dbx.files_delete("/AtCoder/lastSubID.txt")
+        dbx.files_upload(f.read(), "/AtCoder/lastSubID.txt")
     print("detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 def detection():
@@ -103,7 +103,7 @@ def detection():
         newLastSubID = -1
 
         while True:
-            sublistURL = "https://beta.atcoder.jp/contests/" + str(contest["id"]) + "/submissions?page=" + str(sublistPageNum)
+            sublistURL = "https://atcoder.jp/contests/" + str(contest["id"]) + "/submissions?page=" + str(sublistPageNum)
             sublistHTML = requests.get(sublistURL)
             try:
                 sublistHTML.raise_for_status()
@@ -137,7 +137,7 @@ def detection():
                     for ids in AtCoderID:
                         if userID == ids:
                             score = int(subData[4])
-                            imagePath = "data/detection/"
+                            imagePath = "AtCoder/data/detection/"
                             if score <= 100:
                                 imagePath = imagePath + "100"
                             elif score <= 200:
@@ -160,7 +160,7 @@ def detection():
                                 imagePath = imagePath + "2000"
                             imagePath = imagePath + ".png"
                             try:
-                                api.update_with_media(filename = imagePath, status = userID + " ( @" + TwitterID[idx] + " ) さんが " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\n提出コード：" + "https://beta.atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
+                                api.update_with_media(filename = imagePath, status = userID + " ( @" + TwitterID[idx] + " ) さんが " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\n提出ソースコード：" + "https://atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
                                 print("detection: " + userID + " ( @" + TwitterID[idx] + " ) 's new AC submission (contest : " + str(contest["title"]) + ", problem : " + str(subData[1]) + ")")
                             except:
                                 print("detection: Tweet Error")
@@ -180,3 +180,8 @@ def detection():
 
     # データをアップロード
     uploadToDropbox()
+
+if __name__ == '__main__':
+    print("detection: Running as debug...")
+    detection()
+    print("detection: Debug finished")
