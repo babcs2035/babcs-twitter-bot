@@ -162,7 +162,7 @@ def register():
             if len(tweetSplited) >= 3:
                 userData_json = api_OAuth.get("https://api.twitter.com/1.1/users/show.json?user_id=" + tweet["user"]["id_str"])
                 userData = json.loads(userData_json.text)
-                if tweetSplited[1] == "reg":
+                if tweetSplited[1] == "reg_atcoder":
                     if checkID(tweetSplited[2]):
                         AtCoderID.append(tweetSplited[2])
                         TwitterID.append(userData["screen_name"])
@@ -172,7 +172,7 @@ def register():
                     else:
                         api.update_status("@" + str(userData["screen_name"]) + " 正しい AtCoder ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Reject to register new AtCoder ID : " + tweetSplited[2])
-                if tweetSplited[1] == "del":
+                if tweetSplited[1] == "del_atcoder":
                     if checkID(tweetSplited[2]):
                         if myIndex(tweetSplited[2], AtCoderID) != -1 and myIndex(str(userData["screen_name"]), TwitterID) != -1 and myIndex(tweetSplited[2], AtCoderID) == myIndex(str(userData["screen_name"]), TwitterID):
                             AtCoderID.pop(myIndex(str(userData["screen_name"]), TwitterID))
