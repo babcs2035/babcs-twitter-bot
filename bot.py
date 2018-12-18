@@ -86,8 +86,8 @@ def scheduled_job():
     # 終了ログ出力
     outputLog("--- AtCoder AC 検出 終了 ---")
 
-# AOJ AC 検出（30 秒ごと）
-@sched.scheduled_job('interval', seconds = 30)
+# AOJ AC 検出（20 秒ごと）
+@sched.scheduled_job('interval', seconds = 20)
 def scheduled_job():
     
     # 開始ログ出力
