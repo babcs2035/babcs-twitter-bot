@@ -9,6 +9,7 @@ from AtCoder import register
 from AtCoder import detection
 from AtCoder import ranking
 from AtCoder import contest
+import AOJ.register
 
 # ログ出力
 def outputLog(comment):
@@ -58,8 +59,8 @@ def scheduled_job():
     # 終了ログ出力
     outputLog("--- AtCoder AC 検出 終了 ---")
 
-# AtCoder ID 登録（15 秒ごと）
-@sched.scheduled_job('interval', seconds = 15)
+# AtCoder & AOJ ID 登録（20 秒ごと）
+@sched.scheduled_job('interval', seconds = 20)
 def scheduled_job():
     
     # 開始ログ出力
@@ -70,6 +71,15 @@ def scheduled_job():
     
     # 終了ログ出力
     outputLog("--- AtCoder ID 登録 終了 ---")
+
+    # 開始ログ出力
+    outputLog("--- AOJ ID 登録 開始 ---")
+
+    # 実行
+    AOJ.register.register()
+    
+    # 終了ログ出力
+    outputLog("--- AOJ ID 登録 終了 ---")
     
 # Unique AC ランキング（毎日 0:00）
 @sched.scheduled_job('cron', minute = '0', hour = '0')
