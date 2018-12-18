@@ -38,7 +38,7 @@ def scheduled_job():
     # 終了ログ出力
     outputLog("--- 定期ツイート 終了 ---")
     
-# フォロバ & AtCoder AC 検出（毎時 0, 20, 40 分）
+# フォロバ（毎時 0, 20, 40 分）
 @sched.scheduled_job('cron', minute = '0, 20, 40', hour = '*/1')
 def scheduled_job():
 
@@ -50,28 +50,6 @@ def scheduled_job():
 
     # 終了ログ出力
     outputLog("--- フォロバ 終了 ---")
-
-    # 開始ログ出力
-    outputLog("--- AtCoder AC 検出 開始 ---")
-
-    # 実行
-    detection.detection()
-
-    # 終了ログ出力
-    outputLog("--- AtCoder AC 検出 終了 ---")
-
-# AOJ AC 検出（30 秒ごと）
-@sched.scheduled_job('interval', seconds = 30)
-def scheduled_job():
-    
-    # 開始ログ出力
-    outputLog("--- AOJ AC 検出 開始 ---")
-
-    # 実行
-    AOJ.detection.detection()
-    
-    # 終了ログ出力
-    outputLog("--- AOJ AC 検出 終了 ---")
 
 # AtCoder & AOJ ID 登録（20 秒ごと）
 @sched.scheduled_job('interval', seconds = 20)
@@ -94,6 +72,32 @@ def scheduled_job():
     
     # 終了ログ出力
     outputLog("--- AOJ ID 登録 終了 ---")
+
+# AtCoder AC 検出（毎時 0, 15, 30, 45 分）
+@sched.scheduled_job('cron', minute = '0, 15, 30, 45', hour = '*/1')
+def scheduled_job():
+
+    # 開始ログ出力
+    outputLog("--- AtCoder AC 検出 開始 ---")
+
+    # 実行
+    detection.detection()
+
+    # 終了ログ出力
+    outputLog("--- AtCoder AC 検出 終了 ---")
+
+# AOJ AC 検出（30 秒ごと）
+@sched.scheduled_job('interval', seconds = 30)
+def scheduled_job():
+    
+    # 開始ログ出力
+    outputLog("--- AOJ AC 検出 開始 ---")
+
+    # 実行
+    AOJ.detection.detection()
+    
+    # 終了ログ出力
+    outputLog("--- AOJ AC 検出 終了 ---")
     
 # Unique AC ランキング（毎日 0:00）
 @sched.scheduled_job('cron', minute = '0', hour = '0')
