@@ -97,6 +97,8 @@ def detection():
         if int(sub["judgeId"]) <= int(lastSubID):
             lastSubID = int(subs_jsonData[0]["judgeId"])
             break
+        if sub["status"] != 4:
+            continue
 
         # AOJ ID に当てはまるか調べる
         pos = -1
@@ -110,20 +112,7 @@ def detection():
             continue
 
         subURL = "https://onlinejudge.u-aizu.ac.jp/recent_judges/" + str(sub["problemId"]) + "/judge/" + str(sub["judgeId"]) + "/" + str(id) + "/" + str(sub["language"])
-        problemName = str(sub["problemId"])
-        problemHTML = requests.get("http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=" + str(sub["problemId"]) + "&lang=jp")
-        try:
-            problemHTML.raise_for_status()
-            problemData = BeautifulSoup(problemHTML.text, "html.parser")
-        except:
-            print("AOJ-detection: problemHTML Error")
-
-        problemH1s = problemData.find("h1", class_ = "title")
-        if len(problemH1s.contents) == 1:
-            problemName = str(problemH1s.contents[0])
-        else:
-            problemName = str(problemH1s.contents[0].contents) + str(problemH1s.contents[1])
-
+        problemName = str(sub["problemTitle"])
         try:
             api.update_status(str(AOJID[pos]) + " ( @" + str(TwitterID[pos]) + " ) さんが " + problemName + " を AC しました！\n提出ソースコード：" + subURL + "\n" + timeStamp)
             print("AOJ-detection: " + str(AOJID[pos]) + " ( @" + str(TwitterID[pos]) + " ) 's new AC submission (problem : " + problemName + ")")
