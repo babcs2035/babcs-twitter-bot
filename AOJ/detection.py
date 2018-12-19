@@ -97,6 +97,8 @@ def detection():
         if int(sub["judgeId"]) <= int(lastSubID):
             lastSubID = int(subs_jsonData[0]["judgeId"])
             break
+        if sub["status"] != 4:
+            continue
 
         # AOJ ID に当てはまるか調べる
         pos = -1
