@@ -2,8 +2,8 @@
 import os
 import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
-from bot import announce
-from bot import followBack
+import announce
+import followBack
 
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
