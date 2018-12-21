@@ -39,22 +39,22 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # lastTweetID をダウンロード
-    dbx.files_download_to_file("lastTweetID.txt", "/AtCoder/lastTweetID.txt")
-    with open("lastTweetID.txt", "r") as f:
+    dbx.files_download_to_file("AtCoder/lastTweetID.txt", "/AtCoder/lastTweetID.txt")
+    with open("AtCoder/lastTweetID.txt", "r") as f:
         lastTweetID = f.readline()
     print("register: Downloaded lastTweetID : ", str(lastTweetID))
     
     # AtCoderID をダウンロード
-    dbx.files_download_to_file("AtCoderID.txt", "/AtCoder/AtCoderID.txt")
-    with open("AtCoderID.txt", "r") as f:
+    dbx.files_download_to_file("AtCoder/AtCoderID.txt", "/AtCoder/AtCoderID.txt")
+    with open("AtCoder/AtCoderID.txt", "r") as f:
         AtCoderID.clear()
         for id in f:
             AtCoderID.append(id.rstrip("\n"))
     print("register: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
     
     # TwitterID をダウンロード
-    dbx.files_download_to_file("TwitterID.txt", "/AtCoder/TwitterID.txt")
-    with open("TwitterID.txt", "r") as f:
+    dbx.files_download_to_file("AtCoder/TwitterID.txt", "/AtCoder/TwitterID.txt")
+    with open("AtCoder/TwitterID.txt", "r") as f:
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
@@ -76,35 +76,35 @@ def uploadToDropbox():
     
     # lastTweetID をアップロード
     if idFixedFlag:
-        with open("lastTweetID.txt", "w") as f:
+        with open("AtCoder/lastTweetID.txt", "w") as f:
             f.write(str(lastTweetID))
-        with open("lastTweetID.txt", "rb") as f:
+        with open("AtCoder/lastTweetID.txt", "rb") as f:
             dbx.files_delete("/AtCoder/lastTweetID.txt")
             dbx.files_upload(f.read(), "/AtCoder/lastTweetID.txt")
         print("register: Uploaded lastTweetID : ", str(lastTweetID))
     
     if listFixedFlag:
         # AtCoderID をアップロード
-        with open("AtCoderID.txt", "w") as f:
+        with open("AtCoder/AtCoderID.txt", "w") as f:
             for id in AtCoderID:
                 f.write(str(id) + "\n")
-        with open("AtCoderID.txt", "rb") as f:
+        with open("AtCoder/AtCoderID.txt", "rb") as f:
             dbx.files_delete("/AtCoder/AtCoderID.txt")
             dbx.files_upload(f.read(), "/AtCoder/AtCoderID.txt")
             print("register: Uploaded AtCoderID (size : ", str(len(AtCoderID)), ")")
-        with open("AtCoderID.txt", "rb") as f:
+        with open("AtCoder/AtCoderID.txt", "rb") as f:
             dbx.files_upload(f.read(), "/_backup/AtCoder/AtCoderID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
             print("register: Uploaded AtCoderID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(AtCoderID)), ")")
 
         # TwitterID をアップロード
-        with open("TwitterID.txt", "w") as f:
+        with open("AtCoder/TwitterID.txt", "w") as f:
             for id in TwitterID:
                 f.write(str(id) + "\n")
-        with open("TwitterID.txt", "rb") as f:
+        with open("AtCoder/TwitterID.txt", "rb") as f:
             dbx.files_delete("/AtCoder/TwitterID.txt")
             dbx.files_upload(f.read(), "/AtCoder/TwitterID.txt")
             print("register: Uploaded TwitterID (size : ", str(len(TwitterID)), ")")
-        with open("TwitterID.txt", "rb") as f:
+        with open("AtCoder/TwitterID.txt", "rb") as f:
             dbx.files_upload(f.read(), "/_backup/AtCoder/TwitterID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
             print("register: Uploaded TwitterID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(TwitterID)), ")")
 
