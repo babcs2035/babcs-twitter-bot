@@ -26,24 +26,24 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # AOJID をダウンロード
-    dbx.files_download_to_file("AOJID.txt", "/AOJ/AOJID.txt")
-    with open("AOJID.txt", "r") as f:
+    dbx.files_download_to_file("AOJ/AOJID.txt", "/AOJ/AOJID.txt")
+    with open("AOJ/AOJID.txt", "r") as f:
         AOJID.clear()
         for id in f:
             AOJID.append(id.rstrip("\n"))
     print("AOJ-detection: Downloaded AOJID (size : ", str(len(AOJID)), ")")
     
     # TwitterID をダウンロード
-    dbx.files_download_to_file("TwitterID.txt", "/AOJ/TwitterID.txt")
-    with open("TwitterID.txt", "r") as f:
+    dbx.files_download_to_file("AOJ/TwitterID.txt", "/AOJ/TwitterID.txt")
+    with open("AOJ/TwitterID.txt", "r") as f:
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
     print("AOJ-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     # lastSubID をダウンロード
-    dbx.files_download_to_file("lastSubID.txt", "/AOJ/lastSubID.txt")
-    with open("lastSubID.txt", "r") as f:
+    dbx.files_download_to_file("AOJ/lastSubID.txt", "/AOJ/lastSubID.txt")
+    with open("AOJ/lastSubID.txt", "r") as f:
         lastSubID = f.readline()
     print("AOJ-detection: Downloaded lastSubID : ", str(lastSubID))
 
@@ -58,9 +58,9 @@ def uploadToDropbox():
     dbx.users_get_current_account()
     
     # lastSubID をアップロード
-    with open("lastSubID.txt", "w") as f:
+    with open("AOJ/lastSubID.txt", "w") as f:
         f.write(str(lastSubID))
-    with open("lastSubID.txt", "rb") as f:
+    with open("AOJ/lastSubID.txt", "rb") as f:
         dbx.files_delete("/AOJ/lastSubID.txt")
         dbx.files_upload(f.read(), "/AOJ/lastSubID.txt")
     print("AOJ-detection: Uploaded lastSubID : ", str(lastSubID))
