@@ -9,21 +9,21 @@ from requests_oauthlib import OAuth1Session
 
 # グローバル変数
 lastTweetID = 0
-AtCoderID = []
+AOJID = []
 TwitterID = []
 listFixedFlag = False
 idFixedFlag = False
 
-# AtCoder ID が存在するか確認
-def checkID(atcoderID):
+# AOJ ID が存在するか確認
+def checkID(aojID):
 
-    # AtCoder ユーザーページにアクセス
+    # AOJ ユーザーページにアクセス
     try:
-        html = urllib.request.urlopen("https://atcoder.jp/users/" + atcoderID)
-        print("register: " + atcoderID + " is correct AtCoder ID")
+        html = urllib.request.urlopen("https://judgeapi.u-aizu.ac.jp/users/" + aojID)
+        print("register: " + aojID + " is correct AOJ ID")
         return True
     except:
-        print("register: " + atcoderID + " is not correct AtCoder ID")
+        print("register: " + aojID + " is not correct AOJ ID")
         return False
 
 # Dropbox からダウンロード
@@ -31,7 +31,7 @@ def downloadFromDropbox():
     
     # グローバル変数
     global lastTweetID
-    global AtCoderID
+    global AOJID
     global TwitterID
 
     # Dropbox オブジェクトの生成
@@ -39,21 +39,21 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # lastTweetID をダウンロード
-    dbx.files_download_to_file("lastTweetID.txt", "/AtCoder/lastTweetID.txt")
+    dbx.files_download_to_file("lastTweetID.txt", "/AOJ/lastTweetID.txt")
     with open("lastTweetID.txt", "r") as f:
         lastTweetID = f.readline()
     print("register: Downloaded lastTweetID : ", str(lastTweetID))
     
-    # AtCoderID をダウンロード
-    dbx.files_download_to_file("AtCoderID.txt", "/AtCoder/AtCoderID.txt")
-    with open("AtCoderID.txt", "r") as f:
-        AtCoderID.clear()
+    # AOJID をダウンロード
+    dbx.files_download_to_file("AOJID.txt", "/AOJ/AOJID.txt")
+    with open("AOJID.txt", "r") as f:
+        AOJID.clear()
         for id in f:
-            AtCoderID.append(id.rstrip("\n"))
-    print("register: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
+            AOJID.append(id.rstrip("\n"))
+    print("register: Downloaded AOJID (size : ", str(len(AOJID)), ")")
     
     # TwitterID をダウンロード
-    dbx.files_download_to_file("TwitterID.txt", "/AtCoder/TwitterID.txt")
+    dbx.files_download_to_file("TwitterID.txt", "/AOJ/TwitterID.txt")
     with open("TwitterID.txt", "r") as f:
         TwitterID.clear()
         for id in f:
@@ -65,7 +65,7 @@ def uploadToDropbox():
     
     # グローバル変数
     global lastTweetID
-    global AtCoderID
+    global AOJID
     global TwitterID
     global listFixedFlag
     global idFixedFlag
@@ -79,33 +79,33 @@ def uploadToDropbox():
         with open("lastTweetID.txt", "w") as f:
             f.write(str(lastTweetID))
         with open("lastTweetID.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/lastTweetID.txt")
-            dbx.files_upload(f.read(), "/AtCoder/lastTweetID.txt")
+            dbx.files_delete("/AOJ/lastTweetID.txt")
+            dbx.files_upload(f.read(), "/AOJ/lastTweetID.txt")
         print("register: Uploaded lastTweetID : ", str(lastTweetID))
     
     if listFixedFlag:
-        # AtCoderID をアップロード
-        with open("AtCoderID.txt", "w") as f:
-            for id in AtCoderID:
+        # AOJID をアップロード
+        with open("AOJID.txt", "w") as f:
+            for id in AOJID:
                 f.write(str(id) + "\n")
-        with open("AtCoderID.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/AtCoderID.txt")
-            dbx.files_upload(f.read(), "/AtCoder/AtCoderID.txt")
-            print("register: Uploaded AtCoderID (size : ", str(len(AtCoderID)), ")")
-        with open("AtCoderID.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/_backup/AtCoder/AtCoderID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
-            print("register: Uploaded AtCoderID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(AtCoderID)), ")")
+        with open("AOJID.txt", "rb") as f:
+            dbx.files_delete("/AOJ/AOJID.txt")
+            dbx.files_upload(f.read(), "/AOJ/AOJID.txt")
+            print("register: Uploaded AOJID (size : ", str(len(AOJID)), ")")
+        with open("AOJID.txt", "rb") as f:
+            dbx.files_upload(f.read(), "/_backup/AOJ/AOJID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
+            print("register: Uploaded AOJID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(AOJID)), ")")
 
         # TwitterID をアップロード
         with open("TwitterID.txt", "w") as f:
             for id in TwitterID:
                 f.write(str(id) + "\n")
         with open("TwitterID.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/TwitterID.txt")
-            dbx.files_upload(f.read(), "/AtCoder/TwitterID.txt")
+            dbx.files_delete("/AOJ/TwitterID.txt")
+            dbx.files_upload(f.read(), "/AOJ/TwitterID.txt")
             print("register: Uploaded TwitterID (size : ", str(len(TwitterID)), ")")
         with open("TwitterID.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/_backup/AtCoder/TwitterID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
+            dbx.files_upload(f.read(), "/_backup/AOJ/TwitterID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
             print("register: Uploaded TwitterID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(TwitterID)), ")")
 
 # list 内の要素の添え字を返す（無い場合は -1）
@@ -119,7 +119,7 @@ def register():
     
     # グローバル変数
     global lastTweetID
-    global AtCoderID
+    global AOJID
     global TwitterID
     global listFixedFlag
     global idFixedFlag
@@ -162,30 +162,30 @@ def register():
             if len(tweetSplited) >= 3:
                 userData_json = api_OAuth.get("https://api.twitter.com/1.1/users/show.json?user_id=" + tweet["user"]["id_str"])
                 userData = json.loads(userData_json.text)
-                if tweetSplited[1] == "reg_atcoder":
+                if tweetSplited[1] == "reg_aoj":
                     if checkID(tweetSplited[2]):
-                        AtCoderID.append(tweetSplited[2])
+                        AOJID.append(tweetSplited[2])
                         TwitterID.append(userData["screen_name"])
-                        api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
-                        print("register: Register new AtCoder ID : " + tweetSplited[2])
+                        api.update_status("@" + str(userData["screen_name"]) + " AOJ ID を登録しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                        print("register: Register new AOJ ID : " + tweetSplited[2])
                         listFixedFlag = True
                     else:
-                        api.update_status("@" + str(userData["screen_name"]) + " 正しい AtCoder ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
-                        print("register: Reject to register new AtCoder ID : " + tweetSplited[2])
-                if tweetSplited[1] == "del_atcoder":
+                        api.update_status("@" + str(userData["screen_name"]) + " 正しい AOJ ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                        print("register: Reject to register new AOJ ID : " + tweetSplited[2])
+                if tweetSplited[1] == "del_aoj":
                     if checkID(tweetSplited[2]):
-                        if myIndex(tweetSplited[2], AtCoderID) != -1 and myIndex(str(userData["screen_name"]), TwitterID) != -1 and myIndex(tweetSplited[2], AtCoderID) == myIndex(str(userData["screen_name"]), TwitterID):
-                            AtCoderID.pop(myIndex(str(userData["screen_name"]), TwitterID))
+                        if myIndex(tweetSplited[2], AOJID) != -1 and myIndex(str(userData["screen_name"]), TwitterID) != -1 and myIndex(tweetSplited[2], AOJID) == myIndex(str(userData["screen_name"]), TwitterID):
+                            AOJID.pop(myIndex(str(userData["screen_name"]), TwitterID))
                             TwitterID.pop(myIndex(str(userData["screen_name"]), TwitterID))
-                            api.update_status("@" + str(userData["screen_name"]) + " AtCoder ID を登録解除しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
-                            print("register: Unregister AtCoder ID : " + tweetSplited[2])
+                            api.update_status("@" + str(userData["screen_name"]) + " AOJ ID を登録解除しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                            print("register: Unregister AOJ ID : " + tweetSplited[2])
                             listFixedFlag = True
                         else:
-                            api.update_status("@" + str(userData["screen_name"]) + " この AtCoder ID は登録されていません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
-                            print("register: Reject to unregister AtCoder ID : " + tweetSplited[2])
+                            api.update_status("@" + str(userData["screen_name"]) + " この AOJ ID は登録されていません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                            print("register: Reject to unregister AOJ ID : " + tweetSplited[2])
                     else:
-                        api.update_status("@" + str(userData["screen_name"]) + " 正しい AtCoder ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
-                        print("register: Reject to unregister AtCoder ID : " + tweetSplited[2])
+                        api.update_status("@" + str(userData["screen_name"]) + " 正しい AOJ ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                        print("register: Reject to unregister AOJ ID : " + tweetSplited[2])
 
         lastTweetID = int(timeline[0]["id_str"])
 
