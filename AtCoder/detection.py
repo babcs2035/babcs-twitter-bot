@@ -27,24 +27,24 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # AtCoderID をダウンロード
-    dbx.files_download_to_file("AtCoderID.txt", "/AtCoder/AtCoderID.txt")
-    with open("AtCoderID.txt", "r") as f:
+    dbx.files_download_to_file("AtCoder/AtCoderID.txt", "/AtCoder/AtCoderID.txt")
+    with open("AtCoder/AtCoderID.txt", "r") as f:
         AtCoderID.clear()
         for id in f:
             AtCoderID.append(id.rstrip("\n"))
     print("detection: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
     
     # TwitterID をダウンロード
-    dbx.files_download_to_file("TwitterID.txt", "/AtCoder/TwitterID.txt")
-    with open("TwitterID.txt", "r") as f:
+    dbx.files_download_to_file("AtCoder/TwitterID.txt", "/AtCoder/TwitterID.txt")
+    with open("AtCoder/TwitterID.txt", "r") as f:
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
     print("detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     #lastSubID をダウンロード
-    dbx.files_download_to_file("lastSubID.txt", "/AtCoder/lastSubID.txt")
-    with open("lastSubID.txt", "rb") as f:
+    dbx.files_download_to_file("AtCoder/lastSubID.txt", "/AtCoder/lastSubID.txt")
+    with open("AtCoder/lastSubID.txt", "rb") as f:
         lastSubID = pickle.load(f)
     print("detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
 
@@ -59,9 +59,9 @@ def uploadToDropbox():
     dbx.users_get_current_account()
     
     # lastSubID をアップロード
-    with open("lastSubID.txt", "wb") as f:
+    with open("AtCoder/lastSubID.txt", "wb") as f:
         pickle.dump(lastSubID, f)
-    with open("lastSubID.txt", "rb") as f:
+    with open("AtCoder/lastSubID.txt", "rb") as f:
         dbx.files_delete("/AtCoder/lastSubID.txt")
         dbx.files_upload(f.read(), "/AtCoder/lastSubID.txt")
     print("detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
