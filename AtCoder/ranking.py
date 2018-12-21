@@ -28,30 +28,30 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # AtCoderID をダウンロード
-    dbx.files_download_to_file("AtCoderID.txt", "/AtCoder/AtCoderID.txt")
-    with open("AtCoderID.txt", "r") as f:
+    dbx.files_download_to_file("AtCoder/AtCoderID.txt", "/AtCoder/AtCoderID.txt")
+    with open("AtCoder/AtCoderID.txt", "r") as f:
         AtCoderID.clear()
         for id in f:
             AtCoderID.append(id.rstrip("\n"))
     print("ranking: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
     
     # TwitterID をダウンロード
-    dbx.files_download_to_file("TwitterID.txt", "/AtCoder/TwitterID.txt")
-    with open("TwitterID.txt", "r") as f:
+    dbx.files_download_to_file("AtCoder/TwitterID.txt", "/AtCoder/TwitterID.txt")
+    with open("AtCoder/TwitterID.txt", "r") as f:
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
     print("ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     # acCount をダウンロード
-    dbx.files_download_to_file("acCount.txt", "/AtCoder/acCount.txt")
-    with open("acCount.txt", "rb") as f:
+    dbx.files_download_to_file("AtCoder/acCount.txt", "/AtCoder/acCount.txt")
+    with open("AtCoder/acCount.txt", "rb") as f:
         acCount = pickle.load(f)
     print("ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
 
     # acPoint をダウンロード
-    dbx.files_download_to_file("acPoint.txt", "/AtCoder/acPoint.txt")
-    with open("acPoint.txt", "rb") as f:
+    dbx.files_download_to_file("AtCoder/acPoint.txt", "/AtCoder/acPoint.txt")
+    with open("AtCoder/acPoint.txt", "rb") as f:
         acPoint = pickle.load(f)
     print("ranking: Downloaded acPoint (size : ", str(len(acPoint)), ")")
 
@@ -67,28 +67,28 @@ def uploadToDropbox():
     dbx.users_get_current_account()
     
     # acCount をアップロード
-    with open("acCount.txt", "wb") as f:
+    with open("AtCoder/acCount.txt", "wb") as f:
         pickle.dump(acCount, f)
-    with open("acCount.txt", "rb") as f:
+    with open("AtCoder/acCount.txt", "rb") as f:
         dbx.files_delete("/AtCoder/acCount.txt")
         dbx.files_upload(f.read(), "/AtCoder/acCount.txt")
     print("ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
 
     # acPoint をアップロード
-    with open("acPoint.txt", "wb") as f:
+    with open("AtCoder/acPoint.txt", "wb") as f:
         pickle.dump(acPoint, f)
-    with open("acPoint.txt", "rb") as f:
+    with open("AtCoder/acPoint.txt", "rb") as f:
         dbx.files_delete("/AtCoder/acPoint.txt")
         dbx.files_upload(f.read(), "/AtCoder/acPoint.txt")
     print("ranking: Uploaded acPoint (size : ", str(len(acPoint)), ")")
     
     # countRankingImg_fixed をアップロード
-    with open("AtCoder/data/countRankingImg_fixed.jpg", "rb") as f:
+    with open("AtCoder/countRankingImg_fixed.jpg", "rb") as f:
         dbx.files_upload(f.read(), "/_backup/AtCoder/countRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
         print("ranking: Uploaded countRankingImg_fixed")
 
     # pointRankingImg_fixed をアップロード
-    with open("AtCoder/data/pointRankingImg_fixed.jpg", "rb") as f:
+    with open("AtCoder/pointRankingImg_fixed.jpg", "rb") as f:
         dbx.files_upload(f.read(), "/_backup/AtCoder/pointRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
         print("ranking: Uploaded pointRankingImg_fixed")
 
@@ -164,7 +164,7 @@ def ranking():
         countRankingDraw.text((120, 19), newACCount[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
         countRankingDraw.text((560, 19), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
         countResImg.paste(countRankingImg, (0, 65 + 63 * idx))
-    countResImg.save("AtCoder/data/countRankingImg_fixed.jpg")
+    countResImg.save("AtCoder/countRankingImg_fixed.jpg")
 
     # Point Sum ランキングを作成
     pointRankNum = 1
@@ -185,7 +185,7 @@ def ranking():
         pointRankingDraw.text((120, 19), newACPoint[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
         pointRankingDraw.text((560, 19), str(newACPoint[idx]["point"]), fill = (0, 0, 0), font = rankingFont)
         pointResImg.paste(pointRankingImg, (0, 65 + 63 * idx))
-    pointResImg.save("AtCoder/data/pointRankingImg_fixed.jpg")
+    pointResImg.save("AtCoder/pointRankingImg_fixed.jpg")
 
     # 時刻表示を作成
     timeStamp = datetime.datetime.today()
@@ -206,7 +206,7 @@ def ranking():
             countTweetText += str(countRankNum) + " 位 " + newACCount[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACCount[idx]["user_id"],AtCoderID)]) + " ) " + str(newACCount[idx]["count"]) + " Unique AC\n"
         else:
             break
-    api.update_with_media(filename = "AtCoder/data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
+    api.update_with_media(filename = "AtCoder/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
     pointTweetText = "Point Sum ランキング TOP " + str(pointRankNum) + " !!\n"
     pointRankNum = 1
     pointNum = 1
@@ -221,7 +221,7 @@ def ranking():
             pointTweetText += str(pointRankNum) + " 位 " + newACPoint[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACPoint[idx]["user_id"],AtCoderID)]) + " ) " + str(newACPoint[idx]["point"]) + " Point\n"
         else:
             break
-    api.update_with_media(filename = "AtCoder/data/pointRankingImg_fixed.jpg", status = pointTweetText + "\n" + timeStamp)
+    api.update_with_media(filename = "AtCoder/pointRankingImg_fixed.jpg", status = pointTweetText + "\n" + timeStamp)
     
     # データをアップロード
     acCount = nowACCount
