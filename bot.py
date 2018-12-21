@@ -26,8 +26,8 @@ def scheduled_job():
     print("bot: ----- followBack End -----")
 
 # 各種 Bot を呼び出す
-subprocess.Popen("python AtCoder/AtCoder-bot.py")
-subprocess.Popen("python AOJ/AOJ-bot.py")
+subprocess.Popen("python AtCoder//AtCoder-bot.py")
+subprocess.Popen("python AOJ//AOJ-bot.py")
 
 # おまじない
 sched.start()
