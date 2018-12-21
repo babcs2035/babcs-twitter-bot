@@ -23,7 +23,7 @@ def uploadToDropbox():
     dbx.users_get_current_account()
     
     # contestsListImg_fixed をアップロード
-    with open("AtCoder/data/contestsListImg_fixed.jpg", "rb") as f:
+    with open("AtCoder/contestsListImg_fixed.jpg", "rb") as f:
         dbx.files_upload(f.read(), "/_backup/AtCoder/contestsListImg_fixed/"+str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S"))+".jpg")
         print("contest: Uploaded contestsListImg_fixed")
 
@@ -68,11 +68,11 @@ def contest():
         contestListDraw.text((1660, 15), str(contest["ratedRange"]), fill = (0, 0, 0), font = listFont)
         contestsListImg.paste(contestListImg, (0, 68 + 64 * idx))
         idx = idx + 1
-    contestsListImg.save("AtCoder/data/contestsListImg_fixed.jpg")
+    contestsListImg.save("AtCoder/contestsListImg_fixed.jpg")
 
     # リストをツイート
     listTweetText = "現在，" + str(len(contestsList)) + " のコンテストが予定されています．\nhttps://atcoder.jp/contests/\n"
-    api.update_with_media(filename = "AtCoder/data/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
+    api.update_with_media(filename = "AtCoder/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
 
     # 画像をアップロード
     uploadToDropbox()
