@@ -2,8 +2,8 @@
 import os
 import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
-from AOJ import register
-from AOJ import detection
+import register
+import detection
 
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})

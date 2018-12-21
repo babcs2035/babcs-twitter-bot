@@ -2,10 +2,10 @@
 import os
 import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
-from AtCoder import register
-from AtCoder import detection
-from AtCoder import ranking
-from AtCoder import contest
+import register
+import detection
+import ranking
+import contest
 
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})

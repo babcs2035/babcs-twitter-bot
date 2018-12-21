@@ -1,4 +1,5 @@
 ﻿# import
+import subprocess
 import os
 import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -23,6 +24,10 @@ def scheduled_job():
     print("bot: ----- followBack Start -----")
     followBack.followBack()
     print("bot: ----- followBack End -----")
+
+# 各種 Bot を呼び出す
+subprocess.Popen("python AtCoder/AtCoder-bot.py")
+subprocess.Popen("python AOJ/AOJ-bot.py")
 
 # おまじない
 sched.start()
