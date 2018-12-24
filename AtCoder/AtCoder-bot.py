@@ -2,21 +2,12 @@
 import os
 import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
-import register
 import detection
 import ranking
 import contest
 
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
-
-# AtCoder ID 登録（20 秒ごと）
-@sched.scheduled_job('interval', seconds = 20)
-def scheduled_job():
-
-    print("AtCoder-bot: ----- AtCoder-register Start -----")
-    register.register()
-    print("AtCoder-bot: ----- AtCoder-register End -----")
 
 # AtCoder AC 検出（毎時 0, 15, 30, 45 分）
 @sched.scheduled_job('cron', minute = '0, 15, 30, 45', hour = '*/1')
