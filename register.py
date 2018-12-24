@@ -185,14 +185,7 @@ sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
 @sched.scheduled_job('interval', seconds = 20)
 def scheduled_job():
 
-    print("----- AtCoder & AOJ register Start -----")
-
-    # デバッグ用
-    os.environ["CONSUMER_KEY"] = "RTtwxNmks6Hv8h306uFsDZb3j"
-    os.environ["CONSUMER_SECRET"] = "PYfxUmefLMKfx7l3GmwFXj37P0sBAnQYHcNLjugeCz3OPqeJKV"
-    os.environ["ACCESS_TOKEN_KEY"] = "1042735300466765824-5mLdDcPDpeMBtt52SeQd33iMsLaxeN"
-    os.environ["ACCESS_TOKEN_SECRET"] = "wSMpjWMyeP2aeO6NIaHd4oeZK6w8a9HlazbZuKSxozdRG"
-    os.environ["DROPBOX_KEY"] = "P5Qr1Sh_I2AAAAAAAAAAMYiau3PSLYhXRYcOlbkzlZJHH4VSlKFyosEp-jXKH9aX"
+    print("register: ----- AtCoder & AOJ register Start -----")
 
     # グローバル変数
     global lastTweetID
@@ -300,7 +293,7 @@ def scheduled_job():
     else:
         print("register: Twitter API Error: %d" % timeline_json.status_code)
 
-    print("----- AtCoder & AOJ register End -----")
+    print("register: ----- AtCoder & AOJ register End -----")
 
     
 # おまじない
