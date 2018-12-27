@@ -107,8 +107,8 @@ def ranking():
     for user in AOJID:
         if user in acCount:
             if nowACCount[user] - acCount[user] > 0:
-                newACCount.append(({"user_id" : user, "count" :
-                nowACCount[user] - acCount[user]}))
+                newACCount.append(({"user_id" : user, "count" : nowACCount[user] - acCount[user]}))
+    newACCount.sort(key = lambda x: x["count"], reverse = True)
 
     # Unique AC 数ランキングを作成
     countRankNum = 1
