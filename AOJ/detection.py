@@ -12,6 +12,7 @@ import requests
 AOJID = []
 TwitterID = []
 lastSubID = 0
+lastSubFixedFlag = True
 
 # Dropbox からダウンロード
 def downloadFromDropbox():
@@ -52,18 +53,20 @@ def uploadToDropbox():
     
     # グローバル変数
     global lastSubID
+    global lastSubFixedFlag
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
     
-    # lastSubID をアップロード
-    with open("AOJ/lastSubID.txt", "w") as f:
-        f.write(str(lastSubID))
-    with open("AOJ/lastSubID.txt", "rb") as f:
-        dbx.files_delete("/AOJ/lastSubID.txt")
-        dbx.files_upload(f.read(), "/AOJ/lastSubID.txt")
-    print("AOJ-detection: Uploaded lastSubID : ", str(lastSubID))
+    if lastSubFixedFlag:
+        # lastSubID をアップロード
+        with open("AOJ/lastSubID.txt", "w") as f:
+            f.write(str(lastSubID))
+        with open("AOJ/lastSubID.txt", "rb") as f:
+            dbx.files_delete("/AOJ/lastSubID.txt")
+            dbx.files_upload(f.read(), "/AOJ/lastSubID.txt")
+        print("AOJ-detection: Uploaded lastSubID : ", str(lastSubID))
 
 def detection():
     
@@ -71,6 +74,7 @@ def detection():
     global AOJID
     global TwitterID
     global lastSubID
+    global lastSubFixedFlag
     
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
@@ -93,10 +97,11 @@ def detection():
     # 提出を解析
     subs_jsonRes = urllib.request.urlopen("https://judgeapi.u-aizu.ac.jp/submission_records/recent")
     subs_jsonData = json.loads(subs_jsonRes.read().decode("utf-8"))
+    lastSubFixedFlag = False
     for sub in subs_jsonData:
         if int(sub["judgeId"]) <= int(lastSubID):
-            lastSubID = int(subs_jsonData[0]["judgeId"])
             break
+        lastSubFixedFlag = True
         if sub["status"] != 4:
             continue
 
@@ -120,6 +125,7 @@ def detection():
             print("AOJ-detection: Tweet Error")
 
     # データをアップロード
+    lastSubID = int(subs_jsonData[0]["judgeId"])
     uploadToDropbox()
 
 if __name__ == '__main__':
