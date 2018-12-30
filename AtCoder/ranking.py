@@ -92,6 +92,11 @@ def uploadToDropbox():
         dbx.files_upload(f.read(), "/_backup/AtCoder/pointRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
         print("ranking: Uploaded pointRankingImg_fixed")
 
+    # perRankingImg_fixed をアップロード
+    with open("AtCoder/perRankingImg_fixed.jpg", "rb") as f:
+        dbx.files_upload(f.read(), "/_backup/AtCoder/perRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
+        print("ranking: Uploaded perRankingImg_fixed")
+
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
     if x in l:
@@ -134,6 +139,7 @@ def ranking():
             nowACPoint[str(user["user_id"])] = int(user["point_sum"])
     newACCount = []
     newACPoint = []
+    newACPer = []
     for user in AtCoderID:
         if user in acCount:
             if nowACCount[user] - acCount[user] > 0:
@@ -141,8 +147,10 @@ def ranking():
         if user in acPoint:
             if nowACPoint[user] - acPoint[user] > 0:
                 newACPoint.append(({"user_id" : user, "point" : nowACPoint[user] - acPoint[user]}))
+                newACPer.append(({"user_id" : user, "per": float(nowACPoint[user] - acPoint[user]) / float(nowACCount[user] - acCount[user])}))
     newACCount.sort(key = lambda x: x["count"], reverse = True)
     newACPoint.sort(key = lambda x: x["point"], reverse = True)
+    newACPer.sort(key = lambda x: x["per"], reverse = True)
 
     # Unique AC 数ランキングを作成
     countRankNum = 1
@@ -187,12 +195,33 @@ def ranking():
         pointResImg.paste(pointRankingImg, (0, 65 + 63 * idx))
     pointResImg.save("AtCoder/pointRankingImg_fixed.jpg")
 
+    # Point Per Count ランキングを作成
+    perRankNum = 1
+    perNum = 1
+    perRankingFirstImg = Image.open("AtCoder/data/perRankingImg (first).jpg")
+    perResImg = Image.new("RGB", (738, 65 + 63 * len(newACPer)))
+    perResImg.paste(perRankingFirstImg, (0, 0))
+    for idx in range(len(newACPer)):
+        perRankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
+        perRankingDraw = ImageDraw.Draw(perRankingImg)
+        if idx > 0:
+            if int(newACPer[idx - 1]["per"]) > int(newACPer[idx]["per"]):
+                perRankNum = perRankNum + perNum
+                perNum = 1
+            else:
+                perNum = perNum + 1
+        perRankingDraw.text((10, 19), str(perRankNum), fill = (0, 0, 0), font = rankingFont)
+        perRankingDraw.text((120, 19), newACPer[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
+        perRankingDraw.text((560, 19), str(newACPer[idx]["per"]), fill = (0, 0, 0), font = rankingFont)
+        perResImg.paste(perRankingImg, (0, 65 + 63 * idx))
+    perResImg.save("AtCoder/perRankingImg_fixed.jpg")
+
     # 時刻表示を作成
     timeStamp = datetime.datetime.today()
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
 
     # ランキングをツイート
-    countTweetText = "Unique AC 数ランキング TOP " + str(countRankNum) + " !!\n"
+    countTweetText = "AtCoder Unique AC 数ランキング TOP " + str(countRankNum) + "\n"
     countRankNum = 1
     countNum = 1
     for idx in range(len(newACCount)):
@@ -202,12 +231,12 @@ def ranking():
                 countNum = 1
             else:
                 countNum = countNum + 1
-        if len(countTweetText) + len(timeStamp) + len(str(countRankNum) + " 位 " + newACCount[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACCount[idx]["user_id"],AtCoderID)]) + " ) " + str(newACCount[idx]["count"]) + " Unique AC\n") <= 140:
+        if countRankNum + countNum - 1 <= 3:
             countTweetText += str(countRankNum) + " 位 " + newACCount[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACCount[idx]["user_id"],AtCoderID)]) + " ) " + str(newACCount[idx]["count"]) + " Unique AC\n"
         else:
             break
     api.update_with_media(filename = "AtCoder/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
-    pointTweetText = "Point Sum ランキング TOP " + str(pointRankNum) + " !!\n"
+    pointTweetText = "AtCoder Point Sum ランキング TOP " + str(pointRankNum) + "\n"
     pointRankNum = 1
     pointNum = 1
     for idx in range(len(newACPoint)):
@@ -217,11 +246,26 @@ def ranking():
                 pointNum = 1
             else:
                 pointNum = pointNum + 1
-        if len(pointTweetText) + len(timeStamp) + len(str(pointRankNum) + " 位 " + newACPoint[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACPoint[idx]["user_id"],AtCoderID)]) + " ) " + str(newACPoint[idx]["point"]) + " Point\n") <= 140:
+        if pointRankNum + pointNum - 1 <= 3:
             pointTweetText += str(pointRankNum) + " 位 " + newACPoint[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACPoint[idx]["user_id"],AtCoderID)]) + " ) " + str(newACPoint[idx]["point"]) + " Point\n"
         else:
             break
     api.update_with_media(filename = "AtCoder/pointRankingImg_fixed.jpg", status = pointTweetText + "\n" + timeStamp)
+    perTweetText = "AtCoder Point / Count ランキング TOP " + str(perRankNum) + "\n"
+    perRankNum = 1
+    perNum = 1
+    for idx in range(len(newACPer)):
+        if idx > 0:
+            if int(newACPer[idx - 1]["per"]) > int(newACPer[idx]["per"]):
+                perRankNum = perRankNum + perNum
+                perNum = 1
+            else:
+                perNum = perNum + 1
+        if perRankNum + perNum - 1 <= 3:
+            perTweetText += str(perRankNum) + " 位 " + newACPer[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACPer[idx]["user_id"],AtCoderID)]) + " ) " + str(newACPer[idx]["per"]) + " Point\n"
+        else:
+            break
+    api.update_with_media(filename = "AtCoder/perRankingImg_fixed.jpg", status = perTweetText + "\n" + timeStamp)
     
     # データをアップロード
     acCount = nowACCount
@@ -229,6 +273,6 @@ def ranking():
     uploadToDropbox()
 
 if __name__ == '__main__':
-    print("ranking: Running as debug...")
+    print("AtCoder-ranking: Running as debug...")
     ranking()
-    print("ranking: Debug finished")
+    print("AtCoder-ranking: Debug finished")
