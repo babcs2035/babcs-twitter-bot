@@ -14,7 +14,8 @@ sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
 def scheduled_job():
 
     print("bot: ----- announce Start -----")
-    announce.announce()
+    # announce.announce()
+    print("bot: announce has been passed")
     print("bot: ----- announce End -----")
     
 # フォロバ（毎時 0, 20, 40 分）
