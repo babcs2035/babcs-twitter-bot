@@ -29,6 +29,7 @@ def scheduled_job():
 subprocess.Popen(["python", "register.py"])
 subprocess.Popen(["python", "AtCoder/AtCoder-bot.py"])
 subprocess.Popen(["python", "AOJ/AOJ-bot.py"])
+subprocess.Popen(["python", "CF/CF-bot.py"])
 
 # おまじない
 sched.start()
