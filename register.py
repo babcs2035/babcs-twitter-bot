@@ -17,6 +17,9 @@ AtCoder_listFixedFlag = False
 AOJID = []
 AOJ_TwitterID = []
 AOJ_listFixedFlag = False
+CFID = []
+CF_TwitterID = []
+CF_listFixedFlag = False
 idFixedFlag = False
 
 # AtCoder ID が存在するか確認
@@ -43,6 +46,18 @@ def checkAOJID(aojID):
         print("register: " + aojID + " is not correct AOJ ID")
         return False
 
+# Codeforces ID が存在するか確認
+def checkCFID(cfID):
+
+    # AOJ ユーザーページにアクセス
+    try:
+        html = urllib.request.urlopen("https://codeforces.com/api/user.status?handle=" + cfID)
+        print("register: " + cfID + " is correct Codeforces ID")
+        return True
+    except:
+        print("register: " + cfID + " is not correct Codeforces ID")
+        return False
+
 # Dropbox からダウンロード
 def downloadFromDropbox():
     
@@ -52,6 +67,8 @@ def downloadFromDropbox():
     global AtCoder_TwitterID
     global AOJID
     global AOJ_TwitterID
+    global CFID
+    global CF_TwitterID
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
@@ -95,6 +112,22 @@ def downloadFromDropbox():
             AOJ_TwitterID.append(id.rstrip("\n"))
     print("register: Downloaded AOJ_TwitterID (size : ", str(len(AOJ_TwitterID)), ")")
 
+    # CFID をダウンロード
+    dbx.files_download_to_file("CF/CFID.txt", "/CF/CFID.txt")
+    with open("CF/CFID.txt", "r") as f:
+        CFID.clear()
+        for id in f:
+            CFID.append(id.rstrip("\n"))
+    print("register: Downloaded CFID (size : ", str(len(CFID)), ")")
+    
+    # CF_TwitterID をダウンロード
+    dbx.files_download_to_file("CF/TwitterID.txt", "/CF/TwitterID.txt")
+    with open("CF/TwitterID.txt", "r") as f:
+        CF_TwitterID.clear()
+        for id in f:
+            CF_TwitterID.append(id.rstrip("\n"))
+    print("register: Downloaded CF_TwitterID (size : ", str(len(CF_TwitterID)), ")")
+
 # Dropbox にアップロード
 def uploadToDropbox():
     
@@ -106,6 +139,9 @@ def uploadToDropbox():
     global AOJID
     global AOJ_TwitterID
     global AOJ_listFixedFlag
+    global CFID
+    global CF_TwitterID
+    global CF_listFixedFlag
     global idFixedFlag
 
     # Dropbox オブジェクトの生成
@@ -170,6 +206,31 @@ def uploadToDropbox():
         with open("AOJ/TwitterID.txt", "rb") as f:
             dbx.files_upload(f.read(), "/_backup/AOJ/TwitterID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
             print("register: Uploaded AOJ_TwitterID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(AOJ_TwitterID)), ")")
+    
+    if CF_listFixedFlag:
+        # CFID をアップロード
+        with open("CF/CFID.txt", "w") as f:
+            for id in CFID:
+                f.write(str(id) + "\n")
+        with open("CF/CFID.txt", "rb") as f:
+            dbx.files_delete("/CF/CFID.txt")
+            dbx.files_upload(f.read(), "/CF/CFID.txt")
+            print("register: Uploaded CFID (size : ", str(len(CFID)), ")")
+        with open("CF/CFID.txt", "rb") as f:
+            dbx.files_upload(f.read(), "/_backup/CF/CFID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
+            print("register: Uploaded CFID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(CFID)), ")")
+
+        # CF_TwitterID をアップロード
+        with open("CF/TwitterID.txt", "w") as f:
+            for id in CF_TwitterID:
+                f.write(str(id) + "\n")
+        with open("CF/TwitterID.txt", "rb") as f:
+            dbx.files_delete("/CF/TwitterID.txt")
+            dbx.files_upload(f.read(), "/CF/TwitterID.txt")
+            print("register: Uploaded CF_TwitterID (size : ", str(len(CF_TwitterID)), ")")
+        with open("CF/TwitterID.txt", "rb") as f:
+            dbx.files_upload(f.read(), "/_backup/CF/TwitterID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
+            print("register: Uploaded CF_TwitterID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(CF_TwitterID)), ")")
 
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
@@ -181,11 +242,11 @@ def myIndex(x, l):
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
 
-# AtCoder & AOJ ID 登録（20 秒ごと）
+# AtCoder, AOJ, Codeforces ID 登録（20 秒ごと）
 @sched.scheduled_job('interval', seconds = 20)
 def scheduled_job():
 
-    print("register: ----- AtCoder & AOJ register Start -----")
+    print("register: ----- AtCoder, AOJ, Codeforces register Start -----")
 
     # グローバル変数
     global lastTweetID
@@ -195,6 +256,9 @@ def scheduled_job():
     global AOJID
     global AOJ_TwitterID
     global AOJ_listFixedFlag
+    global CFID
+    global CF_TwitterID
+    global CF_listFixedFlag
     global idFixedFlag
 
     # 各種キー設定
@@ -225,6 +289,8 @@ def scheduled_job():
     if timeline_json.status_code == 200:
         timeline = json.loads(timeline_json.text)
         AtCoder_listFixedFlag = False
+        AOJ_listFixedFlag = False
+        CF_listFixedFlag = False
         idFixedFlag = False
         for tweet in timeline:
             if int(tweet["id_str"]) <= int(lastTweetID):
@@ -235,6 +301,8 @@ def scheduled_job():
             if len(tweetSplited) >= 3:
                 userData_json = api_OAuth.get("https://api.twitter.com/1.1/users/show.json?user_id=" + tweet["user"]["id_str"])
                 userData = json.loads(userData_json.text)
+
+                # AtCoder ID 登録
                 if tweetSplited[1] == "reg_atcoder":
                     if checkAtCoderID(tweetSplited[2]):
                         AtCoderID.append(tweetSplited[2])
@@ -245,6 +313,8 @@ def scheduled_job():
                     else:
                         api.update_status("@" + str(userData["screen_name"]) + " 正しい AtCoder ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Reject to register new AtCoder ID : " + tweetSplited[2])
+                
+                # AtCoder ID 解除    
                 if tweetSplited[1] == "del_atcoder":
                     if checkAtCoderID(tweetSplited[2]):
                         if myIndex(tweetSplited[2], AtCoderID) != -1 and myIndex(str(userData["screen_name"]), AtCoder_TwitterID) != -1 and myIndex(tweetSplited[2], AtCoderID) == myIndex(str(userData["screen_name"]), AtCoder_TwitterID):
@@ -259,6 +329,8 @@ def scheduled_job():
                     else:
                         api.update_status("@" + str(userData["screen_name"]) + " 正しい AtCoder ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Reject to unregister AtCoder ID : " + tweetSplited[2])
+
+                # AOJ ID 登録
                 if tweetSplited[1] == "reg_aoj":
                     if checkAOJID(tweetSplited[2]):
                         AOJID.append(tweetSplited[2])
@@ -269,6 +341,8 @@ def scheduled_job():
                     else:
                         api.update_status("@" + str(userData["screen_name"]) + " 正しい AOJ ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Reject to register new AOJ ID : " + tweetSplited[2])
+
+                # AOJ ID 解除    
                 if tweetSplited[1] == "del_aoj":
                     if checkAOJID(tweetSplited[2]):
                         if myIndex(tweetSplited[2], AOJID) != -1 and myIndex(str(userData["screen_name"]), AOJ_TwitterID) != -1 and myIndex(tweetSplited[2], AOJID) == myIndex(str(userData["screen_name"]), AOJ_TwitterID):
@@ -284,6 +358,33 @@ def scheduled_job():
                         api.update_status("@" + str(userData["screen_name"]) + " 正しい AOJ ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Reject to unregister AOJ ID : " + tweetSplited[2])
 
+                # CF ID 登録
+                if tweetSplited[1] == "reg_cf":
+                    if checkCFID(tweetSplited[2]):
+                        CFID.append(tweetSplited[2])
+                        CF_TwitterID.append(userData["screen_name"])
+                        api.update_status("@" + str(userData["screen_name"]) + " Codeforces ID を登録しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                        print("register: Register new Codeforces ID : " + tweetSplited[2])
+                        CF_listFixedFlag = True
+                    else:
+                        api.update_status("@" + str(userData["screen_name"]) + " 正しい Codeforces ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                        print("register: Reject to register new Codeforces ID : " + tweetSplited[2])
+
+                # CF ID 解除    
+                if tweetSplited[1] == "del_cf":
+                    if checkCFID(tweetSplited[2]):
+                        if myIndex(tweetSplited[2], CFID) != -1 and myIndex(str(userData["screen_name"]), CF_TwitterID) != -1 and myIndex(tweetSplited[2], CFID) == myIndex(str(userData["screen_name"]), CF_TwitterID):
+                            CFID.pop(myIndex(str(userData["screen_name"]), CF_TwitterID))
+                            CF_TwitterID.pop(myIndex(str(userData["screen_name"]), CF_TwitterID))
+                            api.update_status("@" + str(userData["screen_name"]) + " Codeforces ID を登録解除しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                            print("register: Unregister Codeforces ID : " + tweetSplited[2])
+                            CF_listFixedFlag = True
+                        else:
+                            api.update_status("@" + str(userData["screen_name"]) + " この Codeforces ID は登録されていません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                            print("register: Reject to unregister Codeforces ID : " + tweetSplited[2])
+                    else:
+                        api.update_status("@" + str(userData["screen_name"]) + " 正しい Codeforces ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                        print("register: Reject to unregister Codeforces ID : " + tweetSplited[2])
 
         lastTweetID = int(timeline[0]["id_str"])
 
@@ -293,8 +394,7 @@ def scheduled_job():
     else:
         print("register: Twitter API Error: %d" % timeline_json.status_code)
 
-    print("register: ----- AtCoder & AOJ register End -----")
-
+    print("register: ----- AtCoder, AOJ, Codeforces register End -----")
     
 # おまじない
 sched.start()
