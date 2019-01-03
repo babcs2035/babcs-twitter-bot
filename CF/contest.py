@@ -52,6 +52,7 @@ def contest():
     for contest in contestsJsonData["result"]:
         if str(contest["phase"]) == "BEFORE":
             contestsList.append(contest)
+    contestsList.sort(key = lambda x: x["id"])
 
     # 画像生成
     listFont = ImageFont.truetype("CF/data/YuGothM.ttc", 32)
