@@ -18,13 +18,21 @@ def scheduled_job():
     detection.detection()
     print("AtCoder-bot: ----- AtCoder-detection End -----")
   
-# AtCoder ランキング（毎日 0:00）
+# AtCoder Daily ランキング（毎日 0:00）
 @sched.scheduled_job('cron', minute = '0', hour = '0')
 def scheduled_job():
 
-    print("AtCoder-bot: ----- AtCoder-ranking Start -----")
-    ranking.ranking()
-    print("AtCoder-bot: ----- AtCoder-ranking End -----")
+    print("AtCoder-bot: ----- AtCoder-ranking (Daily) Start -----")
+    ranking.ranking(0)
+    print("AtCoder-bot: ----- AtCoder-ranking (Daily) End -----")
+
+# AtCoder Mid Daily ランキング（毎日 12:00）
+@sched.scheduled_job('cron', minute = '0', hour = '12')
+def scheduled_job():
+
+    print("AtCoder-bot: ----- AtCoder-ranking (Mid Daily) Start -----")
+    ranking.ranking(1)
+    print("AtCoder-bot: ----- AtCoder-ranking (Mid Daily) End -----")
 
 # AtCoder コンテスト一覧（毎日 6:00, 18:00）
 @sched.scheduled_job('cron', minute = '0', hour = '6, 18')
