@@ -104,7 +104,8 @@ def myIndex(x, l):
     else:
         return -1
 
-def ranking():
+# ランキング生成 (type 0:Daily, 1:Mid Daily)
+def ranking(type):
     
     # グローバル変数
     global acCount
@@ -221,7 +222,13 @@ def ranking():
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
 
     # ランキングをツイート
-    countTweetText = "AtCoder Unique AC 数ランキング TOP " + str(countRankNum) + "\n"
+    tweetTextType = ""
+    if type == 0:
+        tweetTextType = "Daily"
+    if type == 1:
+        tweetTextType = "Mid Daily"
+
+    countTweetText = "AtCoder Unique AC 数 " + tweetTextType + " ランキング TOP " + str(countRankNum) + "\n"
     countRankNum = 1
     countNum = 1
     for idx in range(len(newACCount)):
@@ -236,7 +243,8 @@ def ranking():
         else:
             break
     api.update_with_media(filename = "AtCoder/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
-    pointTweetText = "AtCoder Point Sum ランキング TOP " + str(pointRankNum) + "\n"
+    
+    pointTweetText = "AtCoder Point Sum " + tweetTextType + " ランキング TOP " + str(pointRankNum) + "\n"
     pointRankNum = 1
     pointNum = 1
     for idx in range(len(newACPoint)):
@@ -251,7 +259,8 @@ def ranking():
         else:
             break
     api.update_with_media(filename = "AtCoder/pointRankingImg_fixed.jpg", status = pointTweetText + "\n" + timeStamp)
-    perTweetText = "AtCoder Point / Count ランキング TOP " + str(perRankNum) + "\n"
+
+    perTweetText = "AtCoder Point / Count " + tweetTextType + " ランキング TOP " + str(perRankNum) + "\n"
     perRankNum = 1
     perNum = 1
     for idx in range(len(newACPer)):
@@ -268,11 +277,12 @@ def ranking():
     api.update_with_media(filename = "AtCoder/perRankingImg_fixed.jpg", status = perTweetText + "\n" + timeStamp)
     
     # データをアップロード
-    acCount = nowACCount
-    acPoint = nowACPoint
-    uploadToDropbox()
+    if type == 0:
+        acCount = nowACCount
+        acPoint = nowACPoint
+        uploadToDropbox()
 
 if __name__ == '__main__':
     print("AtCoder-ranking: Running as debug...")
-    ranking()
+    ranking(1)
     print("AtCoder-ranking: Debug finished")
