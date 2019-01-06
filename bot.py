@@ -38,3 +38,5 @@ def application(environ, start_response):
     
     # おまじない
     sched.start()
+
+application(os.environ, True)
