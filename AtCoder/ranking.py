@@ -15,7 +15,7 @@ acCount = {}
 acPoint = {}
 
 # Dropbox からダウンロード
-def downloadFromDropbox():
+def downloadFromDropbox(type):
     
     # グローバル変数
     global AtCoderID
@@ -43,20 +43,28 @@ def downloadFromDropbox():
             TwitterID.append(id.rstrip("\n"))
     print("ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
+    dirType = ""
+    if type == 0 or type == 1:
+        dirType += "daily"
+    if type == 2:
+        dirType += "weekly"
+    if type == 3:
+        dirType += "monthly"
+
     # acCount をダウンロード
-    dbx.files_download_to_file("AtCoder/acCount.txt", "/AtCoder/acCount.txt")
-    with open("AtCoder/acCount.txt", "rb") as f:
+    dbx.files_download_to_file("AtCoder/" + dirType + "_acCount.txt", "/AtCoder/" + dirType + "_acCount.txt")
+    with open("AtCoder/" + dirType + "_acCount.txt", "rb") as f:
         acCount = pickle.load(f)
-    print("ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
+    print("ranking: Downloaded " + dirType + " acCount (size : ", str(len(acCount)), ")")
 
     # acPoint をダウンロード
-    dbx.files_download_to_file("AtCoder/acPoint.txt", "/AtCoder/acPoint.txt")
-    with open("AtCoder/acPoint.txt", "rb") as f:
+    dbx.files_download_to_file("AtCoder/" + dirType + "_acPoint.txt", "/AtCoder/" + dirType + "_acPoint.txt")
+    with open("AtCoder/" + dirType + "_acPoint.txt", "rb") as f:
         acPoint = pickle.load(f)
-    print("ranking: Downloaded acPoint (size : ", str(len(acPoint)), ")")
+    print("ranking: Downloaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
 
 # Dropbox にアップロード
-def uploadToDropbox():
+def uploadToDropbox(type):
     
     # グローバル変数
     global acCount
@@ -65,37 +73,48 @@ def uploadToDropbox():
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
-    
-    # acCount をアップロード
-    with open("AtCoder/acCount.txt", "wb") as f:
-        pickle.dump(acCount, f)
-    with open("AtCoder/acCount.txt", "rb") as f:
-        dbx.files_delete("/AtCoder/acCount.txt")
-        dbx.files_upload(f.read(), "/AtCoder/acCount.txt")
-    print("ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
 
-    # acPoint をアップロード
-    with open("AtCoder/acPoint.txt", "wb") as f:
-        pickle.dump(acPoint, f)
-    with open("AtCoder/acPoint.txt", "rb") as f:
-        dbx.files_delete("/AtCoder/acPoint.txt")
-        dbx.files_upload(f.read(), "/AtCoder/acPoint.txt")
-    print("ranking: Uploaded acPoint (size : ", str(len(acPoint)), ")")
+    dirType = ""
+    if type == 0:
+        dirType = "daily"
+    if type == 1:
+        dirType = "mid daily"
+    if type == 2:
+        dirType = "weekly"
+    if type == 3:
+        dirType = "monthly"
     
+    if type != 1:
+        # acCount をアップロード
+        with open("AtCoder/" + dirType + "_acCount.txt", "wb") as f:
+            pickle.dump(acCount, f)
+        with open("AtCoder/" + dirType + "_acCount.txt", "rb") as f:
+            dbx.files_delete("/AtCoder/" + dirType + "_acCount.txt")
+            dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_acCount.txt")
+        print("ranking: Uploaded " + dirType + " acCount (size : ", str(len(acCount)), ")")
+
+        # acPoint をアップロード
+        with open("AtCoder/" + dirType + "_acPoint.txt", "wb") as f:
+            pickle.dump(acPoint, f)
+        with open("AtCoder/" + dirType + "_acPoint.txt", "rb") as f:
+            dbx.files_delete("/AtCoder/" + dirType + "_acPoint.txt")
+            dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_acPoint.txt")
+        print("ranking: Uploaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
+
     # countRankingImg_fixed をアップロード
-    with open("AtCoder/countRankingImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/AtCoder/countRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-        print("ranking: Uploaded countRankingImg_fixed")
+    with open("AtCoder/" + dirType + "_countRankingImg_fixed.jpg", "rb") as f:
+        dbx.files_upload(f.read(), "/_backup/AtCoder/countRankingImg_fixed/" + dirType + "_" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
+        print("ranking: Uploaded " + dirType + " countRankingImg_fixed")
 
     # pointRankingImg_fixed をアップロード
-    with open("AtCoder/pointRankingImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/AtCoder/pointRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-        print("ranking: Uploaded pointRankingImg_fixed")
+    with open("AtCoder/" + dirType + "_pointRankingImg_fixed.jpg", "rb") as f:
+        dbx.files_upload(f.read(), "/_backup/AtCoder/pointRankingImg_fixed/" + dirType + "_" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
+        print("ranking: Uploaded " + dirType + " pointRankingImg_fixed")
 
     # perRankingImg_fixed をアップロード
-    with open("AtCoder/perRankingImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/AtCoder/perRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-        print("ranking: Uploaded perRankingImg_fixed")
+    with open("AtCoder/" + dirType + "_perRankingImg_fixed.jpg", "rb") as f:
+        dbx.files_upload(f.read(), "/_backup/AtCoder/perRankingImg_fixed/" + dirType + "_" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
+        print("ranking: Uploaded " + dirType + " perRankingImg_fixed")
 
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
@@ -104,7 +123,7 @@ def myIndex(x, l):
     else:
         return -1
 
-# ランキング生成 (type 0:Daily, 1:Mid Daily)
+# ランキング生成 (type 0:Daily, 1:Mid Daily, 2:Weekly, 3:Monthly)
 def ranking(type):
     
     # グローバル変数
@@ -123,7 +142,7 @@ def ranking(type):
     api = tweepy.API(auth)
     
     # データをダウンロード
-    downloadFromDropbox()
+    downloadFromDropbox(type)
 
     # AC 数を取得
     acCountJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/atcoder-api/info/ac")
@@ -153,6 +172,16 @@ def ranking(type):
     newACPoint.sort(key = lambda x: x["point"], reverse = True)
     newACPer.sort(key = lambda x: x["per"], reverse = True)
 
+    dirType = ""
+    if type == 0:
+        dirType = "daily"
+    if type == 1:
+        dirType = "mid daily"
+    if type == 2:
+        dirType = "weekly"
+    if type == 3:
+        dirType = "monthly"
+
     # Unique AC 数ランキングを作成
     countRankNum = 1
     countNum = 1
@@ -173,7 +202,7 @@ def ranking(type):
         countRankingDraw.text((120, 19), newACCount[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
         countRankingDraw.text((560, 19), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
         countResImg.paste(countRankingImg, (0, 65 + 63 * idx))
-    countResImg.save("AtCoder/countRankingImg_fixed.jpg")
+    countResImg.save("AtCoder/" + dirType + "_countRankingImg_fixed.jpg")
 
     # Point Sum ランキングを作成
     pointRankNum = 1
@@ -194,7 +223,7 @@ def ranking(type):
         pointRankingDraw.text((120, 19), newACPoint[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
         pointRankingDraw.text((560, 19), str(newACPoint[idx]["point"]), fill = (0, 0, 0), font = rankingFont)
         pointResImg.paste(pointRankingImg, (0, 65 + 63 * idx))
-    pointResImg.save("AtCoder/pointRankingImg_fixed.jpg")
+    pointResImg.save("AtCoder/" + dirType + "_pointRankingImg_fixed.jpg")
 
     # Point Per Count ランキングを作成
     perRankNum = 1
@@ -215,7 +244,7 @@ def ranking(type):
         perRankingDraw.text((120, 19), newACPer[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
         perRankingDraw.text((560, 19), str(newACPer[idx]["per"]), fill = (0, 0, 0), font = rankingFont)
         perResImg.paste(perRankingImg, (0, 65 + 63 * idx))
-    perResImg.save("AtCoder/perRankingImg_fixed.jpg")
+    perResImg.save("AtCoder/" + dirType + "_perRankingImg_fixed.jpg")
 
     # 時刻表示を作成
     timeStamp = datetime.datetime.today()
@@ -227,6 +256,10 @@ def ranking(type):
         tweetTextType = "Daily"
     if type == 1:
         tweetTextType = "Mid Daily"
+    if type == 2:
+        tweetTextType = "Weekly"
+    if type == 3:
+        tweetTextType = "Monthly"
 
     countTweetText = "AtCoder Unique AC 数 " + tweetTextType + " ランキング TOP " + str(countRankNum) + "\n"
     countRankNum = 1
@@ -242,7 +275,7 @@ def ranking(type):
             countTweetText += str(countRankNum) + " 位 " + newACCount[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACCount[idx]["user_id"],AtCoderID)]) + " ) " + str(newACCount[idx]["count"]) + " Unique AC\n"
         else:
             break
-    api.update_with_media(filename = "AtCoder/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
+    api.update_with_media(filename = "AtCoder/" + dirType + "_countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
     
     pointTweetText = "AtCoder Point Sum " + tweetTextType + " ランキング TOP " + str(pointRankNum) + "\n"
     pointRankNum = 1
@@ -258,7 +291,7 @@ def ranking(type):
             pointTweetText += str(pointRankNum) + " 位 " + newACPoint[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACPoint[idx]["user_id"],AtCoderID)]) + " ) " + str(newACPoint[idx]["point"]) + " Point\n"
         else:
             break
-    api.update_with_media(filename = "AtCoder/pointRankingImg_fixed.jpg", status = pointTweetText + "\n" + timeStamp)
+    api.update_with_media(filename = "AtCoder/" + dirType + "_pointRankingImg_fixed.jpg", status = pointTweetText + "\n" + timeStamp)
 
     perTweetText = "AtCoder Point / Count " + tweetTextType + " ランキング TOP " + str(perRankNum) + "\n"
     perRankNum = 1
@@ -274,13 +307,12 @@ def ranking(type):
             perTweetText += str(perRankNum) + " 位 " + newACPer[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACPer[idx]["user_id"],AtCoderID)]) + " ) " + str(newACPer[idx]["per"]) + " Point\n"
         else:
             break
-    api.update_with_media(filename = "AtCoder/perRankingImg_fixed.jpg", status = perTweetText + "\n" + timeStamp)
+    api.update_with_media(filename = "AtCoder/" + dirType + "_perRankingImg_fixed.jpg", status = perTweetText + "\n" + timeStamp)
     
     # データをアップロード
-    if type == 0:
-        acCount = nowACCount
-        acPoint = nowACPoint
-        uploadToDropbox()
+    acCount = nowACCount
+    acPoint = nowACPoint
+    uploadToDropbox(type)
 
 if __name__ == '__main__':
     print("AtCoder-ranking: Running as debug...")
