@@ -61,7 +61,7 @@ def uploadToDropbox():
     with open("CF/acCount.txt", "wb") as f:
         pickle.dump(acCount, f)
     with open("CF/acCount.txt", "rb") as f:
-        #dbx.files_delete("/CF/acCount.txt")
+        dbx.files_delete("/CF/acCount.txt")
         dbx.files_upload(f.read(), "/CF/acCount.txt")
     print("CF-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
     
