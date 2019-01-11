@@ -152,7 +152,7 @@ def ranking():
             else:
                 countNum = countNum + 1
         if countRankNum + countNum - 1 <= 3:
-            countTweetText += str(countRankNum) + " 位 " + newACCount[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACCount[idx]["user_id"],CFID)]) + " ) " + str(newACCount[idx]["count"]) + " Unique AC\n"
+            countTweetText += str(countRankNum) + " 位 " + newACCount[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACCount[idx]["user_id"],CFID)]) + " ) " + str(newACCount[idx]["count"]) + " AC\n"
         else:
             break
     api.update_with_media(filename = "CF/data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
