@@ -147,7 +147,7 @@ def ranking():
                 countNum = 1
             else:
                 countNum = countNum + 1
-        if len(countTweetText) + len(timeStamp) + len(str(countRankNum) + " 位 " + newACCount[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACCount[idx]["user_id"],AOJID)]) + " ) " + str(newACCount[idx]["count"]) + " Unique AC\n") <= 140:
+        if countRankNum + countNum - 1 <= 3:
             countTweetText += str(countRankNum) + " 位 " + newACCount[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACCount[idx]["user_id"],AOJID)]) + " ) " + str(newACCount[idx]["count"]) + " Unique AC\n"
         else:
             break
