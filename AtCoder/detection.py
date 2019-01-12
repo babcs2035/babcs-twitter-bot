@@ -94,7 +94,6 @@ def detection():
     # コンテストごとに提出を解析
     contestsJsonRes = urllib.request.urlopen("https://atcoder-api.appspot.com/contests")
     contestsJsonData = json.loads(contestsJsonRes.read().decode("utf-8"))
-    lastNewLastSubID = -1
     for contest in contestsJsonData:
 
         # ページ送り
@@ -125,7 +124,7 @@ def detection():
                 userID = str(links[1].get("href")).split("/")[2]
                 if newLastSubID == -1:
                     newLastSubID = subID
-                if subID <= int(lastSubID[str(contest["id"])]):
+                if subID <= int(lastSubID[str(contest["id"])]) or int(lastSubID[str(contest["id"])]) == -1:
                     skipFlag = True
                     break
                 subCount = subCount + 1
@@ -170,10 +169,6 @@ def detection():
             sublistPageNum = sublistPageNum + 1
 
         # lastSubID を更新
-        if newLastSubID != -1:
-            lastNewLastSubID = newLastSubID
-        else:
-            newLastSubID = lastNewLastSubID
         lastSubID[str(contest["id"])] = newLastSubID
         print("detection: Checked " + contest["title"] + " submissions (subCount : " + str(subCount) + ", newlastSubID : " + str(lastSubID[str(contest["id"])]) + ")")
         
