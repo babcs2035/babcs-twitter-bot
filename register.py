@@ -20,12 +20,14 @@ AOJ_listFixedFlag = False
 CFID = []
 CF_TwitterID = []
 CF_listFixedFlag = False
+YKID = []
+YK_TwitterID = []
+YK_listFixedFlag = False
 idFixedFlag = False
 
 # AtCoder ID が存在するか確認
 def checkAtCoderID(atcoderID):
 
-    # AtCoder ユーザーページにアクセス
     try:
         html = urllib.request.urlopen("https://atcoder.jp/users/" + atcoderID)
         print("register: " + atcoderID + " is correct AtCoder ID")
@@ -37,7 +39,6 @@ def checkAtCoderID(atcoderID):
 # AOJ ID が存在するか確認
 def checkAOJID(aojID):
 
-    # AOJ ユーザーページにアクセス
     try:
         html = urllib.request.urlopen("https://judgeapi.u-aizu.ac.jp/users/" + aojID)
         print("register: " + aojID + " is correct AOJ ID")
@@ -49,7 +50,6 @@ def checkAOJID(aojID):
 # Codeforces ID が存在するか確認
 def checkCFID(cfID):
 
-    # AOJ ユーザーページにアクセス
     try:
         html = urllib.request.urlopen("https://codeforces.com/api/user.status?handle=" + cfID)
         print("register: " + cfID + " is correct Codeforces ID")
@@ -57,6 +57,18 @@ def checkCFID(cfID):
     except:
         print("register: " + cfID + " is not correct Codeforces ID")
         return False
+
+# yukicoder ID が存在するか確認
+def checkYKID(ykID):
+
+    try:
+        html = urllib.request.urlopen("https://yukicoder.me/api/v1/user/name/" + ykID)
+        print("register: " + ykID + " is correct yukicoder ID")
+        return True
+    except:
+        print("register: " + ykID + " is not correct yukicoder ID")
+        return False
+
 
 # Dropbox からダウンロード
 def downloadFromDropbox():
@@ -69,6 +81,8 @@ def downloadFromDropbox():
     global AOJ_TwitterID
     global CFID
     global CF_TwitterID
+    global YKID
+    global YK_TwitterID
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
@@ -128,6 +142,22 @@ def downloadFromDropbox():
             CF_TwitterID.append(id.rstrip("\n"))
     print("register: Downloaded CF_TwitterID (size : ", str(len(CF_TwitterID)), ")")
 
+    # YKID をダウンロード
+    dbx.files_download_to_file("YK/YKID.txt", "/YK/YKID.txt")
+    with open("YK/YKID.txt", "r") as f:
+        YKID.clear()
+        for id in f:
+            YKID.append(id.rstrip("\n"))
+    print("register: Downloaded YKID (size : ", str(len(YKID)), ")")
+    
+    # YK_TwitterID をダウンロード
+    dbx.files_download_to_file("YK/TwitterID.txt", "/YK/TwitterID.txt")
+    with open("YK/TwitterID.txt", "r") as f:
+        YK_TwitterID.clear()
+        for id in f:
+            YK_TwitterID.append(id.rstrip("\n"))
+    print("register: Downloaded YK_TwitterID (size : ", str(len(YK_TwitterID)), ")")
+
 # Dropbox にアップロード
 def uploadToDropbox():
     
@@ -142,6 +172,9 @@ def uploadToDropbox():
     global CFID
     global CF_TwitterID
     global CF_listFixedFlag
+    global YKID
+    global YK_TwitterID
+    global YK_listFixedFlag
     global idFixedFlag
 
     # Dropbox オブジェクトの生成
@@ -231,6 +264,31 @@ def uploadToDropbox():
         with open("CF/TwitterID.txt", "rb") as f:
             dbx.files_upload(f.read(), "/_backup/CF/TwitterID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
             print("register: Uploaded CF_TwitterID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(CF_TwitterID)), ")")
+    
+    if YK_listFixedFlag:
+        # YKID をアップロード
+        with open("YK/YKID.txt", "w") as f:
+            for id in YKID:
+                f.write(str(id) + "\n")
+        with open("YK/YKID.txt", "rb") as f:
+            dbx.files_delete("/YK/YKID.txt")
+            dbx.files_upload(f.read(), "/YK/YKID.txt")
+            print("register: Uploaded YKID (size : ", str(len(YKID)), ")")
+        with open("YK/YKID.txt", "rb") as f:
+            dbx.files_upload(f.read(), "/_backup/YK/YKID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
+            print("register: Uploaded YKID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(YKID)), ")")
+
+        # YK_TwitterID をアップロード
+        with open("YK/TwitterID.txt", "w") as f:
+            for id in YK_TwitterID:
+                f.write(str(id) + "\n")
+        with open("YK/TwitterID.txt", "rb") as f:
+            dbx.files_delete("/YK/TwitterID.txt")
+            dbx.files_upload(f.read(), "/YK/TwitterID.txt")
+            print("register: Uploaded YK_TwitterID (size : ", str(len(YK_TwitterID)), ")")
+        with open("YK/TwitterID.txt", "rb") as f:
+            dbx.files_upload(f.read(), "/_backup/YK/TwitterID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
+            print("register: Uploaded YK_TwitterID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(YK_TwitterID)), ")")
 
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
@@ -242,11 +300,11 @@ def myIndex(x, l):
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
 
-# AtCoder, AOJ, Codeforces ID 登録（20 秒ごと）
+# AtCoder, AOJ, Codeforces, yukicoder ID 登録（20 秒ごと）
 @sched.scheduled_job('interval', seconds = 20)
 def scheduled_job():
 
-    print("register: ----- AtCoder, AOJ, Codeforces register Start -----")
+    print("register: ----- AtCoder, AOJ, Codeforces, yukicoder register Start -----")
 
     # グローバル変数
     global lastTweetID
@@ -259,6 +317,9 @@ def scheduled_job():
     global CFID
     global CF_TwitterID
     global CF_listFixedFlag
+    global YKID
+    global YK_TwitterID
+    global YK_listFixedFlag
     global idFixedFlag
 
     # 各種キー設定
@@ -291,6 +352,7 @@ def scheduled_job():
         AtCoder_listFixedFlag = False
         AOJ_listFixedFlag = False
         CF_listFixedFlag = False
+        YK_listFixedFlag = False
         idFixedFlag = False
         for tweet in timeline:
             if int(tweet["id_str"]) <= int(lastTweetID):
@@ -314,7 +376,7 @@ def scheduled_job():
                         api.update_status("@" + str(userData["screen_name"]) + " 正しい AtCoder ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Reject to register new AtCoder ID : " + tweetSplited[2])
                 
-                # AtCoder ID 解除    
+                # AtCoder ID 解除
                 if tweetSplited[1] == "del_atcoder":
                     if checkAtCoderID(tweetSplited[2]):
                         if myIndex(tweetSplited[2], AtCoderID) != -1 and myIndex(str(userData["screen_name"]), AtCoder_TwitterID) != -1 and myIndex(tweetSplited[2], AtCoderID) == myIndex(str(userData["screen_name"]), AtCoder_TwitterID):
@@ -342,7 +404,7 @@ def scheduled_job():
                         api.update_status("@" + str(userData["screen_name"]) + " 正しい AOJ ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Reject to register new AOJ ID : " + tweetSplited[2])
 
-                # AOJ ID 解除    
+                # AOJ ID 解除
                 if tweetSplited[1] == "del_aoj":
                     if checkAOJID(tweetSplited[2]):
                         if myIndex(tweetSplited[2], AOJID) != -1 and myIndex(str(userData["screen_name"]), AOJ_TwitterID) != -1 and myIndex(tweetSplited[2], AOJID) == myIndex(str(userData["screen_name"]), AOJ_TwitterID):
@@ -370,7 +432,7 @@ def scheduled_job():
                         api.update_status("@" + str(userData["screen_name"]) + " 正しい Codeforces ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Reject to register new Codeforces ID : " + tweetSplited[2])
 
-                # CF ID 解除    
+                # CF ID 解除
                 if tweetSplited[1] == "del_cf":
                     if checkCFID(tweetSplited[2]):
                         if myIndex(tweetSplited[2], CFID) != -1 and myIndex(str(userData["screen_name"]), CF_TwitterID) != -1 and myIndex(tweetSplited[2], CFID) == myIndex(str(userData["screen_name"]), CF_TwitterID):
@@ -385,6 +447,34 @@ def scheduled_job():
                     else:
                         api.update_status("@" + str(userData["screen_name"]) + " 正しい Codeforces ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
                         print("register: Reject to unregister Codeforces ID : " + tweetSplited[2])
+                
+                # YK ID 登録
+                if tweetSplited[1] == "reg_yk":
+                    if checkYKID(tweetSplited[2]):
+                        YKID.append(tweetSplited[2])
+                        YK_TwitterID.append(userData["screen_name"])
+                        api.update_status("@" + str(userData["screen_name"]) + " yukicoder ID を登録しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                        print("register: Register new yukicoder ID : " + tweetSplited[2])
+                        YK_listFixedFlag = True
+                    else:
+                        api.update_status("@" + str(userData["screen_name"]) + " 正しい yukicoder ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                        print("register: Reject to register new yukicoder ID : " + tweetSplited[2])
+
+                # YK ID 解除
+                if tweetSplited[1] == "del_yk":
+                    if checkYKID(tweetSplited[2]):
+                        if myIndex(tweetSplited[2], YKID) != -1 and myIndex(str(userData["screen_name"]), YK_TwitterID) != -1 and myIndex(tweetSplited[2], YKID) == myIndex(str(userData["screen_name"]), YK_TwitterID):
+                            YKID.pop(myIndex(str(userData["screen_name"]), YK_TwitterID))
+                            YK_TwitterID.pop(myIndex(str(userData["screen_name"]), YK_TwitterID))
+                            api.update_status("@" + str(userData["screen_name"]) + " yukicoder ID を登録解除しました！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                            print("register: Unregister yukicoder ID : " + tweetSplited[2])
+                            YK_listFixedFlag = True
+                        else:
+                            api.update_status("@" + str(userData["screen_name"]) + " この yukicoder ID は登録されていません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                            print("register: Reject to unregister yukicoder ID : " + tweetSplited[2])
+                    else:
+                        api.update_status("@" + str(userData["screen_name"]) + " 正しい yukicoder ID ではありません！\n" + timeStamp, in_reply_to_status_id = tweet["id"])
+                        print("register: Reject to unregister yukicoder ID : " + tweetSplited[2])
 
         lastTweetID = int(timeline[0]["id_str"])
 
@@ -394,7 +484,7 @@ def scheduled_job():
     else:
         print("register: Twitter API Error: %d" % timeline_json.status_code)
 
-    print("register: ----- AtCoder, AOJ, Codeforces register End -----")
+    print("register: ----- AtCoder, AOJ, Codeforces, yukicoder register End -----")
     
 # おまじない
 sched.start()
