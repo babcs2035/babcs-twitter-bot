@@ -71,7 +71,7 @@ def contest():
     contestsListImg.save("AtCoder/contestsListImg_fixed.jpg")
 
     # リストをツイート
-    listTweetText = "現在，" + str(len(contestsList)) + " のコンテストが予定されています．\nhttps://atcoder.jp/contests/\n"
+    listTweetText = "現在，" + str(len(contestsList)) + " の AtCoder コンテストが予定されています．\nhttps://atcoder.jp/contests/\n"
     api.update_with_media(filename = "AtCoder/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
 
     # 画像をアップロード

@@ -45,8 +45,17 @@ def vcontest():
     listData = BeautifulSoup(listHTML.text, "html.parser")
     listTable = listData.find_all("tbody")
     listRows = listTable[0].find_all("tr")
+    listRows += listTable[1].find_all("tr")
     vcontestsList = []
     for detail in listRows[0].find_all("a"):
+        name = str(detail.contents[0])
+        beginTime = str(detail.parent.contents[2].contents[0])
+        endTime = str(detail.parent.contents[2].contents[1].contents[0])
+        endTime_formatted = datetime.datetime.strptime(endTime, "%Y-%m-%d %H:%M:%S\n        ")
+        if endTime_formatted < datetime.datetime.today():
+           continue
+        vcontestsList.append(({"name" : name, "beginTime" : beginTime, "endTime" : endTime}))
+    for detail in listRows[len(vcontestsList)].find_all("a"):
         name = str(detail.contents[0])
         beginTime = str(detail.parent.contents[2].contents[0])
         endTime = str(detail.parent.contents[2].contents[1].contents[0])
@@ -72,7 +81,7 @@ def vcontest():
     vcontestsListImg.save("AtCoder/data/vcontest/vcontestsListImg_fixed.jpg")
 
     # リストをツイート
-    listTweetText = "現在，" + str(idx) + " のバーチャルコンテストが予定されて or 行われています．\nhttps://not-522.appspot.com/\n"
+    listTweetText = "現在，" + str(idx) + " の AtCoder バーチャルコンテストが行われて or 予定されています．\nhttps://not-522.appspot.com/\n"
     api.update_with_media(filename = "AtCoder/data/vcontest/vcontestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
 
     # 画像をアップロード
@@ -80,5 +89,5 @@ def vcontest():
 
 if __name__ == '__main__':
     print("AtCoder-vcontest: Running as debug...")
-    contest()
+    vcontest()
     print("AtCoder-vcontest: Debug finished")
