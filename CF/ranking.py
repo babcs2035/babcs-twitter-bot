@@ -107,12 +107,21 @@ def ranking():
             if sub["verdict"] == "OK":
                 cnt = cnt + 1
         nowACCount[str(user)] = int(cnt)
-
     for user in CFID:
         if user in acCount:
             if nowACCount[user] - acCount[user] > 0:
                 newACCount.append(({"user_id" : user, "count" : nowACCount[user] - acCount[user]}))
     newACCount.sort(key = lambda x: x["count"], reverse = True)
+    
+    # 時刻表示を作成
+    timeStamp = datetime.datetime.today()
+    timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
+
+    if len(newACCount) == 0:
+        api.update_status("Codeforces AC 提出数ランキング\n（該当ユーザーはいませんでした・・・）" + "\n" + timeStamp)
+        acCount = nowACCount
+        uploadToDropbox()
+        return
 
     # AC 提出数ランキングを作成
     countRankNum = 1
@@ -135,10 +144,6 @@ def ranking():
         countRankingDraw.text((560, 19), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
         countResImg.paste(countRankingImg, (0, 65 + 63 * idx))
     countResImg.save("CF/data/countRankingImg_fixed.jpg")
-
-    # 時刻表示を作成
-    timeStamp = datetime.datetime.today()
-    timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
 
     # ランキングをツイート
     countTweetText = "Codeforces AC 提出数ランキング TOP " + str(countRankNum) + "\n"
