@@ -102,13 +102,22 @@ def ranking():
         acCountJson = urllib.request.urlopen("https://judgeapi.u-aizu.ac.jp/users/" + str(user))
         acCountData = json.loads(acCountJson.read().decode("utf-8"))
         nowACCount[str(user)] = int(acCountData["status"]["solved"])
-
     newACCount = []
     for user in AOJID:
         if user in acCount:
             if nowACCount[user] - acCount[user] > 0:
                 newACCount.append(({"user_id" : user, "count" : nowACCount[user] - acCount[user]}))
     newACCount.sort(key = lambda x: x["count"], reverse = True)
+    
+    # 時刻表示を作成
+    timeStamp = datetime.datetime.today()
+    timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
+
+    if len(newACCount) == 0:
+        api.update_status("AOJ Unique AC 数ランキング\n（該当ユーザーはいませんでした・・・）" + "\n" + timeStamp)
+        acCount = nowACCount
+        uploadToDropbox()
+        return
 
     # Unique AC 数ランキングを作成
     countRankNum = 1
@@ -132,9 +141,6 @@ def ranking():
         countResImg.paste(countRankingImg, (0, 65 + 63 * idx))
     countResImg.save("AOJ/data/countRankingImg_fixed.jpg")
 
-    # 時刻表示を作成
-    timeStamp = datetime.datetime.today()
-    timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
 
     # ランキングをツイート
     countTweetText = "AOJ Unique AC 数ランキング TOP " + str(countRankNum) + "\n"
