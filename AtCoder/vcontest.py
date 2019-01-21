@@ -44,25 +44,25 @@ def vcontest():
     listHTML.raise_for_status()
     listData = BeautifulSoup(listHTML.text, "html.parser")
     listTable = listData.find_all("tbody")
-    listRows = listTable[0].find_all("tr")
-    listRows += listTable[1].find_all("tr")
+    list1 = []
+    list2 = []
     vcontestsList = []
-    for detail in listRows[0].find_all("a"):
+    for row in listTable[0].find_all("tr"):
+        detail = row.find("a")
         name = str(detail.contents[0])
         beginTime = str(detail.parent.contents[2].contents[0])
         endTime = str(detail.parent.contents[2].contents[1].contents[0])
-        endTime_formatted = datetime.datetime.strptime(endTime, "%Y-%m-%d %H:%M:%S\n        ")
-        if endTime_formatted < datetime.datetime.today():
-           continue
-        vcontestsList.append(({"name" : name, "beginTime" : beginTime, "endTime" : endTime}))
-    for detail in listRows[len(vcontestsList)].find_all("a"):
+        list1.append(({"name" : name, "beginTime" : beginTime, "endTime" : endTime}))
+    for row in listTable[1].find_all("tr"):
+        detail = row.find("a")
         name = str(detail.contents[0])
         beginTime = str(detail.parent.contents[2].contents[0])
         endTime = str(detail.parent.contents[2].contents[1].contents[0])
-        endTime_formatted = datetime.datetime.strptime(endTime, "%Y-%m-%d %H:%M:%S\n        ")
-        if endTime_formatted < datetime.datetime.today():
-           continue
-        vcontestsList.append(({"name" : name, "beginTime" : beginTime, "endTime" : endTime}))
+        list2.append(({"name" : name, "beginTime" : beginTime, "endTime" : endTime}))
+    list1.reverse()
+    list2.reverse()
+    vcontestsList += list1
+    vcontestsList += list2
 
     # 画像生成
     listFont = ImageFont.truetype("AtCoder/data/YuGothM.ttc", 32)
