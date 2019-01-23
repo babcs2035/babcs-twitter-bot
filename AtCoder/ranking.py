@@ -33,7 +33,7 @@ def downloadFromDropbox(type):
         AtCoderID.clear()
         for id in f:
             AtCoderID.append(id.rstrip("\n"))
-    print("ranking: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
+    print("AtCoder-ranking: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
     
     # TwitterID をダウンロード
     dbx.files_download_to_file("AtCoder/TwitterID.txt", "/AtCoder/TwitterID.txt")
@@ -41,7 +41,7 @@ def downloadFromDropbox(type):
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
-    print("ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+    print("AtCoder-ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     dirType = ""
     if type == 0 or type == 1:
@@ -55,13 +55,13 @@ def downloadFromDropbox(type):
     dbx.files_download_to_file("AtCoder/" + dirType + "_acCount.txt", "/AtCoder/" + dirType + "_acCount.txt")
     with open("AtCoder/" + dirType + "_acCount.txt", "rb") as f:
         acCount = pickle.load(f)
-    print("ranking: Downloaded " + dirType + " acCount (size : ", str(len(acCount)), ")")
+    print("AtCoder-ranking: Downloaded " + dirType + " acCount (size : ", str(len(acCount)), ")")
 
     # acPoint をダウンロード
     dbx.files_download_to_file("AtCoder/" + dirType + "_acPoint.txt", "/AtCoder/" + dirType + "_acPoint.txt")
     with open("AtCoder/" + dirType + "_acPoint.txt", "rb") as f:
         acPoint = pickle.load(f)
-    print("ranking: Downloaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
+    print("AtCoder-ranking: Downloaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox(type):
@@ -91,7 +91,7 @@ def uploadToDropbox(type):
         with open("AtCoder/" + dirType + "_acCount.txt", "rb") as f:
             dbx.files_delete("/AtCoder/" + dirType + "_acCount.txt")
             dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_acCount.txt")
-        print("ranking: Uploaded " + dirType + " acCount (size : ", str(len(acCount)), ")")
+        print("AtCoder-ranking: Uploaded " + dirType + " acCount (size : ", str(len(acCount)), ")")
 
         # acPoint をアップロード
         with open("AtCoder/" + dirType + "_acPoint.txt", "wb") as f:
@@ -99,22 +99,22 @@ def uploadToDropbox(type):
         with open("AtCoder/" + dirType + "_acPoint.txt", "rb") as f:
             dbx.files_delete("/AtCoder/" + dirType + "_acPoint.txt")
             dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_acPoint.txt")
-        print("ranking: Uploaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
+        print("AtCoder-ranking: Uploaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
 
     # countRankingImg_fixed をアップロード
     with open("AtCoder/" + dirType + "_countRankingImg_fixed.jpg", "rb") as f:
         dbx.files_upload(f.read(), "/_backup/AtCoder/countRankingImg_fixed/" + dirType + "_" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-        print("ranking: Uploaded " + dirType + " countRankingImg_fixed")
+        print("AtCoder-ranking: Uploaded " + dirType + " countRankingImg_fixed")
 
     # pointRankingImg_fixed をアップロード
     with open("AtCoder/" + dirType + "_pointRankingImg_fixed.jpg", "rb") as f:
         dbx.files_upload(f.read(), "/_backup/AtCoder/pointRankingImg_fixed/" + dirType + "_" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-        print("ranking: Uploaded " + dirType + " pointRankingImg_fixed")
+        print("AtCoder-ranking: Uploaded " + dirType + " pointRankingImg_fixed")
 
     # perRankingImg_fixed をアップロード
     with open("AtCoder/" + dirType + "_perRankingImg_fixed.jpg", "rb") as f:
         dbx.files_upload(f.read(), "/_backup/AtCoder/perRankingImg_fixed/" + dirType + "_" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-        print("ranking: Uploaded " + dirType + " perRankingImg_fixed")
+        print("AtCoder-ranking: Uploaded " + dirType + " perRankingImg_fixed")
 
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
@@ -165,7 +165,7 @@ def ranking(type):
             if nowACCount[user] - acCount[user] > 0:
                 newACCount.append(({"user_id" : user, "count" : nowACCount[user] - acCount[user]}))
         if user in acPoint:
-            if nowACPoint[user] - acPoint[user] > 0:
+            if nowACPoint[user] - acPoint[user] > 0 and nowACCount[user] - acCount[user] > 0:
                 newACPoint.append(({"user_id" : user, "point" : nowACPoint[user] - acPoint[user]}))
                 newACPer.append(({"user_id" : user, "per": float(nowACPoint[user] - acPoint[user]) / float(nowACCount[user] - acCount[user])}))
     newACCount.sort(key = lambda x: x["count"], reverse = True)
