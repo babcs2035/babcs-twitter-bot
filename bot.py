@@ -35,6 +35,7 @@ def application(environ, start_response):
     subprocess.Popen(["python", "AtCoder/AtCoder-bot.py"])
     subprocess.Popen(["python", "AOJ/AOJ-bot.py"])
     subprocess.Popen(["python", "CF/CF-bot.py"])
+    subprocess.Popen(["python", "YK/YK-bot.py"])
     
     # おまじない
     sched.start()
