@@ -62,7 +62,7 @@ def checkCFID(cfID):
 def checkYKID(ykID):
 
     try:
-        html = urllib.request.urlopen("https://yukicoder.me/api/v1/user/name/" + ykID)
+        html = urllib.request.urlopen("https://yukicoder.me/api/v1/user/name/" + urllib.parse.quote_plus(ykID, encoding = "utf-8"))
         print("register: " + ykID + " is correct yukicoder ID")
         return True
     except:
