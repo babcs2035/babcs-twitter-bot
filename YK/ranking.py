@@ -7,6 +7,7 @@ import dropbox
 import urllib
 from PIL import Image, ImageDraw, ImageFont
 import pickle
+import codecs
 
 # グローバル変数
 YKID = []
@@ -27,7 +28,7 @@ def downloadFromDropbox():
 
     # YKID をダウンロード
     dbx.files_download_to_file("YKID.txt", "/YK/YKID.txt")
-    with open("YKID.txt", "r") as f:
+    with codecs.open("YKID.txt", "r", "utf-8") as f:
         YKID.clear()
         for id in f:
             YKID.append(id.rstrip("\n"))
@@ -92,14 +93,15 @@ def ranking():
     auth = tweepy.OAuthHandler(CK, CS)
     auth.set_access_token(AT, AS)
     api = tweepy.API(auth)
-    
+
     # データをダウンロード
     downloadFromDropbox()
 
     # AC 数を取得
     nowACCount = {}
     for user in YKID:
-        acCountJson = urllib.request.urlopen("https://yukicoder.me/api/v1/user/name/" + str(user))
+        url = "https://yukicoder.me/api/v1/user/name/" + urllib.parse.quote_plus(user, encoding = "utf-8")
+        acCountJson = urllib.request.urlopen(url)
         acCountData = json.loads(acCountJson.read().decode("utf-8"))
         nowACCount[str(user)] = int(acCountData["Solved"])
 
