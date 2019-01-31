@@ -32,7 +32,7 @@ def downloadFromDropbox():
         AtCoderID.clear()
         for id in f:
             AtCoderID.append(id.rstrip("\n"))
-    print("detection: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
+    print("AtCoder-detection: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
     
     # TwitterID をダウンロード
     dbx.files_download_to_file("AtCoder/TwitterID.txt", "/AtCoder/TwitterID.txt")
@@ -40,13 +40,13 @@ def downloadFromDropbox():
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
-    print("detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+    print("AtCoder-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     #lastSubID をダウンロード
     dbx.files_download_to_file("AtCoder/lastSubID.txt", "/AtCoder/lastSubID.txt")
     with open("AtCoder/lastSubID.txt", "rb") as f:
         lastSubID = pickle.load(f)
-    print("detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
+    print("AtCoder-detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -64,7 +64,7 @@ def uploadToDropbox():
     with open("AtCoder/lastSubID.txt", "rb") as f:
         dbx.files_delete("/AtCoder/lastSubID.txt")
         dbx.files_upload(f.read(), "/AtCoder/lastSubID.txt")
-    print("detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
+    print("AtCoder-detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 def detection():
     
@@ -108,7 +108,7 @@ def detection():
                 sublistHTML.raise_for_status()
                 sublistData = BeautifulSoup(sublistHTML.text, "html.parser")
             except:
-                print("detection: sublistHTML Error")
+                print("AtCoder-detection: sublistHTML Error")
                 break
             sublistTable = sublistData.find_all("table", class_ = "table table-bordered table-striped small th-center")
             if len(sublistTable) == 0:
@@ -135,34 +135,35 @@ def detection():
                     idx = 0
                     for ids in AtCoderID:
                         if userID == ids:
-                            score = int(float(str(subData[4])))
-                            imagePath = "AtCoder/data/detection/"
-                            if score <= 100:
-                                imagePath = imagePath + "100"
-                            elif score <= 200:
-                                imagePath = imagePath + "200"
-                            elif score <= 300:
-                                imagePath = imagePath + "300"
-                            elif score <= 400:
-                                imagePath = imagePath + "400"
-                            elif score <= 600:
-                                imagePath = imagePath + "600"
-                            elif score <= 800:
-                                imagePath = imagePath + "800"
-                            elif score <= 1100:
-                                imagePath = imagePath + "1100"
-                            elif score <= 1500:
-                                imagePath = imagePath + "1500"
-                            elif score <= 1900:
-                                imagePath = imagePath + "1900"
-                            else:
-                                imagePath = imagePath + "2000"
-                            imagePath = imagePath + ".png"
+                            # score = int(float(str(subData[4])))
+                            # imagePath = "AtCoder/data/detection/"
+                            # if score <= 100:
+                            #     imagePath = imagePath + "100"
+                            # elif score <= 200:
+                            #     imagePath = imagePath + "200"
+                            # elif score <= 300:
+                            #     imagePath = imagePath + "300"
+                            # elif score <= 400:
+                            #     imagePath = imagePath + "400"
+                            # elif score <= 600:
+                            #     imagePath = imagePath + "600"
+                            # elif score <= 800:
+                            #     imagePath = imagePath + "800"
+                            # elif score <= 1100:
+                            #     imagePath = imagePath + "1100"
+                            # elif score <= 1500:
+                            #     imagePath = imagePath + "1500"
+                            # elif score <= 1900:
+                            #     imagePath = imagePath + "1900"
+                            # else:
+                            #     imagePath = imagePath + "2000"
+                            # imagePath = imagePath + ".png"
                             try:
-                                api.update_with_media(filename = imagePath, status = userID + " ( @" + TwitterID[idx] + " ) さんが " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\n提出ソースコード：" + "https://atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
-                                print("detection: " + userID + " ( @" + TwitterID[idx] + " ) 's new AC submission (contest : " + str(contest["title"]) + ", problem : " + str(subData[1]) + ")")
+                                # api.update_with_media(filename = imagePath, status = userID + " ( @" + TwitterID[idx] + " ) さんが " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\n提出ソースコード：" + "https://atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
+                                api.update_status(userID + " ( @" + TwitterID[idx] + " ) さんが <AtCoder> " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\nhttps://atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
+                                print("AtCoder-detection: " + userID + " ( @" + TwitterID[idx] + " ) 's new AC submission (contest : " + str(contest["title"]) + ", problem : " + str(subData[1]) + ")")
                             except:
-                                print("detection: Tweet Error")
+                                print("AtCoder-detection: Tweet Error")
                         idx = idx + 1
             if skipFlag:
                 break
@@ -170,7 +171,7 @@ def detection():
 
         # lastSubID を更新
         lastSubID[str(contest["id"])] = newLastSubID
-        print("detection: Checked " + contest["title"] + " submissions (subCount : " + str(subCount) + ", newlastSubID : " + str(lastSubID[str(contest["id"])]) + ")")
+        print("AtCoder-detection: Checked " + contest["title"] + " submissions (subCount : " + str(subCount) + ", newlastSubID : " + str(lastSubID[str(contest["id"])]) + ")")
         
 
     # データをアップロード
