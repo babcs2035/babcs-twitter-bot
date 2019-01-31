@@ -119,7 +119,7 @@ def detection():
         subURL = "https://onlinejudge.u-aizu.ac.jp/recent_judges/" + str(sub["problemId"]) + "/judge/" + str(sub["judgeId"]) + "/" + str(id) + "/" + str(sub["language"])
         problemName = str(sub["problemTitle"])
         try:
-            api.update_status(str(AOJID[pos]) + " ( @" + str(TwitterID[pos]) + " ) さんが " + problemName + " を AC しました！\n提出ソースコード：" + subURL + "\n" + timeStamp)
+            api.update_status(str(AOJID[pos]) + " ( @" + str(TwitterID[pos]) + " ) さんが <AOJ> " + problemName + " を AC しました！\n" + subURL + "\n" + timeStamp)
             print("AOJ-detection: " + str(AOJID[pos]) + " ( @" + str(TwitterID[pos]) + " ) 's new AC submission (problem : " + problemName + ")")
         except:
             print("AOJ-detection: Tweet Error")
