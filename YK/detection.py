@@ -129,7 +129,7 @@ def detection():
                 for ids in YKID:
                     if userID == ids:
                         try:
-                            api.update_status(userID + " ( @" + TwitterID[idx] + " ) さんが " + str(problemName) + " を AC しました！\n提出ソースコード：" + "https://yukicoder.me/submissions/" + str(subID) + "\n" + timeStamp)
+                            api.update_status(userID + " ( @" + TwitterID[idx] + " ) さんが <yukicoder> " + str(problemName) + " を AC しました！\n" + "https://yukicoder.me/submissions/" + str(subID) + "\n" + timeStamp)
                             print("YK-detection: " + userID + " ( @" + TwitterID[idx] + " ) 's new AC submission (problem : " + str(problemName) + ")")
                         except:
                             print("YK-detection: Tweet Error")
