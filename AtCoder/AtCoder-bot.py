@@ -34,16 +34,16 @@ def scheduled_job():
     ranking.ranking(1)
     print("AtCoder-bot: ----- AtCoder-ranking (Mid Daily) End -----")
 
-# AtCoder Weekly ランキング（毎週月曜 0:00）
-@sched.scheduled_job('cron', minute = '0', hour = '0', day_of_week = 'mon')
+# AtCoder Weekly ランキング（毎週月曜 0:01）
+@sched.scheduled_job('cron', minute = '1', hour = '0', day_of_week = 'mon')
 def scheduled_job():
 
     print("AtCoder-bot: ----- AtCoder-ranking (Weekly) Start -----")
     ranking.ranking(2)
     print("AtCoder-bot: ----- AtCoder-ranking (Weekly) End -----")
 
-# AtCoder Monthly ランキング（毎月１日 0:00）
-@sched.scheduled_job('cron', minute = '0', hour = '0', day = '1')
+# AtCoder Monthly ランキング（毎月１日 0:02）
+@sched.scheduled_job('cron', minute = '2', hour = '0', day = '1')
 def scheduled_job():
 
     print("AtCoder-bot: ----- AtCoder-ranking (Monthly) Start -----")
