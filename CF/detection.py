@@ -101,7 +101,7 @@ def detection():
                     break
                 if str(sub["verdict"]) == "OK":
                     try:
-                        api.update_status(user + " ( @" + TwitterID[idx] + " ) さんが " + str(sub["problem"]["name"]) + " を AC しました！\n提出ソースコード：" + "https://codeforces.com/contest/" + str(sub["contestId"]) + "/submission/" + str(sub["id"]) + "\n" + timeStamp)
+                        api.update_status(user + " ( @" + TwitterID[idx] + " ) さんが <Codeforces> " + str(sub["problem"]["name"]) + " を AC しました！\n" + "https://codeforces.com/contest/" + str(sub["contestId"]) + "/submission/" + str(sub["id"]) + "\n" + timeStamp)
                         print("CF-detection: " + user + " ( @" + TwitterID[idx] + " ) 's new AC submission (problem : " + str(sub["problem"]["name"]) + ")")
                     except:
                         print("CF-detection: Tweet Error")
