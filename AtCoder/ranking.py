@@ -426,7 +426,7 @@ def ranking(type):
                     rankPointRankNum = rankPointRankNum + rankPointNum
                     rankPointNum = 1
                 else:
-                    rankPoint_fixedNum = rankPoint_fixedNum + 1
+                    rankPointNum = rankPointNum + 1
             if rankPointRankNum + rankPointNum - 1 <= 3:
                 rankPointTweetText += str(rankPointRankNum) + " 位 " + rankPoint_fixed[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(rankPoint_fixed[idx]["user_id"],AtCoderID)]) + " ) " + str(rankPoint_fixed[idx]["point"]) + " Points\n"
             else:
