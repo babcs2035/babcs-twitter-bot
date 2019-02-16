@@ -25,13 +25,13 @@ def downloadFromDropbox():
     dbx.files_download_to_file("AtCoder/daily_acCount.txt", "/AtCoder/daily_acCount.txt")
     with open("AtCoder/daily_acCount.txt", "rb") as f:
         acCount = pickle.load(f)
-    print("AtCoder-ranking: Downloaded daily acCount (size : ", str(len(acCount)), ")")
+    print("AtCoder-status: Downloaded daily acCount (size : ", str(len(acCount)), ")")
     
     # acPoint をダウンロード
     dbx.files_download_to_file("AtCoder/daily_acPoint.txt", "/AtCoder/daily_acPoint.txt")
     with open("AtCoder/daily_acPoint.txt", "rb") as f:
         acPoint = pickle.load(f)
-    print("AtCoder-ranking: Downloaded daily acPoint (size : ", str(len(acPoint)), ")")
+    print("AtCoder-status: Downloaded daily acPoint (size : ", str(len(acPoint)), ")")
 
 def status(atcoderID):
 
@@ -54,18 +54,18 @@ def status(atcoderID):
     downloadFromDropbox()
 
     # json 形式で取得
-    userJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/atcoder-api/v2/user_info?user=" + atcoderID)
+    userJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/atcoder-api/v2/user_info?user=" + urllib.parse.quote_plus(atcoderID, encoding = "utf-8"))
     userData = json.loads(userJson.read().decode("utf-8"))
 
     tweetText = ""
     if atcoderID in acCount:
-        tweetText += "今日の AC 数 : " + str(int(userData["accepted_count"]) - int(acCount[atcoderID])) + "\n"
-        tweetText += "今日の Point Sum : " + str(int(userData["rated_point_sum"]) - int(acPoint[atcoderID])) + "\n"
+        tweetText += "今日の AtCoder での AC 数 : " + str(int(userData["accepted_count"]) - int(acCount[atcoderID])) + "\n"
+        tweetText += "今日の AtCoder で AC した問題の Point Sum : " + str(int(userData["rated_point_sum"]) - int(acPoint[atcoderID])) + "\n"
     else:
         tweetText += "この AtCoder ID は登録されていません！\n"
     return tweetText
 
 if __name__ == '__main__':
     print("AtCoder-status: Running as debug...")
-    status("chokudai")
+    status("Bwambocos")
     print("AtCoder-status: Debug finished")
