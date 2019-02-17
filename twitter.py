@@ -8,9 +8,11 @@ import dropbox
 from apscheduler.schedulers.blocking import BlockingScheduler
 from requests_oauthlib import OAuth1Session
 import AtCoder.status
+import AtCoder.register
 
 # グローバル変数
 lastTweetID = 0
+idFixedFlag = False
 
 # Dropbox からダウンロード
 def downloadFromDropbox():
@@ -33,18 +35,21 @@ def uploadToDropbox():
     
     # グローバル変数
     global lastTweetID
+    global idFixedFlag
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
     
-    # lastTweetID をアップロード
-    with open("lastTweetID.txt", "w") as f:
-        f.write(str(lastTweetID))
-    with open("lastTweetID.txt", "rb") as f:
-        dbx.files_delete("/lastTweetID.txt")
-        dbx.files_upload(f.read(), "/lastTweetID.txt")
-    print("twitter: Uploaded lastTweetID : ", str(lastTweetID))
+    if idFixedFlag:
+
+        # lastTweetID をアップロード
+        with open("lastTweetID.txt", "w") as f:
+            f.write(str(lastTweetID))
+        with open("lastTweetID.txt", "rb") as f:
+            dbx.files_delete("/lastTweetID.txt")
+            dbx.files_upload(f.read(), "/lastTweetID.txt")
+        print("twitter: Uploaded lastTweetID : ", str(lastTweetID))
 
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
@@ -54,6 +59,7 @@ def scheduled_job():
 
     # グローバル変数
     global lastTweetID
+    global idFixedFlag
 
     print("twitter: ----- twitter Start -----")
 
@@ -82,14 +88,15 @@ def scheduled_job():
     # ツイートを解析
     myTwitterID = "babcs_bot"
     defSubID = 0
+    idFixedFlag = False
     if timeline_json.status_code == 200:
         timeline = json.loads(timeline_json.text)
         for tweet in timeline:
             if int(tweet["id_str"]) <= int(lastTweetID):
                 break
+            idFixedFlag = True
             lastTweetID = int(timeline[0]["id_str"])
-            tweetText = str(tweet["text"])
-            tweetSplited = tweetText.split()
+            tweetSplited = str(tweet["text"]).split()
 
             if len(tweetSplited) >= 3:
                 userData_json = api_OAuth.get("https://api.twitter.com/1.1/users/show.json?user_id=" + tweet["user"]["id_str"])
@@ -101,6 +108,18 @@ def scheduled_job():
                     tweetText += AtCoder.status.status(tweetSplited[2])
                     api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
                     print("twitter: Tweeted " + tweetSplited[2] + "'s AtCoder status")
+                    
+                # AtCoder-register (register)
+                if tweetSplited[1] == "reg_atcoder":
+                    tweetText = AtCoder.register.register(tweetSplited[2], str(userData["screen_name"]), 0)
+                    api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
+                    print("twitter: Tweeted " + tweetText)
+
+                # AtCoder-register (unregister)
+                if tweetSplited[1] == "del_atcoder":
+                    tweetText = AtCoder.register.register(tweetSplited[2], str(userData["screen_name"]), 1)
+                    api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
+                    print("twitter: Tweeted " + tweetText)
 
         # 変更されたデータをアップロード
         lastTweetID = int(timeline[0]["id_str"])
