@@ -9,6 +9,9 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from requests_oauthlib import OAuth1Session
 import AtCoder.status
 import AtCoder.register
+import AOJ.register
+import CF.register
+import YK.register
 
 # グローバル変数
 lastTweetID = 0
@@ -118,6 +121,42 @@ def scheduled_job():
                 # AtCoder-register (unregister)
                 if tweetSplited[1] == "del_atcoder":
                     tweetText = AtCoder.register.register(tweetSplited[2], str(userData["screen_name"]), 1)
+                    api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
+                    print("twitter: Tweeted " + tweetText)
+
+                # AOJ-register (register)
+                if tweetSplited[1] == "reg_aoj":
+                    tweetText = AOJ.register.register(tweetSplited[2], str(userData["screen_name"]), 0)
+                    api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
+                    print("twitter: Tweeted " + tweetText)
+
+                # AOJ-register (unregister)
+                if tweetSplited[1] == "del_aoj":
+                    tweetText = AOJ.register.register(tweetSplited[2], str(userData["screen_name"]), 1)
+                    api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
+                    print("twitter: Tweeted " + tweetText)
+
+                # CF-register (register)
+                if tweetSplited[1] == "reg_cf":
+                    tweetText = CF.register.register(tweetSplited[2], str(userData["screen_name"]), 0)
+                    api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
+                    print("twitter: Tweeted " + tweetText)
+
+                # CF-register (unregister)
+                if tweetSplited[1] == "del_cf":
+                    tweetText = CF.register.register(tweetSplited[2], str(userData["screen_name"]), 1)
+                    api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
+                    print("twitter: Tweeted " + tweetText)
+
+                # YK-register (register)
+                if tweetSplited[1] == "reg_yk":
+                    tweetText = YK.register.register(tweetSplited[2], str(userData["screen_name"]), 0)
+                    api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
+                    print("twitter: Tweeted " + tweetText)
+
+                # YK-register (unregister)
+                if tweetSplited[1] == "del_yk":
+                    tweetText = YK.register.register(tweetSplited[2], str(userData["screen_name"]), 1)
                     api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
                     print("twitter: Tweeted " + tweetText)
 
