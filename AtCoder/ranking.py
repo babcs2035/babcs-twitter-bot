@@ -167,18 +167,14 @@ def ranking(type):
     downloadFromDropbox(type)
 
     # AC 数を取得
-    acCountJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/atcoder-api/info/ac")
-    acPointJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/atcoder-api/info/sums")
-    acCountData = json.loads(acCountJson.read().decode("utf-8"))
-    acPointData = json.loads(acPointJson.read().decode("utf-8"))
     nowACCount = {}
     nowACPoint = {}
-    for user in acCountData:
-        if user["user_id"] in AtCoderID:
-            nowACCount[str(user["user_id"])] = int(user["problem_count"])
-    for user in acPointData:
-        if user["user_id"] in AtCoderID:
-            nowACPoint[str(user["user_id"])] = int(user["point_sum"])
+    for user in AtCoderID:
+        acJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/atcoder-api/v2/user_info?user=" + str(user))
+        acData = json.loads(acJson.read().decode("utf-8"))
+        print("AtCoder-ranking: Downloaded " + str(user) + "'s acData")
+        nowACCount[str(user)] = int(acData["accepted_count"])
+        nowACPoint[str(user)] = int(acData["rated_point_sum"])
     newACCount = []
     newACPoint = []
     newACPer = []
@@ -351,7 +347,8 @@ def ranking(type):
         else:
             break
     api.update_with_media(filename = "AtCoder/" + dirType + "_countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
-    
+    print("AtCoder-ranking: Tweeted " + dirType + " countRanking")
+
     # Point Sum ランキングをツイート
     pointTweetText = "AtCoder Point Sum " + tweetTextType + " ランキング TOP " + str(pointRankNum) + "\n"
     pointRankNum = 1
@@ -368,7 +365,8 @@ def ranking(type):
         else:
             break
     api.update_with_media(filename = "AtCoder/" + dirType + "_pointRankingImg_fixed.jpg", status = pointTweetText + "\n" + timeStamp)
-    
+    print("AtCoder-ranking: Tweeted " + dirType + " pointRanking")
+
     # Point Per Count ランキングをツイート
     perTweetText = "AtCoder Point / Count " + tweetTextType + " ランキング TOP " + str(perRankNum) + "\n"
     perRankNum = 1
@@ -385,7 +383,8 @@ def ranking(type):
         else:
             break
     api.update_with_media(filename = "AtCoder/" + dirType + "_perRankingImg_fixed.jpg", status = perTweetText + "\n" + timeStamp)
-    
+    print("AtCoder-ranking: Tweeted " + dirType + " perRanking")
+
     # ランキングポイント処理
     if type == 0:
 
@@ -432,6 +431,7 @@ def ranking(type):
             else:
                 break
         api.update_with_media(filename = "AtCoder/" + dirType + "_rankPointRankingImg_fixed.jpg", status = rankPointTweetText + "\n" + timeStamp)
+        print("AtCoder-ranking: Tweeted " + dirType + " rankPointRanking")
 
     # データをアップロード
     acCount = nowACCount
