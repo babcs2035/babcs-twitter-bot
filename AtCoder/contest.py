@@ -24,8 +24,8 @@ def uploadToDropbox():
     
     # contestsListImg_fixed をアップロード
     with open("AtCoder/contestsListImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/AtCoder/contestsListImg_fixed/"+str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S"))+".jpg")
-        print("contest: Uploaded contestsListImg_fixed")
+        dbx.files_upload(f.read(), "/_backup/AtCoder/contestsListImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
+        print("AtCoder-contest: Uploaded contestsListImg_fixed")
 
 def contest():
     
@@ -45,13 +45,18 @@ def contest():
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
 
     # 開催予定のコンテストを取得
-    contestsJsonRes = urllib.request.urlopen("https://atcoder-api.appspot.com/contests")
+    contestsJsonRes = urllib.request.urlopen("https://kenkoooo.com/atcoder/resources/contests.json")
     contestsJsonData = json.loads(contestsJsonRes.read().decode("utf-8"))
+    print("AtCoder-contest: Downloaded contestsJsonData")
     contestsList = []
     for contest in contestsJsonData:
-        date = epoch_to_datetime(contest["startTimeSeconds"])
+        date = epoch_to_datetime(contest["start_epoch_second"])
         if datetime.datetime.today() < date:
             contestsList.append(contest)
+
+    if len(contestsList) == 0:
+        api.update_status("現在予定されている AtCoder コンテストはありません．\nhttps://atcoder.jp/contests/\n\n" + timeStamp)
+        return
 
     # 画像生成
     listFont = ImageFont.truetype("AtCoder/data/YuGothM.ttc", 32)
@@ -71,13 +76,14 @@ def contest():
     contestsListImg.save("AtCoder/contestsListImg_fixed.jpg")
 
     # リストをツイート
-    listTweetText = "現在，" + str(len(contestsList)) + " の AtCoder コンテストが予定されています．\nhttps://atcoder.jp/contests/\n"
+    listTweetText = "現在 " + str(len(contestsList)) + " の AtCoder コンテストが予定されています．\nhttps://atcoder.jp/contests/\n"
     api.update_with_media(filename = "AtCoder/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
+    print("AtCoder-contest: Tweeted contestsListImg_fixed")
 
     # 画像をアップロード
     uploadToDropbox()
 
 if __name__ == '__main__':
-    print("contest: Running as debug...")
+    print("AtCoder-contest: Running as debug...")
     contest()
-    print("contest: Debug finished")
+    print("AtCoder-contest: Debug finished")
