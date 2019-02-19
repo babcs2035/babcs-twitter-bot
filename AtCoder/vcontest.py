@@ -43,6 +43,8 @@ def vcontest():
     listHTML = requests.get(listURL)
     listHTML.raise_for_status()
     listData = BeautifulSoup(listHTML.text, "html.parser")
+    print("AtCoder-vcontest: Downloaded listData")
+
     listTable = listData.find_all("tbody")
     list1 = []
     list2 = []
@@ -63,6 +65,9 @@ def vcontest():
     list2.reverse()
     vcontestsList += list1
     vcontestsList += list2
+    if len(vcontestsList) == 0:
+        api.update_status("現在予定されている AtCoder バーチャルコンテストはありません．\nhttps://not-522.appspot.com/\n\n" + timeStamp)
+        return
 
     # 画像生成
     listFont = ImageFont.truetype("AtCoder/data/YuGothM.ttc", 32)
@@ -81,8 +86,9 @@ def vcontest():
     vcontestsListImg.save("AtCoder/data/vcontest/vcontestsListImg_fixed.jpg")
 
     # リストをツイート
-    listTweetText = "現在，" + str(idx) + " の AtCoder バーチャルコンテストが行われて or 予定されています．\nhttps://not-522.appspot.com/\n"
+    listTweetText = "現在 " + str(idx) + " の AtCoder バーチャルコンテストが行われて or 予定されています．\nhttps://not-522.appspot.com/\n"
     api.update_with_media(filename = "AtCoder/data/vcontest/vcontestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
+    print("AtCoder-vcontest: Tweeted vcontestsListImg_fixed")
 
     # 画像をアップロード
     uploadToDropbox()
