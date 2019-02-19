@@ -92,8 +92,10 @@ def detection():
     downloadFromDropbox()
 
     # コンテストごとに提出を解析
-    contestsJsonRes = urllib.request.urlopen("https://atcoder-api.appspot.com/contests")
+    contestsJsonRes = urllib.request.urlopen("https://kenkoooo.com/atcoder/resources/contests.json")
     contestsJsonData = json.loads(contestsJsonRes.read().decode("utf-8"))
+    print("AtCoder-detection: Downloaded contestsJsonData")
+
     for contest in contestsJsonData:
 
         # ページ送り
@@ -172,12 +174,11 @@ def detection():
         # lastSubID を更新
         lastSubID[str(contest["id"])] = newLastSubID
         print("AtCoder-detection: Checked " + contest["title"] + " submissions (subCount : " + str(subCount) + ", newlastSubID : " + str(lastSubID[str(contest["id"])]) + ")")
-        
 
     # データをアップロード
     uploadToDropbox()
 
 if __name__ == '__main__':
-    print("detection: Running as debug...")
+    print("AtCoder-detection: Running as debug...")
     detection()
-    print("detection: Debug finished")
+    print("AtCoder-detection: Debug finished")
