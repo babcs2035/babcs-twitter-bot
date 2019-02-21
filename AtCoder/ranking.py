@@ -173,8 +173,14 @@ def ranking(type):
         acJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/atcoder-api/v2/user_info?user=" + str(user))
         acData = json.loads(acJson.read().decode("utf-8"))
         print("AtCoder-ranking: Downloaded " + str(user) + "'s acData")
-        nowACCount[str(user)] = int(acData["accepted_count"])
-        nowACPoint[str(user)] = int(acData["rated_point_sum"])
+        if user not in acCount:
+            nowACCount[str(user)] = int(acData["accepted_count"])
+        elif acData["accepted_count"] >= acCount[user]:
+            nowACCount[str(user)] = int(acData["accepted_count"])
+        if user not in acPoint:
+            nowACPoint[str(user)] = int(acData["rated_point_sum"])
+        elif acData["rated_point_sum"] >= acPoint[user]:
+            nowACPoint[str(user)] = int(acData["rated_point_sum"])
     newACCount = []
     newACPoint = []
     newACPer = []
