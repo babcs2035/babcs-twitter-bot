@@ -126,6 +126,9 @@ def detection():
                 userID = str(links[1].get("href")).split("/")[2]
                 if newLastSubID == -1:
                     newLastSubID = subID
+                if str(contest["id"]) not in lastSubID:
+                    skipFlag = True
+                    break
                 if subID <= int(lastSubID[str(contest["id"])]) or int(lastSubID[str(contest["id"])]) == -1:
                     skipFlag = True
                     break
