@@ -167,20 +167,18 @@ def ranking(type):
     downloadFromDropbox(type)
 
     # AC 数を取得
+    acCountJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/resources/ac.json")
+    acPointJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/resources/sums.json")
+    acCountData = json.loads(acCountJson.read().decode("utf-8"))
+    acPointData = json.loads(acPointJson.read().decode("utf-8"))
     nowACCount = {}
     nowACPoint = {}
-    for user in AtCoderID:
-        acJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/atcoder-api/v2/user_info?user=" + str(user))
-        acData = json.loads(acJson.read().decode("utf-8"))
-        print("AtCoder-ranking: Downloaded " + str(user) + "'s acData")
-        if user not in acCount:
-            nowACCount[str(user)] = int(acData["accepted_count"])
-        elif acData["accepted_count"] >= acCount[user]:
-            nowACCount[str(user)] = int(acData["accepted_count"])
-        if user not in acPoint:
-            nowACPoint[str(user)] = int(acData["rated_point_sum"])
-        elif acData["rated_point_sum"] >= acPoint[user]:
-            nowACPoint[str(user)] = int(acData["rated_point_sum"])
+    for user in acCountData:
+        if user["user_id"] in AtCoderID:
+            nowACCount[str(user["user_id"])] = int(user["problem_count"])
+    for user in acPointData:
+        if user["user_id"] in AtCoderID:
+            nowACPoint[str(user["user_id"])] = int(user["point_sum"])
     newACCount = []
     newACPoint = []
     newACPer = []
