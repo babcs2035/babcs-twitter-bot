@@ -49,7 +49,7 @@ def downloadFromDropbox():
     print("YK-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
 
 # Dropbox にアップロード
-def uploadToDropbox():
+def uploadToDropbox(flag):
     
     # グローバル変数
     global acCount
@@ -67,9 +67,10 @@ def uploadToDropbox():
     print("YK-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
     
     # countRankingImg_fixed をアップロード
-    with open("YK/data/countRankingImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/YK/countRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-        print("YK-ranking: Uploaded countRankingImg_fixed")
+    if flag:
+        with open("YK/data/countRankingImg_fixed.jpg", "rb") as f:
+            dbx.files_upload(f.read(), "/_backup/YK/countRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
+            print("YK-ranking: Uploaded countRankingImg_fixed")
 
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
@@ -119,7 +120,7 @@ def ranking():
     if len(newACCount) == 0:
         api.update_status("yukicoder Unique AC 数ランキング\n（該当ユーザーはいませんでした・・・）" + "\n" + timeStamp)
         acCount = nowACCount
-        uploadToDropbox()
+        uploadToDropbox(False)
         return
 
     # Unique AC 数ランキングを作成
@@ -163,7 +164,7 @@ def ranking():
     
     # データをアップロード
     acCount = nowACCount
-    uploadToDropbox()
+    uploadToDropbox(True)
 
 if __name__ == '__main__':
     print("YK-ranking: Running as debug...")
