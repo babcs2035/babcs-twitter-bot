@@ -45,12 +45,12 @@ def contest():
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
 
     # 開催予定のコンテストを取得
-    contestsJsonRes = urllib.request.urlopen("https://kenkoooo.com/atcoder/resources/contests.json")
+    contestsJsonRes = urllib.request.urlopen("https://atcoder-api.appspot.com/contests")
     contestsJsonData = json.loads(contestsJsonRes.read().decode("utf-8"))
     print("AtCoder-contest: Downloaded contestsJsonData")
     contestsList = []
     for contest in contestsJsonData:
-        date = epoch_to_datetime(contest["start_epoch_second"])
+        date = epoch_to_datetime(contest["startTimeSeconds"])
         if datetime.datetime.today() < date:
             contestsList.append(contest)
 
