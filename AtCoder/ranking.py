@@ -183,10 +183,10 @@ def ranking(type):
     newACPoint = []
     newACPer = []
     for user in AtCoderID:
-        if user in acCount:
+        if user in acCount and user in nowACCount:
             if nowACCount[user] - acCount[user] > 0:
                 newACCount.append(({"user_id" : user, "count" : nowACCount[user] - acCount[user]}))
-        if user in acPoint:
+        if user in acPoint and user in nowACPoint:
             if nowACPoint[user] - acPoint[user] > 0 and nowACCount[user] - acCount[user] > 0:
                 newACPoint.append(({"user_id" : user, "point" : nowACPoint[user] - acPoint[user]}))
                 newACPer.append(({"user_id" : user, "per": float(nowACPoint[user] - acPoint[user]) / float(nowACCount[user] - acCount[user])}))
