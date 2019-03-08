@@ -210,9 +210,10 @@ def ranking(type):
     countPointIndex = 0
     rankingFont = ImageFont.truetype("AtCoder/data/YuGothM.ttc", 32)
     countRankingFirstImg = Image.open("AtCoder/data/countRankingImg (first).jpg")
-    countResImg = Image.new("RGB", (738, 65 + 63 * len(newACCount)))
-    countResImg.paste(countRankingFirstImg, (0, 0))
+    countResImg = Image.new("RGB", (738 * int((len(newACCount) + 19) / 20), 65 + 63 * min(len(newACCount), 20)))
     for idx in range(len(newACCount)):
+        if idx % 20 == 0:
+            countResImg.paste(countRankingFirstImg, (738 * int(idx / 20), 0))
         countRankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
         countRankingDraw = ImageDraw.Draw(countRankingImg)
         if idx > 0:
@@ -225,7 +226,7 @@ def ranking(type):
         countRankingDraw.text((10, 19), str(countRankNum), fill = (0, 0, 0), font = rankingFont)
         countRankingDraw.text((120, 19), newACCount[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
         countRankingDraw.text((560, 19), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
-        countResImg.paste(countRankingImg, (0, 65 + 63 * idx))
+        countResImg.paste(countRankingImg, (738 * int(idx / 20), 65 + 63 * (idx % 20)))
 
         # ランキングポイント処理
         if type == 0:
@@ -248,9 +249,10 @@ def ranking(type):
     pointNum = 1
     pointPointIndex = 0
     pointRankingFirstImg = Image.open("AtCoder/data/pointRankingImg (first).jpg")
-    pointResImg = Image.new("RGB", (738, 65 + 63 * len(newACPoint)))
-    pointResImg.paste(pointRankingFirstImg, (0, 0))
+    pointResImg = Image.new("RGB", (738 * int((len(newACPoint) + 19) / 20), 65 + 63 * min(len(newACPoint), 20)))
     for idx in range(len(newACPoint)):
+        if idx % 20 == 0:
+            pointResImg.paste(pointRankingFirstImg, (738 * int(idx / 20), 0))
         pointRankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
         pointRankingDraw = ImageDraw.Draw(pointRankingImg)
         if idx > 0:
@@ -263,7 +265,7 @@ def ranking(type):
         pointRankingDraw.text((10, 19), str(pointRankNum), fill = (0, 0, 0), font = rankingFont)
         pointRankingDraw.text((120, 19), newACPoint[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
         pointRankingDraw.text((560, 19), str(newACPoint[idx]["point"]), fill = (0, 0, 0), font = rankingFont)
-        pointResImg.paste(pointRankingImg, (0, 65 + 63 * idx))
+        pointResImg.paste(pointRankingImg, (738 * int(idx / 20), 65 + 63 * (idx % 20)))
 
         # ランキングポイント処理
         if type == 0:
@@ -286,9 +288,10 @@ def ranking(type):
     perNum = 1
     perPointIndex = 0
     perRankingFirstImg = Image.open("AtCoder/data/perRankingImg (first).jpg")
-    perResImg = Image.new("RGB", (738, 65 + 63 * len(newACPer)))
-    perResImg.paste(perRankingFirstImg, (0, 0))
+    perResImg = Image.new("RGB", (738 * int((len(newACPer) + 19) / 20), 65 + 63 * min(len(newACPer), 20)))
     for idx in range(len(newACPer)):
+        if idx % 20 == 0:
+            perResImg.paste(perRankingFirstImg, (738 * int(idx / 20), 0))
         perRankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
         perRankingDraw = ImageDraw.Draw(perRankingImg)
         if idx > 0:
@@ -302,7 +305,7 @@ def ranking(type):
         perRankingDraw.text((10, 19), str(perRankNum), fill = (0, 0, 0), font = rankingFont)
         perRankingDraw.text((120, 19), newACPer[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
         perRankingDraw.text((560, 19), str(newACPer[idx]["per"]), fill = (0, 0, 0), font = rankingFont)
-        perResImg.paste(perRankingImg, (0, 65 + 63 * idx))
+        perResImg.paste(perRankingImg, (738 * int(idx / 20), 65 + 63 * (idx % 20)))
 
         # ランキングポイント処理
         if type == 0:
@@ -402,9 +405,10 @@ def ranking(type):
         rankPointRankNum = 1
         rankPointNum = 1
         rankPointRankingFirstImg = Image.open("AtCoder/data/rankPointRankingImg (first).jpg")
-        rankPointResImg = Image.new("RGB", (738, 65 + 63 * len(rankPoint_fixed)))
-        rankPointResImg.paste(rankPointRankingFirstImg, (0, 0))
+        rankPointResImg = Image.new("RGB", (738 * int((len(rankPoint_fixed) + 19) / 20), 65 + 63 * min(len(rankPoint_fixed), 20)))
         for idx in range(len(rankPoint_fixed)):
+            if idx % 20 == 0:
+                rankPointResImg.paste(rankPointRankingFirstImg, (738 * int(idx / 20), 0))
             rankPointRankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
             rankPointRankingDraw = ImageDraw.Draw(rankPointRankingImg)
             if idx > 0:
@@ -417,7 +421,7 @@ def ranking(type):
             rankPointRankingDraw.text((10, 19), str(rankPointRankNum), fill = (0, 0, 0), font = rankingFont)
             rankPointRankingDraw.text((120, 19), rankPoint_fixed[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
             rankPointRankingDraw.text((560, 19), str(rankPoint_fixed[idx]["point"]), fill = (0, 0, 0), font = rankingFont)
-            rankPointResImg.paste(rankPointRankingImg, (0, 65 + 63 * idx))
+            rankPointResImg.paste(rankPointRankingImg, (738 * int(idx / 20), 65 + 63 * (idx % 20)))
         rankPointResImg.save("AtCoder/" + dirType + "_rankPointRankingImg_fixed.jpg")
         
         rankPointTweetText = "AtCoder ランキングポイント ランキング TOP " + str(rankPointRankNum) + "\n"

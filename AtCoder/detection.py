@@ -92,7 +92,7 @@ def detection():
     downloadFromDropbox()
 
     # コンテストごとに提出を解析
-    contestsJsonRes = urllib.request.urlopen("https://kenkoooo.com/atcoder/resources/contests.json")
+    contestsJsonRes = urllib.request.urlopen("https://atcoder-api.appspot.com/contests")
     contestsJsonData = json.loads(contestsJsonRes.read().decode("utf-8"))
     print("AtCoder-detection: Downloaded contestsJsonData")
 
