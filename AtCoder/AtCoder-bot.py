@@ -6,6 +6,7 @@ import detection
 import ranking
 import contest
 import vcontest
+import result
 
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
@@ -65,6 +66,14 @@ def scheduled_job():
     print("AtCoder-bot: ----- AtCoder-vcontest Start -----")
     vcontest.vcontest()
     print("AtCoder-bot: ----- AtCoder-vcontest End -----")
+
+# AtCoder コンテスト成績ランキング（毎日 0:00）
+@sched.scheduled_job('cron', minute = '0', hour = '0')
+def scheduled_job():
+
+    print("AtCoder-bot: ----- AtCoder-result Start -----")
+    result.result()
+    print("AtCoder-bot: ----- AtCoder-result End -----")
 
 # おまじない
 sched.start()
