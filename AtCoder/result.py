@@ -14,6 +14,7 @@ from PIL import Image, ImageDraw, ImageFont
 # グローバル変数
 AtCoderID = []
 TwitterID = []
+ratings = {}
 
 # Dropbox からダウンロード
 def downloadFromDropbox():
@@ -21,6 +22,7 @@ def downloadFromDropbox():
     # グローバル変数
     global AtCoderID
     global TwitterID
+    global ratings
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
@@ -41,6 +43,30 @@ def downloadFromDropbox():
         for id in f:
             TwitterID.append(id.rstrip("\n"))
     print("AtCoder-result: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+
+    # ratings をダウンロード
+    dbx.files_download_to_file("AtCoder/ratings.txt", "/AtCoder/ratings.txt")
+    with open("AtCoder/ratings.txt", "rb") as f:
+        ratings = pickle.load(f)
+    print("AtCoder-result: Downloaded ratings (size : ", str(len(ratings)), ")")
+
+# Dropbox にアップロード
+def uploadToDropbox():
+    
+    # グローバル変数
+    global ratings
+    
+    # Dropbox オブジェクトの生成
+    dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
+    dbx.users_get_current_account()
+
+    # ratings をアップロード
+    with open("AtCoder/ratings.txt", "wb") as f:
+        pickle.dump(ratings, f)
+    with open("AtCoder/ratings.txt", "rb") as f:
+        dbx.files_delete("/AtCoder/ratings.txt")
+        dbx.files_upload(f.read(), "/AtCoder/ratings.txt")
+    print("AtCoder-result: Uploaded ratings (size : ", str(len(ratings)), ")")
 
 def epoch_to_datetime(epoch):
     return datetime.datetime(*time.localtime(epoch)[:6])
@@ -91,6 +117,7 @@ def result():
     global AtCoderID
     global TwitterID
     global contestFlag
+    global ratings
 
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
@@ -110,12 +137,13 @@ def result():
     timeStamp = datetime.datetime.today()
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
 
+    ## コンテスト結果のランキング処理
     # 取得すべきコンテストを取得
     contestsJsonRes = urllib.request.urlopen("https://atcoder-api.appspot.com/contests")
     contestsJsonData = json.loads(contestsJsonRes.read().decode("utf-8"))
     print("AtCoder-result: Downloaded contestsJsonData")
     newcontests = []
-    yesterday =  datetime.datetime.today() - datetime.timedelta(1)
+    yesterday = datetime.datetime.today() - datetime.timedelta(1)
     for contest in contestsJsonData:
         date = epoch_to_datetime(contest["startTimeSeconds"] + contest["durationSeconds"])
         if yesterday <= date and date < datetime.datetime.today():
@@ -173,6 +201,39 @@ def result():
             tweetText = str(contest) + " レート変動値" + makeRanking("diff", diffList, "")
             api.update_with_media(filename = "AtCoder/data/result/diffRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
             print("AtCoder-result: Tweeted " + str(contest) + " diffRanking")
+
+    ## 色が変化したユーザーに通知
+    for user in AtCoderID:
+        
+        # 現在の色を取得
+        profileURL = "https://atcoder.jp/users/" + str(user)
+        profileHTML = requests.get(profileURL)
+        try:
+            profileHTML.raise_for_status()
+            profileData = BeautifulSoup(profileHTML.text, "html.parser")
+        except:
+            print("AtCoder-result: profileHTML Error")
+            continue
+        print("AtCoder-result: Downloaded " + str(user) + "'s profileData")
+        profileTable = profileData.find_all("table", class_ = "dl-table")
+        try:
+            nowRating = int(profileTable[1].contents[3].contents[1].contents[0].contents[0])
+        except:
+            nowRating = -1
+
+        # 色が変わったか調べる
+        strs = ["灰色", "茶色", "緑", "水色", "青", "黄色", "オレンジ", "レッド"]
+        if user not in ratings:
+            ratings[str(user)] = -1
+        for border in range(7, 0, -1):
+            if ratings[str(user)] < border * 400 and border * 400 <= nowRating:
+                api.update_status(str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " ) さんの AtCoder レートが " + str(ratings[str(user)]) + " -> " + str(nowRating) + " となり，" + strs[border] + "コーダーになりました！おめでとうございます！！！\n" + profileURL + "\n" + timeStamp)
+                print("AtCoder-result: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s rating change")
+                break
+        ratings[str(user)] = nowRating
+
+    # データをアップロード
+    uploadToDropbox()
 
 if __name__ == '__main__':
     print("AtCoder-result: Running as debug...")
