@@ -143,7 +143,9 @@ def myIndex(x, l):
         return -1
 
 def makeRanking(type1, type2, listData, unit):
-
+    
+    global AtCoderID
+    global TwitterID
     global rankPoint
 
     flag = int(listData[0][str(type2)]) > int(listData[len(listData) - 1][str(type2)])
@@ -152,11 +154,11 @@ def makeRanking(type1, type2, listData, unit):
     countIndex = 0
     rankingFont = ImageFont.truetype("AtCoder/data/YuGothM.ttc", 32)
     rankingFirstImg = Image.open("AtCoder/data/" + str(type2) + "RankingImg (first).jpg")
-    resImg = Image.new("RGB", (738 * int((len(listData) + 19) / 20), 65 + 63 * min(len(listData), 20)))
+    resImg = Image.new("RGB", (850 * int((len(listData) + 19) / 20), 65 + 63 * min(len(listData), 20)))
     tweetText = ""
     for idx in range(len(listData)):
         if idx % 20 == 0:
-            resImg.paste(rankingFirstImg, (738 * int(idx / 20), 0))
+            resImg.paste(rankingFirstImg, (850 * int(idx / 20), 0))
         rankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
         rankingDraw = ImageDraw.Draw(rankingImg)
         if idx > 0:
@@ -174,9 +176,9 @@ def makeRanking(type1, type2, listData, unit):
         if rankNum + countNum - 1 <= 3:
             tweetText += str(rankNum) + " 位 " + listData[idx]["user"] + " ( @" + str(TwitterID[myIndex(listData[idx]["user"], AtCoderID)]) + " ) " + str(listData[idx][str(type2)]) + " " + str(unit) + "\n"
         rankingDraw.text((10, 19), str(rankNum), fill = (0, 0, 0), font = rankingFont)
-        rankingDraw.text((120, 19), listData[idx]["user"], fill = (0, 0, 0), font = rankingFont)
-        rankingDraw.text((560, 19), str(listData[idx][str(type2)]), fill = (0, 0, 0), font = rankingFont)
-        resImg.paste(rankingImg, (738 * int(idx / 20), 65 + 63 * (idx % 20)))
+        rankingDraw.text((120, 19), listData[idx]["user"] + " (@" + str(TwitterID[myIndex(str(listData[idx]["user"]), AtCoderID)]) + ")", fill = (0, 0, 0), font = rankingFont)
+        rankingDraw.text((672, 19), str(listData[idx][str(type2)]), fill = (0, 0, 0), font = rankingFont)
+        resImg.paste(rankingImg, (850 * int(idx / 20), 65 + 63 * (idx % 20)))
 
         # ランキングポイント処理
         point = 1
@@ -288,7 +290,7 @@ def ranking(type):
     print("AtCoder-ranking: Tweeted " + dirType + " perRanking")
 
     # ランキングポイント処理
-    if type == 0:
+    if type == 1:
 
         # 前処理
         rankPoint_fixed = []
