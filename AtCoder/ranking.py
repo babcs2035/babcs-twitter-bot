@@ -65,13 +65,11 @@ def downloadFromDropbox(type):
         acPoint = pickle.load(f)
     print("AtCoder-ranking: Downloaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
 
-    if type == 0:
-       
-        # rankPoint をダウンロード
-        dbx.files_download_to_file("AtCoder/" + dirType + "_rankPoint.txt", "/AtCoder/" + dirType + "_rankPoint.txt")
-        with open("AtCoder/" + dirType + "_rankPoint.txt", "rb") as f:
-            rankPoint = pickle.load(f)
-        print("AtCoder-ranking: Downloaded " + dirType + " rankPoint (size : ", str(len(rankPoint)), ")")
+    # rankPoint をダウンロード
+    dbx.files_download_to_file("AtCoder/" + dirType + "_rankPoint.txt", "/AtCoder/" + dirType + "_rankPoint.txt")
+    with open("AtCoder/" + dirType + "_rankPoint.txt", "rb") as f:
+        rankPoint = pickle.load(f)
+    print("AtCoder-ranking: Downloaded " + dirType + " rankPoint (size : ", str(len(rankPoint)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox(type):
@@ -144,6 +142,60 @@ def myIndex(x, l):
     else:
         return -1
 
+def makeRanking(type1, type2, listData, unit):
+
+    global rankPoint
+
+    flag = int(listData[0][str(type2)]) > int(listData[len(listData) - 1][str(type2)])
+    rankNum = 1
+    countNum = 1
+    countIndex = 0
+    rankingFont = ImageFont.truetype("AtCoder/data/YuGothM.ttc", 32)
+    rankingFirstImg = Image.open("AtCoder/data/" + str(type2) + "RankingImg (first).jpg")
+    resImg = Image.new("RGB", (738 * int((len(listData) + 19) / 20), 65 + 63 * min(len(listData), 20)))
+    tweetText = ""
+    for idx in range(len(listData)):
+        if idx % 20 == 0:
+            resImg.paste(rankingFirstImg, (738 * int(idx / 20), 0))
+        rankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
+        rankingDraw = ImageDraw.Draw(rankingImg)
+        if idx > 0:
+            if flag and int(listData[idx - 1][str(type2)]) > int(listData[idx][str(type2)]):
+                rankNum = rankNum + countNum
+                countNum = 1
+                countIndex += 1
+            elif (not flag) and int(listData[idx - 1][str(type2)]) < int(listData[idx][str(type2)]):
+                rankNum = rankNum + countNum
+                countNum = 1
+                countIndex += 1
+            else:
+                countNum = countNum + 1
+        
+        if rankNum + countNum - 1 <= 3:
+            tweetText += str(rankNum) + " 位 " + listData[idx]["user"] + " ( @" + str(TwitterID[myIndex(listData[idx]["user"], AtCoderID)]) + " ) " + str(listData[idx][str(type2)]) + " " + str(unit) + "\n"
+        rankingDraw.text((10, 19), str(rankNum), fill = (0, 0, 0), font = rankingFont)
+        rankingDraw.text((120, 19), listData[idx]["user"], fill = (0, 0, 0), font = rankingFont)
+        rankingDraw.text((560, 19), str(listData[idx][str(type2)]), fill = (0, 0, 0), font = rankingFont)
+        resImg.paste(rankingImg, (738 * int(idx / 20), 65 + 63 * (idx % 20)))
+
+        # ランキングポイント処理
+        point = 1
+        if countIndex == 0:
+            point = 5
+        elif countIndex == 1:
+            point = 4
+        elif countIndex == 2:
+            point = 3
+        
+        if listData[idx]["user"] in rankPoint:
+            rankPoint[listData[idx]["user"]] += point
+        else:
+            rankPoint[listData[idx]["user"]] = point
+
+    resImg.save("AtCoder/" + str(type1) + "RankingImg_fixed.jpg")
+    tweetText = " ランキング TOP " + str(rankNum) + "\n" + tweetText
+    return tweetText
+
 # ランキング生成 (type 0:Daily, 1:Mid Daily, 2:Weekly, 3:Monthly)
 def ranking(type):
     
@@ -162,9 +214,24 @@ def ranking(type):
     auth = tweepy.OAuthHandler(CK, CS)
     auth.set_access_token(AT, AS)
     api = tweepy.API(auth)
+
+    # 時刻表示を作成
+    timeStamp = datetime.datetime.today()
+    timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
     
     # データをダウンロード
     downloadFromDropbox(type)
+    
+    # ランキング種別を設定
+    dirType = ""
+    if type == 0:
+        dirType = "daily"
+    if type == 1:
+        dirType = "mid daily"
+    if type == 2:
+        dirType = "weekly"
+    if type == 3:
+        dirType = "monthly"
 
     # AC 数を取得
     acCountJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/resources/ac.json")
@@ -185,149 +252,16 @@ def ranking(type):
     for user in AtCoderID:
         if user in acCount and user in nowACCount:
             if nowACCount[user] - acCount[user] > 0:
-                newACCount.append(({"user_id" : user, "count" : nowACCount[user] - acCount[user]}))
+                newACCount.append(({"user" : user, "count" : nowACCount[user] - acCount[user]}))
         if user in acPoint and user in nowACPoint:
             if nowACPoint[user] - acPoint[user] > 0 and nowACCount[user] - acCount[user] > 0:
-                newACPoint.append(({"user_id" : user, "point" : nowACPoint[user] - acPoint[user]}))
-                newACPer.append(({"user_id" : user, "per": float(nowACPoint[user] - acPoint[user]) / float(nowACCount[user] - acCount[user])}))
+                newACPoint.append(({"user" : user, "point" : nowACPoint[user] - acPoint[user]}))
+                newACPer.append(({"user" : user, "per": float(nowACPoint[user] - acPoint[user]) / float(nowACCount[user] - acCount[user])}))
     newACCount.sort(key = lambda x: x["count"], reverse = True)
     newACPoint.sort(key = lambda x: x["point"], reverse = True)
     newACPer.sort(key = lambda x: x["per"], reverse = True)
 
-    dirType = ""
-    if type == 0:
-        dirType = "daily"
-    if type == 1:
-        dirType = "mid daily"
-    if type == 2:
-        dirType = "weekly"
-    if type == 3:
-        dirType = "monthly"
-
-    # Unique AC 数ランキングを作成
-    countRankNum = 1
-    countNum = 1
-    countPointIndex = 0
-    rankingFont = ImageFont.truetype("AtCoder/data/YuGothM.ttc", 32)
-    countRankingFirstImg = Image.open("AtCoder/data/countRankingImg (first).jpg")
-    countResImg = Image.new("RGB", (738 * int((len(newACCount) + 19) / 20), 65 + 63 * min(len(newACCount), 20)))
-    for idx in range(len(newACCount)):
-        if idx % 20 == 0:
-            countResImg.paste(countRankingFirstImg, (738 * int(idx / 20), 0))
-        countRankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
-        countRankingDraw = ImageDraw.Draw(countRankingImg)
-        if idx > 0:
-            if int(newACCount[idx - 1]["count"]) > int(newACCount[idx]["count"]):
-                countRankNum = countRankNum + countNum
-                countNum = 1
-                countPointIndex += 1
-            else:
-                countNum = countNum + 1
-        countRankingDraw.text((10, 19), str(countRankNum), fill = (0, 0, 0), font = rankingFont)
-        countRankingDraw.text((120, 19), newACCount[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
-        countRankingDraw.text((560, 19), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
-        countResImg.paste(countRankingImg, (738 * int(idx / 20), 65 + 63 * (idx % 20)))
-
-        # ランキングポイント処理
-        if type == 0:
-            point = 1
-            if countPointIndex == 0:
-                point = 5
-            elif countPointIndex == 1:
-                point = 4
-            elif countPointIndex == 2:
-                point = 3
-            
-            if newACCount[idx]["user_id"] in rankPoint:
-                rankPoint[newACCount[idx]["user_id"]] += point
-            else:
-                rankPoint[newACCount[idx]["user_id"]] = point
-    countResImg.save("AtCoder/" + dirType + "_countRankingImg_fixed.jpg")
-
-    # Point Sum ランキングを作成
-    pointRankNum = 1
-    pointNum = 1
-    pointPointIndex = 0
-    pointRankingFirstImg = Image.open("AtCoder/data/pointRankingImg (first).jpg")
-    pointResImg = Image.new("RGB", (738 * int((len(newACPoint) + 19) / 20), 65 + 63 * min(len(newACPoint), 20)))
-    for idx in range(len(newACPoint)):
-        if idx % 20 == 0:
-            pointResImg.paste(pointRankingFirstImg, (738 * int(idx / 20), 0))
-        pointRankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
-        pointRankingDraw = ImageDraw.Draw(pointRankingImg)
-        if idx > 0:
-            if int(newACPoint[idx - 1]["point"]) > int(newACPoint[idx]["point"]):
-                pointRankNum = pointRankNum + pointNum
-                pointNum = 1
-                pointPointIndex += 1
-            else:
-                pointNum = pointNum + 1
-        pointRankingDraw.text((10, 19), str(pointRankNum), fill = (0, 0, 0), font = rankingFont)
-        pointRankingDraw.text((120, 19), newACPoint[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
-        pointRankingDraw.text((560, 19), str(newACPoint[idx]["point"]), fill = (0, 0, 0), font = rankingFont)
-        pointResImg.paste(pointRankingImg, (738 * int(idx / 20), 65 + 63 * (idx % 20)))
-
-        # ランキングポイント処理
-        if type == 0:
-            point = 1
-            if pointPointIndex == 0:
-                point = 5
-            elif pointPointIndex == 1:
-                point = 4
-            elif pointPointIndex == 2:
-                point = 3
-            if newACPoint[idx]["user_id"] in rankPoint:
-                rankPoint[newACPoint[idx]["user_id"]] += point
-            else:
-                rankPoint[newACPoint[idx]["user_id"]] = point
-
-    pointResImg.save("AtCoder/" + dirType + "_pointRankingImg_fixed.jpg")
-
-    # Point Per Count ランキングを作成
-    perRankNum = 1
-    perNum = 1
-    perPointIndex = 0
-    perRankingFirstImg = Image.open("AtCoder/data/perRankingImg (first).jpg")
-    perResImg = Image.new("RGB", (738 * int((len(newACPer) + 19) / 20), 65 + 63 * min(len(newACPer), 20)))
-    for idx in range(len(newACPer)):
-        if idx % 20 == 0:
-            perResImg.paste(perRankingFirstImg, (738 * int(idx / 20), 0))
-        perRankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
-        perRankingDraw = ImageDraw.Draw(perRankingImg)
-        if idx > 0:
-            if int(newACPer[idx - 1]["per"]) > int(newACPer[idx]["per"]):
-                perRankNum = perRankNum + perNum
-                perNum = 1
-                perPointIndex += 1
-
-            else:
-                perNum = perNum + 1
-        perRankingDraw.text((10, 19), str(perRankNum), fill = (0, 0, 0), font = rankingFont)
-        perRankingDraw.text((120, 19), newACPer[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
-        perRankingDraw.text((560, 19), str(newACPer[idx]["per"]), fill = (0, 0, 0), font = rankingFont)
-        perResImg.paste(perRankingImg, (738 * int(idx / 20), 65 + 63 * (idx % 20)))
-
-        # ランキングポイント処理
-        if type == 0:
-            point = 1
-            if perPointIndex == 0:
-                point = 5
-            elif perPointIndex == 1:
-                point = 4
-            elif perPointIndex == 2:
-                point = 3
-            if newACPer[idx]["user_id"] in rankPoint:
-                rankPoint[newACPer[idx]["user_id"]] += point
-            else:
-                rankPoint[newACPer[idx]["user_id"]] = point
-
-    perResImg.save("AtCoder/" + dirType + "_perRankingImg_fixed.jpg")
-
-    # 時刻表示を作成
-    timeStamp = datetime.datetime.today()
-    timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
-
-    # ランキングをツイート
+    ## ランキングをツイート
     tweetTextType = ""
     if type == 0:
         tweetTextType = "Daily"
@@ -339,57 +273,18 @@ def ranking(type):
         tweetTextType = "Monthly"
 
     # Unique AC 数ランキングをツイート
-    countTweetText = "AtCoder Unique AC 数 " + tweetTextType + " ランキング TOP " + str(countRankNum) + "\n"
-    countRankNum = 1
-    countNum = 1
-    for idx in range(len(newACCount)):
-        if idx > 0:
-            if int(newACCount[idx - 1]["count"]) > int(newACCount[idx]["count"]):
-                countRankNum = countRankNum + countNum
-                countNum = 1
-            else:
-                countNum = countNum + 1
-        if countRankNum + countNum - 1 <= 3:
-            countTweetText += str(countRankNum) + " 位 " + newACCount[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACCount[idx]["user_id"],AtCoderID)]) + " ) " + str(newACCount[idx]["count"]) + " Unique AC\n"
-        else:
-            break
-    api.update_with_media(filename = "AtCoder/" + dirType + "_countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
+    countTweetText = "AtCoder Unique AC 数 " + tweetTextType
+    api.update_with_media(filename = "AtCoder/" + dirType + "_countRankingImg_fixed.jpg", status = countTweetText + makeRanking(dirType + "_count", "count", newACCount, "Unique AC") + "\n" + timeStamp)
     print("AtCoder-ranking: Tweeted " + dirType + " countRanking")
 
     # Point Sum ランキングをツイート
-    pointTweetText = "AtCoder Point Sum " + tweetTextType + " ランキング TOP " + str(pointRankNum) + "\n"
-    pointRankNum = 1
-    pointNum = 1
-    for idx in range(len(newACPoint)):
-        if idx > 0:
-            if int(newACPoint[idx - 1]["point"]) > int(newACPoint[idx]["point"]):
-                pointRankNum = pointRankNum + pointNum
-                pointNum = 1
-            else:
-                pointNum = pointNum + 1
-        if pointRankNum + pointNum - 1 <= 3:
-            pointTweetText += str(pointRankNum) + " 位 " + newACPoint[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACPoint[idx]["user_id"],AtCoderID)]) + " ) " + str(newACPoint[idx]["point"]) + " Point\n"
-        else:
-            break
-    api.update_with_media(filename = "AtCoder/" + dirType + "_pointRankingImg_fixed.jpg", status = pointTweetText + "\n" + timeStamp)
+    pointTweetText = "AtCoder Point Sum " + tweetTextType
+    api.update_with_media(filename = "AtCoder/" + dirType + "_pointRankingImg_fixed.jpg", status = pointTweetText + makeRanking(dirType + "_point", "point", newACPoint, "Point") + "\n" + timeStamp)
     print("AtCoder-ranking: Tweeted " + dirType + " pointRanking")
 
     # Point Per Count ランキングをツイート
-    perTweetText = "AtCoder Point / Count " + tweetTextType + " ランキング TOP " + str(perRankNum) + "\n"
-    perRankNum = 1
-    perNum = 1
-    for idx in range(len(newACPer)):
-        if idx > 0:
-            if int(newACPer[idx - 1]["per"]) > int(newACPer[idx]["per"]):
-                perRankNum = perRankNum + perNum
-                perNum = 1
-            else:
-                perNum = perNum + 1
-        if perRankNum + perNum - 1 <= 3:
-            perTweetText += str(perRankNum) + " 位 " + newACPer[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACPer[idx]["user_id"],AtCoderID)]) + " ) " + str(newACPer[idx]["per"]) + " Point\n"
-        else:
-            break
-    api.update_with_media(filename = "AtCoder/" + dirType + "_perRankingImg_fixed.jpg", status = perTweetText + "\n" + timeStamp)
+    perTweetText = "AtCoder Point / Count " + tweetTextType
+    api.update_with_media(filename = "AtCoder/" + dirType + "_perRankingImg_fixed.jpg", status = perTweetText + makeRanking(dirType + "_per", "per", newACPer, "P./C.") + "\n" + timeStamp)
     print("AtCoder-ranking: Tweeted " + dirType + " perRanking")
 
     # ランキングポイント処理
@@ -398,47 +293,12 @@ def ranking(type):
         # 前処理
         rankPoint_fixed = []
         for user in rankPoint:
-            rankPoint_fixed.append({"user_id" : user, "point" : rankPoint[user]})
+            rankPoint_fixed.append({"user" : user, "point" : rankPoint[user]})
         rankPoint_fixed.sort(key = lambda x: x["point"], reverse = True)
 
         # ランキングを作成
-        rankPointRankNum = 1
-        rankPointNum = 1
-        rankPointRankingFirstImg = Image.open("AtCoder/data/rankPointRankingImg (first).jpg")
-        rankPointResImg = Image.new("RGB", (738 * int((len(rankPoint_fixed) + 19) / 20), 65 + 63 * min(len(rankPoint_fixed), 20)))
-        for idx in range(len(rankPoint_fixed)):
-            if idx % 20 == 0:
-                rankPointResImg.paste(rankPointRankingFirstImg, (738 * int(idx / 20), 0))
-            rankPointRankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
-            rankPointRankingDraw = ImageDraw.Draw(rankPointRankingImg)
-            if idx > 0:
-                if int(rankPoint_fixed[idx - 1]["point"]) > int(rankPoint_fixed[idx]["point"]):
-                    rankPointRankNum = rankPointRankNum + rankPointNum
-                    rankPointNum = 1
-
-                else:
-                    rankPointNum = rankPointNum + 1
-            rankPointRankingDraw.text((10, 19), str(rankPointRankNum), fill = (0, 0, 0), font = rankingFont)
-            rankPointRankingDraw.text((120, 19), rankPoint_fixed[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
-            rankPointRankingDraw.text((560, 19), str(rankPoint_fixed[idx]["point"]), fill = (0, 0, 0), font = rankingFont)
-            rankPointResImg.paste(rankPointRankingImg, (738 * int(idx / 20), 65 + 63 * (idx % 20)))
-        rankPointResImg.save("AtCoder/" + dirType + "_rankPointRankingImg_fixed.jpg")
-        
-        rankPointTweetText = "AtCoder ランキングポイント ランキング TOP " + str(rankPointRankNum) + "\n"
-        rankPointRankNum = 1
-        rankPointNum = 1
-        for idx in range(len(rankPoint_fixed)):
-            if idx > 0:
-                if int(rankPoint_fixed[idx - 1]["point"]) > int(rankPoint_fixed[idx]["point"]):
-                    rankPointRankNum = rankPointRankNum + rankPointNum
-                    rankPointNum = 1
-                else:
-                    rankPointNum = rankPointNum + 1
-            if rankPointRankNum + rankPointNum - 1 <= 3:
-                rankPointTweetText += str(rankPointRankNum) + " 位 " + rankPoint_fixed[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(rankPoint_fixed[idx]["user_id"],AtCoderID)]) + " ) " + str(rankPoint_fixed[idx]["point"]) + " Points\n"
-            else:
-                break
-        api.update_with_media(filename = "AtCoder/" + dirType + "_rankPointRankingImg_fixed.jpg", status = rankPointTweetText + "\n" + timeStamp)
+        rankPointTweetText = "AtCoder ランキングポイント"
+        api.update_with_media(filename = "AtCoder/" + dirType + "_rankPointRankingImg_fixed.jpg", status = rankPointTweetText + makeRanking(dirType + "_rankPoint", "point", rankPoint_fixed, "Point") + "\n" + timeStamp)
         print("AtCoder-ranking: Tweeted " + dirType + " rankPointRanking")
 
     # データをアップロード
