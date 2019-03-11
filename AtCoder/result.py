@@ -1,4 +1,4 @@
-# import
+﻿# import
 import os
 import tweepy
 import datetime
@@ -89,7 +89,7 @@ def makeRanking(type, listData, unit):
     for idx in range(len(listData)):
         if idx % 20 == 0:
             resImg.paste(rankingFirstImg, (738 * int(idx / 20), 0))
-        rankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
+        rankingImg = Image.open("AtCoder/data/result/rankingImg (cell).jpg")
         rankingDraw = ImageDraw.Draw(rankingImg)
         if idx > 0:
             if flag and int(listData[idx - 1][str(type)]) > int(listData[idx][str(type)]):
