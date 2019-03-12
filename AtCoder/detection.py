@@ -13,14 +13,16 @@ import pickle
 AtCoderID = []
 TwitterID = []
 lastSubID = {}
+noticeFlag = {}
 
 # Dropbox からダウンロード
-def downloadFromDropbox():
+def downloadFromDropbox(type):
     
     # グローバル変数
     global AtCoderID
     global TwitterID
     global lastSubID
+    global noticeFlag
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
@@ -42,29 +44,72 @@ def downloadFromDropbox():
             TwitterID.append(id.rstrip("\n"))
     print("AtCoder-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
-    #lastSubID をダウンロード
-    dbx.files_download_to_file("AtCoder/lastSubID.txt", "/AtCoder/lastSubID.txt")
-    with open("AtCoder/lastSubID.txt", "rb") as f:
-        lastSubID = pickle.load(f)
-    print("AtCoder-detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
+    if type == 0:
+
+        # lastSubID をダウンロード
+        dbx.files_download_to_file("AtCoder/lastSubID.txt", "/AtCoder/lastSubID.txt")
+        with open("AtCoder/lastSubID.txt", "rb") as f:
+            lastSubID = pickle.load(f)
+        print("AtCoder-detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
+    
+    # noticeFlag をダウンロード
+    dbx.files_download_to_file("AtCoder/noticeFlag.txt", "/AtCoder/noticeFlag.txt")
+    with open("AtCoder/noticeFlag.txt", "rb") as f:
+        noticeFlag = pickle.load(f)
+    print("AtCoder-detection: Downloaded noticeFlag (size : ", str(len(noticeFlag)), ")")
 
 # Dropbox にアップロード
-def uploadToDropbox():
+def uploadToDropbox(type):
     
     # グローバル変数
     global lastSubID
+    global noticeFlag
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
     
-    # lastSubID をアップロード
-    with open("AtCoder/lastSubID.txt", "wb") as f:
-        pickle.dump(lastSubID, f)
-    with open("AtCoder/lastSubID.txt", "rb") as f:
-        dbx.files_delete("/AtCoder/lastSubID.txt")
-        dbx.files_upload(f.read(), "/AtCoder/lastSubID.txt")
-    print("AtCoder-detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
+    if type == 0:
+
+        # lastSubID をアップロード
+        with open("AtCoder/lastSubID.txt", "wb") as f:
+            pickle.dump(lastSubID, f)
+        with open("AtCoder/lastSubID.txt", "rb") as f:
+            dbx.files_delete("/AtCoder/lastSubID.txt")
+            dbx.files_upload(f.read(), "/AtCoder/lastSubID.txt")
+        print("AtCoder-detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
+
+    # noticeFlag をアップロード
+    with open("AtCoder/noticeFlag.txt", "wb") as f:
+        pickle.dump(noticeFlag, f)
+    with open("AtCoder/noticeFlag.txt", "rb") as f:
+        dbx.files_delete("/AtCoder/noticeFlag.txt")
+        dbx.files_upload(f.read(), "/AtCoder/noticeFlag.txt")
+    print("AtCoder-detection: Uploaded noticeFlag (size : ", str(len(noticeFlag)), ")")
+
+# list 内の要素の添え字を返す（無い場合は -1）
+def myIndex(x, l):
+    if x in l:
+        return l.index(x)
+    else:
+        return -1
+
+# 通知の on/off 切り替え
+def setFlag(atcoderID, twitterID, f):
+
+    # グローバル変数
+    global AtCoderID
+    global TwitterID
+    global noticeFlag
+
+    downloadFromDropbox(1)
+
+    if atcoderID in AtCoderID and twitterID in TwitterID and myIndex(atcoderID, AtCoderID) == myIndex(twitterID, TwitterID):
+        noticeFlag[str(atcoderID)] = str(f)
+        uploadToDropbox(1)
+        return "AtCoder での AC 通知を " + str(f) + " にしました！\n"
+    else:
+        return "この AtCoder ID は登録されていません！\n"
 
 def detection():
     
@@ -89,7 +134,7 @@ def detection():
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
     
     # データをダウンロード
-    downloadFromDropbox()
+    downloadFromDropbox(0)
 
     # コンテストごとに提出を解析
     contestsJsonRes = urllib.request.urlopen("https://atcoder-api.appspot.com/contests")
@@ -140,6 +185,11 @@ def detection():
                     idx = 0
                     for ids in AtCoderID:
                         if userID == ids:
+                            if ids in noticeFlag:
+                                if noticeFlag[str(ids)] == "off":
+                                    break
+                            else:
+                                noticeFlag[str(ids)] = "on"
                             # score = int(float(str(subData[4])))
                             # imagePath = "AtCoder/data/detection/"
                             # if score <= 100:
@@ -179,7 +229,7 @@ def detection():
         print("AtCoder-detection: Checked " + contest["title"] + " submissions (subCount : " + str(subCount) + ", newlastSubID : " + str(lastSubID[str(contest["id"])]) + ")")
 
     # データをアップロード
-    uploadToDropbox()
+    uploadToDropbox(0)
 
 if __name__ == '__main__':
     print("AtCoder-detection: Running as debug...")
