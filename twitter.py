@@ -9,6 +9,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from requests_oauthlib import OAuth1Session
 import AtCoder.status
 import AtCoder.register
+import AtCoder.detection
 import AOJ.register
 import CF.register
 import YK.register
@@ -100,10 +101,19 @@ def scheduled_job():
             idFixedFlag = True
             lastTweetID = int(timeline[0]["id_str"])
             tweetSplited = str(tweet["text"]).split()
+            userData_json = api_OAuth.get("https://api.twitter.com/1.1/users/show.json?user_id=" + tweet["user"]["id_str"])
+            userData = json.loads(userData_json.text)
+
+            if len(tweetSplited) == 4:
+
+                # AtCoder-detection (setFlag)
+                if tweetSplited[1] == "setFlag_atcoder" and (tweetSplited[3] == "on" or tweetSplited[3] == "off"):
+                    tweetText = "@" + str(userData["screen_name"]) + "\n"
+                    tweetText += AtCoder.detection.setFlag(tweetSplited[2], str(userData["screen_name"]), tweetSplited[3])
+                    api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
+                    print("twitter: Tweeted " + tweetSplited[2] + "'s AtCoder detection flag change")
 
             if len(tweetSplited) >= 3:
-                userData_json = api_OAuth.get("https://api.twitter.com/1.1/users/show.json?user_id=" + tweet["user"]["id_str"])
-                userData = json.loads(userData_json.text)
                 
                 # AtCoder-status
                 if tweetSplited[1] == "status_atcoder":
