@@ -13,7 +13,6 @@ AtCoderID = []
 TwitterID = []
 acCount = {}
 acPoint = {}
-rankPoint = {}
 
 # Dropbox からダウンロード
 def downloadFromDropbox(type):
@@ -23,7 +22,6 @@ def downloadFromDropbox(type):
     global TwitterID
     global acCount
     global acPoint
-    global rankPoint
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
@@ -65,19 +63,12 @@ def downloadFromDropbox(type):
         acPoint = pickle.load(f)
     print("AtCoder-ranking: Downloaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
 
-    # rankPoint をダウンロード
-    dbx.files_download_to_file("AtCoder/" + dirType + "_rankPoint.txt", "/AtCoder/" + dirType + "_rankPoint.txt")
-    with open("AtCoder/" + dirType + "_rankPoint.txt", "rb") as f:
-        rankPoint = pickle.load(f)
-    print("AtCoder-ranking: Downloaded " + dirType + " rankPoint (size : ", str(len(rankPoint)), ")")
-
 # Dropbox にアップロード
 def uploadToDropbox(type):
     
     # グローバル変数
     global acCount
     global acPoint
-    global rankPoint
     
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
@@ -110,16 +101,6 @@ def uploadToDropbox(type):
             dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_acPoint.txt")
         print("AtCoder-ranking: Uploaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
 
-    if type == 0:
-        
-        # rankPoint をアップロード
-        with open("AtCoder/" + dirType + "_rankPoint.txt", "wb") as f:
-            pickle.dump(rankPoint, f)
-        with open("AtCoder/" + dirType + "_rankPoint.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/" + dirType + "_rankPoint.txt")
-            dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_rankPoint.txt")
-        print("AtCoder-ranking: Uploaded " + dirType + " rankPoint (size : ", str(len(rankPoint)), ")")
-
     # countRankingImg_fixed をアップロード
     with open("AtCoder/" + dirType + "_countRankingImg_fixed.jpg", "rb") as f:
         dbx.files_upload(f.read(), "/_backup/AtCoder/countRankingImg_fixed/" + dirType + "_" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
@@ -146,7 +127,6 @@ def makeRanking(type1, type2, listData, unit):
     
     global AtCoderID
     global TwitterID
-    global rankPoint
 
     flag = int(listData[0][str(type2)]) > int(listData[len(listData) - 1][str(type2)])
     rankNum = 1
@@ -188,11 +168,6 @@ def makeRanking(type1, type2, listData, unit):
             point = 4
         elif countIndex == 2:
             point = 3
-        
-        if listData[idx]["user"] in rankPoint:
-            rankPoint[listData[idx]["user"]] += point
-        else:
-            rankPoint[listData[idx]["user"]] = point
 
     resImg.save("AtCoder/" + str(type1) + "RankingImg_fixed.jpg")
     tweetText = " ランキング TOP " + str(rankNum) + "\n" + tweetText
@@ -204,7 +179,6 @@ def ranking(type):
     # グローバル変数
     global acCount
     global acPoint
-    global rankPoint
 
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
@@ -288,20 +262,6 @@ def ranking(type):
     perTweetText = "AtCoder Point / Count " + tweetTextType
     api.update_with_media(filename = "AtCoder/" + dirType + "_perRankingImg_fixed.jpg", status = perTweetText + makeRanking(dirType + "_per", "per", newACPer, "P./C.") + "\n" + timeStamp)
     print("AtCoder-ranking: Tweeted " + dirType + " perRanking")
-
-    # ランキングポイント処理
-    if type == 1:
-
-        # 前処理
-        rankPoint_fixed = []
-        for user in rankPoint:
-            rankPoint_fixed.append({"user" : user, "point" : rankPoint[user]})
-        rankPoint_fixed.sort(key = lambda x: x["point"], reverse = True)
-
-        # ランキングを作成
-        rankPointTweetText = "AtCoder ランキングポイント"
-        api.update_with_media(filename = "AtCoder/" + dirType + "_rankPointRankingImg_fixed.jpg", status = rankPointTweetText + makeRanking(dirType + "_rankPoint", "point", rankPoint_fixed, "Point") + "\n" + timeStamp)
-        print("AtCoder-ranking: Tweeted " + dirType + " rankPointRanking")
 
     # データをアップロード
     acCount = nowACCount
