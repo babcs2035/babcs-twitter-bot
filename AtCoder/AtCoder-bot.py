@@ -67,8 +67,8 @@ def scheduled_job():
     vcontest.vcontest()
     print("AtCoder-bot: ----- AtCoder-vcontest End -----")
 
-# AtCoder コンテスト成績ランキング（毎日 0:00）
-@sched.scheduled_job('cron', minute = '0', hour = '0')
+# AtCoder コンテスト成績ランキング（毎日 6:00）
+@sched.scheduled_job('cron', minute = '0', hour = '6')
 def scheduled_job():
 
     print("AtCoder-bot: ----- AtCoder-result Start -----")
