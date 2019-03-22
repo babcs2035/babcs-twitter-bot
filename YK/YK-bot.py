@@ -4,6 +4,7 @@ import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
 import detection
 import ranking
+import contest
 
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
@@ -23,6 +24,14 @@ def scheduled_job():
     print("YK-bot: ----- YK-ranking Start -----")
     ranking.ranking()
     print("YK-bot: ----- YK-ranking End -----")
+
+# yukicoder コンテスト予定（毎日 0, 6, 12, 18 時）
+@sched.scheduled_job('cron', minute = '0', hour = '0')
+def scheduled_job():
+    
+    print("YK-bot: ----- YK-contest Start -----")
+    contest.contest()
+    print("YK-bot: ----- YK-contest End -----")
 
 # おまじない
 sched.start()
