@@ -223,13 +223,12 @@ def result():
 
         # 色が変わったか調べる
         strs = ["灰色", "茶色", "緑", "水色", "青", "黄色", "オレンジ", "レッド"]
-        if user not in ratings:
-            ratings[str(user)] = -1
-        for border in range(7, 0, -1):
-            if ratings[str(user)] < border * 400 and border * 400 <= nowRating:
-                api.update_status(str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " ) さんの AtCoder レートが " + str(ratings[str(user)]) + " -> " + str(nowRating) + " となり，" + strs[border] + "コーダーになりました！おめでとうございます！！！\n" + profileURL + "\n" + timeStamp)
-                print("AtCoder-result: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s rating change")
-                break
+        if user in ratings:
+            for border in range(7, 0, -1):
+                if ratings[str(user)] < border * 400 and border * 400 <= nowRating:
+                    api.update_status(str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " ) さんの AtCoder レートが " + str(ratings[str(user)]) + " -> " + str(nowRating) + " となり，" + strs[border] + "コーダーになりました！おめでとうございます！！！\n" + profileURL + "\n" + timeStamp)
+                    print("AtCoder-result: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s rating change")
+                    break
         ratings[str(user)] = nowRating
 
     # データをアップロード
