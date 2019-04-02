@@ -13,6 +13,7 @@ AtCoderID = []
 TwitterID = []
 acCount = {}
 acPoint = {}
+ratings = {}
 
 # Dropbox からダウンロード
 def downloadFromDropbox(type):
@@ -22,6 +23,7 @@ def downloadFromDropbox(type):
     global TwitterID
     global acCount
     global acPoint
+    global ratings
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
@@ -62,6 +64,12 @@ def downloadFromDropbox(type):
     with open("AtCoder/" + dirType + "_acPoint.txt", "rb") as f:
         acPoint = pickle.load(f)
     print("AtCoder-ranking: Downloaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
+
+    # ratings をダウンロード
+    dbx.files_download_to_file("AtCoder/ratings.txt", "/AtCoder/ratings.txt")
+    with open("AtCoder/ratings.txt", "rb") as f:
+        ratings = pickle.load(f)
+    print("AtCoder-ranking: Downloaded ratings (size : ", str(len(ratings)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox(type):
@@ -127,12 +135,16 @@ def makeRanking(type1, type2, listData, unit):
     
     global AtCoderID
     global TwitterID
+    global ratings
+    
+    colors = [[0, 0, 0], [128, 128, 128], [128, 64, 0], [0, 128, 0], [0, 192, 192], [0, 0, 255], [192, 192, 0], [255, 128, 0], [255, 0, 0]]
 
     flag = int(listData[0][str(type2)]) > int(listData[len(listData) - 1][str(type2)])
     rankNum = 1
     countNum = 1
     countIndex = 0
     rankingFont = ImageFont.truetype("AtCoder/data/YuGothM.ttc", 32)
+    rankingFontS = ImageFont.truetype("AtCoder/data/YuGothB.ttc", 32)
     rankingFirstImg = Image.open("AtCoder/data/" + str(type2) + "RankingImg (first).jpg")
     resImg = Image.new("RGB", (850 * int((len(listData) + 19) / 20), 65 + 63 * min(len(listData), 20)))
     tweetText = ""
@@ -155,9 +167,21 @@ def makeRanking(type1, type2, listData, unit):
         
         if rankNum + countNum - 1 <= 3:
             tweetText += str(rankNum) + " 位 " + listData[idx]["user"] + " ( @" + str(TwitterID[myIndex(listData[idx]["user"], AtCoderID)]) + " ) " + str(listData[idx][str(type2)]) + " " + str(unit) + "\n"
-        rankingDraw.text((10, 19), str(rankNum), fill = (0, 0, 0), font = rankingFont)
-        rankingDraw.text((120, 19), listData[idx]["user"] + " (@" + str(TwitterID[myIndex(str(listData[idx]["user"]), AtCoderID)]) + ")", fill = (0, 0, 0), font = rankingFont)
-        rankingDraw.text((672, 19), str(listData[idx][str(type2)]), fill = (0, 0, 0), font = rankingFont)
+        
+        colorIndex = 0
+        for border in range(7, 0, -1):
+            if str(listData[idx]["user"]) in ratings:
+                if ratings[str(listData[idx]["user"])] >= border * 400:
+                    colorIndex = border + 1
+                    break
+        if rankNum <= 8:
+            rankingDraw.text((10, 19), str(rankNum), fill = (0, 0, 0), font = rankingFontS)
+            rankingDraw.text((120, 19), listData[idx]["user"] + " (@" + str(TwitterID[myIndex(str(listData[idx]["user"]), AtCoderID)]) + ")", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFontS)
+            rankingDraw.text((672, 19), str(listData[idx][str(type2)]), fill = (0, 0, 0), font = rankingFontS)
+        else:
+            rankingDraw.text((10, 19), str(rankNum), fill = (0, 0, 0), font = rankingFont)
+            rankingDraw.text((120, 19), listData[idx]["user"] + " (@" + str(TwitterID[myIndex(str(listData[idx]["user"]), AtCoderID)]) + ")", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFont)
+            rankingDraw.text((672, 19), str(listData[idx][str(type2)]), fill = (0, 0, 0), font = rankingFont)
         resImg.paste(rankingImg, (850 * int(idx / 20), 65 + 63 * (idx % 20)))
 
         # ランキングポイント処理
@@ -194,7 +218,7 @@ def ranking(type):
     # 時刻表示を作成
     timeStamp = datetime.datetime.today()
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
-    
+
     # データをダウンロード
     downloadFromDropbox(type)
     
