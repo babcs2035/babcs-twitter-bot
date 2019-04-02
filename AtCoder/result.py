@@ -79,10 +79,18 @@ def myIndex(x, l):
         return -1
 
 def makeRanking(type, listData, unit):
+
+    global AtCoderID
+    global TwitterID
+    global ratings
+    
+    colors = [[0, 0, 0], [128, 128, 128], [128, 64, 0], [0, 128, 0], [0, 192, 192], [0, 0, 255], [192, 192, 0], [255, 128, 0], [255, 0, 0]]
+
     flag = int(listData[0][str(type)]) > int(listData[len(listData) - 1][str(type)])
     rankNum = 1
     countNum = 1
     rankingFont = ImageFont.truetype("AtCoder/data/YuGothM.ttc", 32)
+    rankingFontS = ImageFont.truetype("AtCoder/data/YuGothB.ttc", 32)
     rankingFirstImg = Image.open("AtCoder/data/result/" + str(type) + "RankingImg (first).jpg")
     resImg = Image.new("RGB", (738 * int((len(listData) + 19) / 20), 65 + 63 * min(len(listData), 20)))
     tweetText = ""
@@ -103,9 +111,21 @@ def makeRanking(type, listData, unit):
         
         if rankNum + countNum - 1 <= 3:
             tweetText += str(rankNum) + " 位 " + listData[idx]["user"] + " ( @" + str(TwitterID[myIndex(listData[idx]["user"], AtCoderID)]) + " ) " + str(listData[idx][str(type)]) + " " + str(unit) + "\n"
-        rankingDraw.text((10, 19), str(rankNum), fill = (0, 0, 0), font = rankingFont)
-        rankingDraw.text((120, 19), listData[idx]["user"], fill = (0, 0, 0), font = rankingFont)
-        rankingDraw.text((560, 19), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFont)
+        
+        colorIndex = 0
+        for border in range(7, 0, -1):
+            if str(listData[idx]["user"]) in ratings:
+                if ratings[str(listData[idx]["user"])] >= border * 400:
+                    colorIndex = border + 1
+                    break   
+        if rankNum <= 8:
+            rankingDraw.text((10, 19), str(rankNum), fill = (0, 0, 0), font = rankingFontS)
+            rankingDraw.text((120, 19), listData[idx]["user"], fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFontS)
+            rankingDraw.text((560, 19), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFontS)
+        else:
+            rankingDraw.text((10, 19), str(rankNum), fill = (0, 0, 0), font = rankingFont)
+            rankingDraw.text((120, 19), listData[idx]["user"], fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFont)
+            rankingDraw.text((560, 19), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFont)
         resImg.paste(rankingImg, (738 * int(idx / 20), 65 + 63 * (idx % 20)))
     resImg.save("AtCoder/data/result/" + str(type) + "RankingImg_fixed.jpg")
     tweetText = " ランキング TOP " + str(rankNum) + "\n" + tweetText
@@ -136,6 +156,35 @@ def result():
     # 時刻表示を作成
     timeStamp = datetime.datetime.today()
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
+
+    ## 色が変化したユーザーに通知
+    for user in AtCoderID:
+        
+        # 現在の色を取得
+        profileURL = "https://atcoder.jp/users/" + str(user)
+        profileHTML = requests.get(profileURL)
+        try:
+            profileHTML.raise_for_status()
+            profileData = BeautifulSoup(profileHTML.text, "html.parser")
+        except:
+            print("AtCoder-result: profileHTML Error")
+            continue
+        print("AtCoder-result: Downloaded " + str(user) + "'s profileData")
+        profileTable = profileData.find_all("table", class_ = "dl-table")
+        try:
+            nowRating = int(profileTable[1].contents[3].contents[1].contents[0].contents[0])
+        except:
+            nowRating = -1
+
+        # 色が変わったか調べる
+        strs = ["灰色", "茶色", "緑", "水色", "青", "黄色", "オレンジ", "レッド"]
+        if user in ratings:
+            for border in range(7, 0, -1):
+                if ratings[str(user)] < border * 400 and border * 400 <= nowRating:
+                    api.update_status(str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " ) さんの AtCoder レートが " + str(ratings[str(user)]) + " -> " + str(nowRating) + " となり，" + strs[border] + "コーダーになりました！おめでとうございます！！！\n" + profileURL + "\n" + timeStamp)
+                    print("AtCoder-result: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s rating change")
+                    break
+        ratings[str(user)] = nowRating
 
     ## コンテスト結果のランキング処理
     # 取得すべきコンテストを取得
@@ -201,35 +250,6 @@ def result():
             tweetText = str(contest) + " レート変動値" + makeRanking("diff", diffList, "")
             api.update_with_media(filename = "AtCoder/data/result/diffRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
             print("AtCoder-result: Tweeted " + str(contest) + " diffRanking")
-
-    ## 色が変化したユーザーに通知
-    for user in AtCoderID:
-        
-        # 現在の色を取得
-        profileURL = "https://atcoder.jp/users/" + str(user)
-        profileHTML = requests.get(profileURL)
-        try:
-            profileHTML.raise_for_status()
-            profileData = BeautifulSoup(profileHTML.text, "html.parser")
-        except:
-            print("AtCoder-result: profileHTML Error")
-            continue
-        print("AtCoder-result: Downloaded " + str(user) + "'s profileData")
-        profileTable = profileData.find_all("table", class_ = "dl-table")
-        try:
-            nowRating = int(profileTable[1].contents[3].contents[1].contents[0].contents[0])
-        except:
-            nowRating = -1
-
-        # 色が変わったか調べる
-        strs = ["灰色", "茶色", "緑", "水色", "青", "黄色", "オレンジ", "レッド"]
-        if user in ratings:
-            for border in range(7, 0, -1):
-                if ratings[str(user)] < border * 400 and border * 400 <= nowRating:
-                    api.update_status(str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " ) さんの AtCoder レートが " + str(ratings[str(user)]) + " -> " + str(nowRating) + " となり，" + strs[border] + "コーダーになりました！おめでとうございます！！！\n" + profileURL + "\n" + timeStamp)
-                    print("AtCoder-result: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s rating change")
-                    break
-        ratings[str(user)] = nowRating
 
     # データをアップロード
     uploadToDropbox()
