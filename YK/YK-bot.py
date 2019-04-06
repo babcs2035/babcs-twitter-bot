@@ -25,8 +25,8 @@ def scheduled_job():
     ranking.ranking()
     print("YK-bot: ----- YK-ranking End -----")
 
-# yukicoder コンテスト予定（毎日 6, 18 時）
-@sched.scheduled_job('cron', minute = '0', hour = '6, 18')
+# yukicoder コンテスト予定（毎日 0, 6, 12, 18 時）
+@sched.scheduled_job('cron', minute = '0', hour = '0, 6, 12, 18')
 def scheduled_job():
     
     print("YK-bot: ----- YK-contest Start -----")
