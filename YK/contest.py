@@ -24,7 +24,7 @@ def uploadToDropbox():
     
     # contestsListImg_fixed をアップロード
     with open("YK/contestsListImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/YK/contestsListImg_fixed/"+str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S"))+".jpg")
+        dbx.files_upload(f.read(), "/_backup/YK/contestsListImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
         print("YK-contest: Uploaded contestsListImg_fixed")
 
 def contest():
@@ -52,6 +52,9 @@ def contest():
         contest["Date"] = contest["Date"][:10] + " " + contest["Date"][11:19]
         contest["EndDate"] = contest["EndDate"][:10] + " " + contest["EndDate"][11:19]
         contestsList.append(contest)
+    if len(contestsList) == 0:
+        api.update_status("現在予定されている yukicoder コンテストはありません．\nhttps://yukicoder.me/contests\n\n" + timeStamp)
+        return
 
     # 画像生成
     listFont = ImageFont.truetype("YK/data/YuGothM.ttc", 32)
@@ -70,7 +73,7 @@ def contest():
     contestsListImg.save("YK/contestsListImg_fixed.jpg")
 
     # リストをツイート
-    listTweetText = "現在，" + str(len(contestsList)) + " の yukicoder コンテストが予定されています．\nhttps://yukicoder.me/contests\n"
+    listTweetText = "現在 " + str(len(contestsList)) + " の yukicoder コンテストが予定されています．\nhttps://yukicoder.me/contests\n"
     api.update_with_media(filename = "YK/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
 
     # 画像をアップロード
