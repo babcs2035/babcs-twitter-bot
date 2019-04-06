@@ -53,6 +53,9 @@ def contest():
         if str(contest["phase"]) == "BEFORE":
             contestsList.append(contest)
     contestsList.sort(key = lambda x: x["startTimeSeconds"])
+    if len(contestsList) == 0:
+        api.update_status("現在予定されている Codeforces コンテストはありません．\nhttps://codeforces.com/contests\n\n" + timeStamp)
+        return
 
     # 画像生成
     listFont = ImageFont.truetype("CF/data/YuGothM.ttc", 32)
@@ -72,7 +75,7 @@ def contest():
     contestsListImg.save("CF/data/contest/contestsListImg_fixed.jpg")
 
     # リストをツイート
-    listTweetText = "現在，" + str(idx) + " の Codeforces コンテストが予定されています．\nhttps://codeforces.com/contests\n"
+    listTweetText = "現在 " + str(idx) + " の Codeforces コンテストが予定されています．\nhttps://codeforces.com/contests\n"
     api.update_with_media(filename = "CF/data/contest/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
 
     # 画像をアップロード
