@@ -5,6 +5,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 import contest
 import detection
 import ranking
+import result
 
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
@@ -32,6 +33,14 @@ def scheduled_job():
     print("CF-bot: ----- CF-ranking Start -----")
     ranking.ranking()
     print("CF-bot: ----- CF-ranking End -----")
+
+# Codeforces コンテスト成績（毎日 6:00）
+@sched.scheduled_job('cron', minute = '0', hour = '6')
+def scheduled_job():
+
+    print("CF-bot: ----- CF-result Start -----")
+    result.result()
+    print("CF-bot: ----- CF-result End -----")
 
 # おまじない
 sched.start()
