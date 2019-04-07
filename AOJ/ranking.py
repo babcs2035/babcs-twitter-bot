@@ -48,7 +48,7 @@ def downloadFromDropbox():
     print("AOJ-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
 
 # Dropbox にアップロード
-def uploadToDropbox(flag):
+def uploadToDropbox():
     
     # グローバル変数
     global acCount
@@ -65,12 +65,6 @@ def uploadToDropbox(flag):
         dbx.files_upload(f.read(), "/AOJ/acCount.txt")
     print("AOJ-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
     
-    # countRankingImg_fixed をアップロード
-    if flag:
-        with open("AOJ/data/countRankingImg_fixed.jpg", "rb") as f:
-            dbx.files_upload(f.read(), "/_backup/AOJ/countRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-            print("AOJ-ranking: Uploaded countRankingImg_fixed")
-
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
     if x in l:
@@ -117,7 +111,7 @@ def ranking():
     if len(newACCount) == 0:
         api.update_status("AOJ Unique AC 数ランキング\n（該当ユーザーはいませんでした・・・）" + "\n" + timeStamp)
         acCount = nowACCount
-        uploadToDropbox(False)
+        uploadToDropbox()
         return
 
     # Unique AC 数ランキングを作成
@@ -142,7 +136,6 @@ def ranking():
         countResImg.paste(countRankingImg, (0, 65 + 63 * idx))
     countResImg.save("AOJ/data/countRankingImg_fixed.jpg")
 
-
     # ランキングをツイート
     countTweetText = "AOJ Unique AC 数ランキング TOP " + str(countRankNum) + "\n"
     countRankNum = 1
@@ -162,7 +155,7 @@ def ranking():
     
     # データをアップロード
     acCount = nowACCount
-    uploadToDropbox(True)
+    uploadToDropbox()
 
 if __name__ == '__main__':
     print("AOJ-ranking: Running as debug...")
