@@ -48,7 +48,7 @@ def downloadFromDropbox():
     print("CF-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
 
 # Dropbox にアップロード
-def uploadToDropbox(flag):
+def uploadToDropbox():
     
     # グローバル変数
     global acCount
@@ -64,12 +64,6 @@ def uploadToDropbox(flag):
         dbx.files_delete("/CF/acCount.txt")
         dbx.files_upload(f.read(), "/CF/acCount.txt")
     print("CF-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
-    
-    # countRankingImg_fixed をアップロード
-    if flag:
-        with open("CF/data/countRankingImg_fixed.jpg", "rb") as f:
-            dbx.files_upload(f.read(), "/_backup/CF/countRankingImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-            print("CF-ranking: Uploaded countRankingImg_fixed")
 
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
@@ -121,7 +115,7 @@ def ranking():
     if len(newACCount) == 0:
         api.update_status("Codeforces AC 提出数ランキング\n（該当ユーザーはいませんでした・・・）" + "\n" + timeStamp)
         acCount = nowACCount
-        uploadToDropbox(False)
+        uploadToDropbox()
         return
 
     # AC 提出数ランキングを作成
@@ -165,7 +159,7 @@ def ranking():
     
     # データをアップロード
     acCount = nowACCount
-    uploadToDropbox(True)
+    uploadToDropbox()
 
 if __name__ == '__main__':
     print("CF-ranking: Running as debug...")
