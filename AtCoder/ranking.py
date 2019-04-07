@@ -109,21 +109,6 @@ def uploadToDropbox(type):
             dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_acPoint.txt")
         print("AtCoder-ranking: Uploaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
 
-    # countRankingImg_fixed をアップロード
-    with open("AtCoder/" + dirType + "_countRankingImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/AtCoder/countRankingImg_fixed/" + dirType + "_" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-        print("AtCoder-ranking: Uploaded " + dirType + " countRankingImg_fixed")
-
-    # pointRankingImg_fixed をアップロード
-    with open("AtCoder/" + dirType + "_pointRankingImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/AtCoder/pointRankingImg_fixed/" + dirType + "_" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-        print("AtCoder-ranking: Uploaded " + dirType + " pointRankingImg_fixed")
-
-    # perRankingImg_fixed をアップロード
-    with open("AtCoder/" + dirType + "_perRankingImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/AtCoder/perRankingImg_fixed/" + dirType + "_" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-        print("AtCoder-ranking: Uploaded " + dirType + " perRankingImg_fixed")
-
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
     if x in l:
