@@ -3,23 +3,10 @@ import os
 import tweepy
 import datetime
 import time
-import dropbox
 import urllib
 from bs4 import BeautifulSoup
 import requests
 from PIL import Image, ImageDraw, ImageFont
-
-# Dropbox にアップロード
-def uploadToDropbox():
-
-    # Dropbox オブジェクトの生成
-    dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
-    dbx.users_get_current_account()
-    
-    # vcontestsListImg_fixed をアップロード
-    with open("AtCoder/data/vcontest/vcontestsListImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/AtCoder/vcontestsListImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-        print("AtCoder-vcontest: Uploaded vcontestsListImg_fixed")
 
 def vcontest():
     
@@ -89,9 +76,6 @@ def vcontest():
     listTweetText = "現在 " + str(idx) + " の AtCoder バーチャルコンテストが行われて or 予定されています．\nhttps://not-522.appspot.com/\n"
     api.update_with_media(filename = "AtCoder/data/vcontest/vcontestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
     print("AtCoder-vcontest: Tweeted vcontestsListImg_fixed")
-
-    # 画像をアップロード
-    uploadToDropbox()
 
 if __name__ == '__main__':
     print("AtCoder-vcontest: Running as debug...")
