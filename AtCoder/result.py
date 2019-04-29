@@ -89,8 +89,8 @@ def makeRanking(type, listData, unit):
     flag = int(listData[0][str(type)]) > int(listData[len(listData) - 1][str(type)])
     rankNum = 1
     countNum = 1
-    rankingFont = ImageFont.truetype("AtCoder/data/YuGothM.ttc", 32)
-    rankingFontS = ImageFont.truetype("AtCoder/data/YuGothB.ttc", 32)
+    rankingFont = ImageFont.truetype("AtCoder/data/fontR.ttc", 32)
+    rankingFontS = ImageFont.truetype("AtCoder/data/fontB.ttc", 32)
     rankingFirstImg = Image.open("AtCoder/data/result/" + str(type) + "RankingImg (first).jpg")
     resImg = Image.new("RGB", (738 * int((len(listData) + 19) / 20), 65 + 63 * min(len(listData), 20)))
     tweetText = ""
@@ -119,13 +119,13 @@ def makeRanking(type, listData, unit):
                     colorIndex = border + 1
                     break   
         if rankNum <= 8:
-            rankingDraw.text((10, 19), str(rankNum), fill = (0, 0, 0), font = rankingFontS)
-            rankingDraw.text((120, 19), listData[idx]["user"], fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFontS)
-            rankingDraw.text((560, 19), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFontS)
+            rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFontS)
+            rankingDraw.text((120, 7), listData[idx]["user"], fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFontS)
+            rankingDraw.text((560, 7), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFontS)
         else:
-            rankingDraw.text((10, 19), str(rankNum), fill = (0, 0, 0), font = rankingFont)
-            rankingDraw.text((120, 19), listData[idx]["user"], fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFont)
-            rankingDraw.text((560, 19), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFont)
+            rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFont)
+            rankingDraw.text((120, 7), listData[idx]["user"], fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFont)
+            rankingDraw.text((560, 7), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFont)
         resImg.paste(rankingImg, (738 * int(idx / 20), 65 + 63 * (idx % 20)))
     resImg.save("AtCoder/data/result/" + str(type) + "RankingImg_fixed.jpg")
     tweetText = " ランキング TOP " + str(rankNum) + "\n" + tweetText
