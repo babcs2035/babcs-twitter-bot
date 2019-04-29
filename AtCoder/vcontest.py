@@ -57,7 +57,7 @@ def vcontest():
         return
 
     # 画像生成
-    listFont = ImageFont.truetype("AtCoder/data/YuGothM.ttc", 32)
+    listFont = ImageFont.truetype("AtCoder/data/fontR.ttc", 32)
     vcontestsListFirstImg = Image.open("AtCoder/data/vcontest/vcontestsListImg (first).jpg")
     vcontestsListImg = Image.new("RGB", (1772, 68 + 64 * len(vcontestsList)))
     vcontestsListImg.paste(vcontestsListFirstImg, (0, 0))
@@ -65,9 +65,9 @@ def vcontest():
     for vcontest in vcontestsList:
         vcontestListImg = Image.open("AtCoder/data/vcontest/vcontestsListImg (cell).jpg")
         vcontestListDraw = ImageDraw.Draw(vcontestListImg)
-        vcontestListDraw.text((10, 15), str(vcontest["beginTime"]), fill = (0, 0, 0), font = listFont)
-        vcontestListDraw.text((360, 15), str(vcontest["endTime"]), fill = (0, 0, 0), font = listFont)
-        vcontestListDraw.text((710, 15), str(vcontest["name"]), fill = (0, 0, 0), font = listFont)
+        vcontestListDraw.text((10, 7), str(vcontest["beginTime"]), fill = (0, 0, 0), font = listFont)
+        vcontestListDraw.text((360, 7), str(vcontest["endTime"]), fill = (0, 0, 0), font = listFont)
+        vcontestListDraw.text((710, 7), str(vcontest["name"]), fill = (0, 0, 0), font = listFont)
         vcontestsListImg.paste(vcontestListImg, (0, 68 + 64 * idx))
         idx = idx + 1
     vcontestsListImg.save("AtCoder/data/vcontest/vcontestsListImg_fixed.jpg")
