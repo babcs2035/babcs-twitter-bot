@@ -46,7 +46,8 @@ def contest():
         return
 
     # 画像生成
-    listFont = ImageFont.truetype("AtCoder/data/YuGothM.ttc", 32)
+    listFontR = ImageFont.truetype("AtCoder/data/fontR.ttc", 32)
+    listFontB = ImageFont.truetype("AtCoder/data/fontB.ttc", 32)
     contestsListFirstImg = Image.open("AtCoder/data/contestsListImg (first).jpg")
     contestsListImg = Image.new("RGB", (1852, 68 + 64 * len(contestsList)))
     contestsListImg.paste(contestsListFirstImg, (0, 0))
@@ -54,10 +55,17 @@ def contest():
     for contest in contestsList:
         contestListImg = Image.open("AtCoder/data/contestsListImg (cell).jpg")
         contestListDraw = ImageDraw.Draw(contestListImg)
-        contestListDraw.text((10, 15), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (0, 0, 0), font = listFont)
-        contestListDraw.text((360, 15), str(contest["title"]), fill = (0, 0, 0), font = listFont)
-        contestListDraw.text((1460, 15), str(sec_to_time(contest["durationSeconds"])), fill = (0, 0, 0), font = listFont)
-        contestListDraw.text((1660, 15), str(contest["ratedRange"]), fill = (0, 0, 0), font = listFont)
+        startTime = epoch_to_datetime(contest["startTimeSeconds"])
+        if startTime <= datetime.datetime.today() + datetime.timedelta(2):
+            contestListDraw.text((10, 7), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (200, 20, 20), font = listFontB)
+            contestListDraw.text((360, 7), str(contest["title"]), fill = (200, 20, 20), font = listFontB)
+            contestListDraw.text((1460, 7), str(sec_to_time(contest["durationSeconds"])), fill = (200, 20, 20), font = listFontB)
+            contestListDraw.text((1660, 7), str(contest["ratedRange"]), fill = (200, 20, 20), font = listFontB)
+        else:
+            contestListDraw.text((10, 7), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (0, 0, 0), font = listFontR)
+            contestListDraw.text((360, 7), str(contest["title"]), fill = (0, 0, 0), font = listFontR)
+            contestListDraw.text((1460, 7), str(sec_to_time(contest["durationSeconds"])), fill = (0, 0, 0), font = listFontR)
+            contestListDraw.text((1660, 7), str(contest["ratedRange"]), fill = (0, 0, 0), font = listFontR)
         contestsListImg.paste(contestListImg, (0, 68 + 64 * idx))
         idx = idx + 1
     contestsListImg.save("AtCoder/contestsListImg_fixed.jpg")
