@@ -63,11 +63,14 @@ def status(atcoderID):
         tweetText += "今日の Unique AC 数 : " + str(int(userData["accepted_count"]) - int(acCount[atcoderID])) + "\n"
     if atcoderID in acPoint:
         tweetText += "今日の Unique AC の Rated Point Sum : " + str(int(userData["rated_point_sum"]) - int(acPoint[atcoderID])) + "\n"
+    if atcoderID in acCount and atcoderID in acPoint:
+        if int(userData["accepted_count"]) - int(acCount[atcoderID]) > 0:
+            tweetText += "今日の Rated Point Sum / Unique AC 数 : " + str((int(userData["rated_point_sum"]) - int(acPoint[atcoderID])) / (int(userData["accepted_count"]) - int(acCount[atcoderID]))) + "\n"
     else:
         tweetText += "この AtCoder ID は登録されていません！\n"
     return tweetText
 
 if __name__ == '__main__':
     print("AtCoder-status: Running as debug...")
-    status("Bwambocos")
+    print(status("Bwambocos"))
     print("AtCoder-status: Debug finished")
