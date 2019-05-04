@@ -48,33 +48,38 @@ def vcontest():
         beginTime = str(detail.parent.contents[2].contents[0])
         endTime = str(detail.parent.contents[2].contents[1].contents[0])
         list2.append(({"name" : name, "beginTime" : beginTime, "endTime" : endTime}))
-    list1.reverse()
-    list2.reverse()
-    vcontestsList += list1
-    vcontestsList += list2
-    if len(vcontestsList) == 0:
+    if len(list1 + list2) == 0:
         api.update_status("現在予定されている AtCoder バーチャルコンテストはありません．\nhttps://not-522.appspot.com/\n\n" + timeStamp)
         return
 
     # 画像生成
-    listFont = ImageFont.truetype("AtCoder/data/fontR.ttc", 32)
+    listFontR = ImageFont.truetype("AtCoder/data/fontR.ttc", 32)
+    listFontB = ImageFont.truetype("AtCoder/data/fontB.ttc", 32)
     vcontestsListFirstImg = Image.open("AtCoder/data/vcontest/vcontestsListImg (first).jpg")
-    vcontestsListImg = Image.new("RGB", (1772, 68 + 64 * len(vcontestsList)))
+    vcontestsListImg = Image.new("RGB", (1772, 68 + 64 * len(list1 + list2)))
     vcontestsListImg.paste(vcontestsListFirstImg, (0, 0))
     idx = 0
-    for vcontest in vcontestsList:
+    for vcontest in list1:
         vcontestListImg = Image.open("AtCoder/data/vcontest/vcontestsListImg (cell).jpg")
         vcontestListDraw = ImageDraw.Draw(vcontestListImg)
-        vcontestListDraw.text((10, 7), str(vcontest["beginTime"]), fill = (0, 0, 0), font = listFont)
-        vcontestListDraw.text((360, 7), str(vcontest["endTime"]), fill = (0, 0, 0), font = listFont)
-        vcontestListDraw.text((710, 7), str(vcontest["name"]), fill = (0, 0, 0), font = listFont)
+        vcontestListDraw.text((10, 7), str(vcontest["beginTime"]), fill = (200, 20, 20), font = listFontB)
+        vcontestListDraw.text((360, 7), str(vcontest["endTime"]), fill = (200, 20, 20), font = listFontB)
+        vcontestListDraw.text((710, 7), str(vcontest["name"]), fill = (200, 20, 20), font = listFontB)
         vcontestsListImg.paste(vcontestListImg, (0, 68 + 64 * idx))
-        idx = idx + 1
-    vcontestsListImg.save("AtCoder/data/vcontest/vcontestsListImg_fixed.jpg")
+        idx += 1
+    for vcontest in list2:
+        vcontestListImg = Image.open("AtCoder/data/vcontest/vcontestsListImg (cell).jpg")
+        vcontestListDraw = ImageDraw.Draw(vcontestListImg)
+        vcontestListDraw.text((10, 7), str(vcontest["beginTime"]), fill = (0, 0, 0), font = listFontR)
+        vcontestListDraw.text((360, 7), str(vcontest["endTime"]), fill = (0, 0, 0), font = listFontR)
+        vcontestListDraw.text((710, 7), str(vcontest["name"]), fill = (0, 0, 0), font = listFontR)
+        vcontestsListImg.paste(vcontestListImg, (0, 68 + 64 * idx))
+        idx += 1
+    vcontestsListImg.save("AtCoder/vcontestsListImg_fixed.jpg")
 
     # リストをツイート
     listTweetText = "現在 " + str(idx) + " の AtCoder バーチャルコンテストが行われて or 予定されています．\nhttps://not-522.appspot.com/\n"
-    api.update_with_media(filename = "AtCoder/data/vcontest/vcontestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
+    api.update_with_media(filename = "AtCoder/vcontestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
     print("AtCoder-vcontest: Tweeted vcontestsListImg_fixed")
 
 if __name__ == '__main__':
