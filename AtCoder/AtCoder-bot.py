@@ -11,12 +11,20 @@ import result
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
 
-# AtCoder AC 検出（毎時 0, 15, 30, 45 分）
+# AtCoder AC 全検出（毎時 0, 15, 30, 45 分）
 @sched.scheduled_job('cron', minute = '0, 15, 30, 45', hour = '*/1')
 def scheduled_job():
 
     print("AtCoder-bot: ----- AtCoder-detection Start -----")
-    detection.detection()
+    detection.detection(1)
+    print("AtCoder-bot: ----- AtCoder-detection End -----")
+
+# AtCoder AC 部分検出（1 分ごと）
+@sched.scheduled_job('interval', minutes = 1)
+def scheduled_job():
+
+    print("AtCoder-bot: ----- AtCoder-detection Start -----")
+    detection.detection(0)
     print("AtCoder-bot: ----- AtCoder-detection End -----")
   
 # AtCoder Daily ランキング（毎日 0:00）
