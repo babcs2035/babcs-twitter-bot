@@ -2,6 +2,7 @@
 import os
 import tweepy
 import datetime
+import time
 import json
 import dropbox
 import urllib
@@ -45,11 +46,15 @@ def downloadFromDropbox(type):
     print("AtCoder-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     if type == 0:
-
+        
         # lastSubID をダウンロード
-        dbx.files_download_to_file("AtCoder/lastSubID.txt", "/AtCoder/lastSubID.txt")
+        try:
+            dbx.files_download_to_file("AtCoder/lastSubID.txt", "/AtCoder/lastSubID.txt")
+        except:
+            return -1
         with open("AtCoder/lastSubID.txt", "rb") as f:
             lastSubID = pickle.load(f)
+        dbx.files_delete("/AtCoder/lastSubID.txt")
         print("AtCoder-detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
     
     # noticeFlag をダウンロード
@@ -75,7 +80,6 @@ def uploadToDropbox(type):
         with open("AtCoder/lastSubID.txt", "wb") as f:
             pickle.dump(lastSubID, f)
         with open("AtCoder/lastSubID.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/lastSubID.txt")
             dbx.files_upload(f.read(), "/AtCoder/lastSubID.txt")
         print("AtCoder-detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
 
@@ -111,7 +115,10 @@ def setFlag(atcoderID, twitterID, f):
     else:
         return "この AtCoder ID は登録されていません！\n"
 
-def detection():
+def epoch_to_datetime(epoch):
+    return datetime.datetime(*time.localtime(epoch)[:6])
+
+def detection(type):
     
     # グローバル変数
     global AtCoderID
@@ -134,14 +141,26 @@ def detection():
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
     
     # データをダウンロード
-    downloadFromDropbox(0)
+    if downloadFromDropbox(0) == -1:
+        print("AtCoder-detection: detection has passed")
+        return
 
     # コンテストごとに提出を解析
     contestsJsonRes = urllib.request.urlopen("https://atcoder-api.appspot.com/contests")
     contestsJsonData = json.loads(contestsJsonRes.read().decode("utf-8"))
     print("AtCoder-detection: Downloaded contestsJsonData")
-
+    
+    checkContests = []
+    border = datetime.datetime.today() - datetime.timedelta(7)
     for contest in contestsJsonData:
+        date = epoch_to_datetime(contest["startTimeSeconds"] + contest["durationSeconds"])
+        if type == 0:
+            if border <= date and date <= datetime.datetime.today():
+                checkContests.append(contest)
+        else:
+            checkContests.append(contest)
+
+    for contest in checkContests:
 
         # ページ送り
         sublistPageNum = 1
