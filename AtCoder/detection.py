@@ -13,7 +13,8 @@ import pickle
 # グローバル変数
 AtCoderID = []
 TwitterID = []
-lastSubID = {}
+lastSubID_All = {}
+lastSubID_Recent = {}
 noticeFlag = {}
 
 # Dropbox からダウンロード
@@ -25,7 +26,8 @@ def downloadFromDropbox(type):
     # グローバル変数
     global AtCoderID
     global TwitterID
-    global lastSubID
+    global lastSubID_All
+    global lastSubID_Recent
     global noticeFlag
 
     # Dropbox オブジェクトの生成
@@ -53,16 +55,16 @@ def downloadFromDropbox(type):
         # lastSubID をダウンロード
         dbx.files_download_to_file("AtCoder/lastSubID.txt", "/AtCoder/lastSubID.txt")
         with open("AtCoder/lastSubID.txt", "rb") as f:
-            lastSubID = pickle.load(f)
-        print("AtCoder-detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
+            lastSubID_All = pickle.load(f)
+        print("AtCoder-detection: Downloaded lastSubID (size : ", str(len(lastSubID_All)), ")")
 
     if type == 1:
         
         # lastSubID_recent をダウンロード
         dbx.files_download_to_file("AtCoder/lastSubID_recent.txt", "/AtCoder/lastSubID_recent.txt")
         with open("AtCoder/lastSubID_recent.txt", "rb") as f:
-            lastSubID = pickle.load(f)
-        print("AtCoder-detection: Downloaded lastSubID_recent (size : ", str(len(lastSubID)), ")")
+            lastSubID_Recent = pickle.load(f)
+        print("AtCoder-detection: Downloaded lastSubID_recent (size : ", str(len(lastSubID_Recent)), ")")
     
     # noticeFlag をダウンロード
     dbx.files_download_to_file("AtCoder/noticeFlag.txt", "/AtCoder/noticeFlag.txt")
@@ -77,7 +79,8 @@ def downloadFromDropbox(type):
 def uploadToDropbox(type):
     
     # グローバル変数
-    global lastSubID
+    global lastSubID_All
+    global lastSubID_Recent
     global noticeFlag
 
     # Dropbox オブジェクトの生成
@@ -88,21 +91,21 @@ def uploadToDropbox(type):
 
         # lastSubID をアップロード
         with open("AtCoder/lastSubID.txt", "wb") as f:
-            pickle.dump(lastSubID, f)
+            pickle.dump(lastSubID_All, f)
         with open("AtCoder/lastSubID.txt", "rb") as f:
             dbx.files_delete("/AtCoder/lastSubID.txt")
             dbx.files_upload(f.read(), "/AtCoder/lastSubID.txt")
-        print("AtCoder-detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
+        print("AtCoder-detection: Uploaded lastSubID (size : ", str(len(lastSubID_All)), ")")
 
     if type == 1:
 
         # lastSubID_recent をアップロード
         with open("AtCoder/lastSubID_recent.txt", "wb") as f:
-            pickle.dump(lastSubID, f)
+            pickle.dump(lastSubID_Recent, f)
         with open("AtCoder/lastSubID_recent.txt", "rb") as f:
             dbx.files_delete("/AtCoder/lastSubID_recent.txt")
             dbx.files_upload(f.read(), "/AtCoder/lastSubID_recent.txt")
-        print("AtCoder-detection: Uploaded lastSubID_recent (size : ", str(len(lastSubID)), ")")
+        print("AtCoder-detection: Uploaded lastSubID_recent (size : ", str(len(lastSubID_Recent)), ")")
 
     # noticeFlag をアップロード
     with open("AtCoder/noticeFlag.txt", "wb") as f:
@@ -146,7 +149,8 @@ def detection(type):
     # グローバル変数
     global AtCoderID
     global TwitterID
-    global lastSubID
+    global lastSubID_All
+    global lastSubID_Recent
     
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
@@ -165,6 +169,11 @@ def detection(type):
     
     # データをダウンロード
     downloadFromDropbox(type)
+    lastSubID = {}
+    if type == 0:
+        lastSubID = lastSubID_All
+    if type == 1:
+        lastSubID = lastSubID_Recent
 
     # コンテストごとに提出を解析
     contestsJsonRes = urllib.request.urlopen("https://atcoder-api.appspot.com/contests")
@@ -172,7 +181,7 @@ def detection(type):
     print("AtCoder-detection: Downloaded contestsJsonData")
     
     checkContests = []
-    border = datetime.datetime.today() - datetime.timedelta(7)
+    border = datetime.datetime.today() - datetime.timedelta(14)
     for contest in contestsJsonData:
         date = epoch_to_datetime(contest["startTimeSeconds"] + contest["durationSeconds"])
         if type == 0:
@@ -270,6 +279,10 @@ def detection(type):
         print("AtCoder-detection: Checked " + contest["title"] + " submissions (subCount : " + str(subCount) + ", newlastSubID : " + str(lastSubID[str(contest["id"])]) + ")")
 
     # データをアップロード
+    if type == 0:
+        lastSubID_All = lastSubID
+    if type == 1:
+        lastSubID_Recent = lastSubID
     uploadToDropbox(type)
 
 if __name__ == '__main__':
