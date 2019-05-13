@@ -15,17 +15,17 @@ sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
 @sched.scheduled_job('cron', minute = '0, 15, 30, 45', hour = '*/1')
 def scheduled_job():
 
-    print("AtCoder-bot: ----- AtCoder-detection Start -----")
-    detection.detection(1)
-    print("AtCoder-bot: ----- AtCoder-detection End -----")
+    print("AtCoder-bot: ----- AtCoder-detection (All) Start -----")
+    detection.detection(0)
+    print("AtCoder-bot: ----- AtCoder-detection (All) End -----")
 
 # AtCoder AC 部分検出（1 分ごと）
 @sched.scheduled_job('interval', minutes = 1)
 def scheduled_job():
 
-    print("AtCoder-bot: ----- AtCoder-detection Start -----")
-    detection.detection(0)
-    print("AtCoder-bot: ----- AtCoder-detection End -----")
+    print("AtCoder-bot: ----- AtCoder-detection (Recent) Start -----")
+    detection.detection(1)
+    print("AtCoder-bot: ----- AtCoder-detection (Recent) End -----")
   
 # AtCoder Daily ランキング（毎日 0:00）
 @sched.scheduled_job('cron', minute = '0', hour = '0')
