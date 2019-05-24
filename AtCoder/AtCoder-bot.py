@@ -24,8 +24,7 @@ def scheduled_job():
 def scheduled_job():
 
     print("AtCoder-bot: ----- AtCoder-detection (Recent) Start -----")
-    # detection.detection(1)
-    print("AtCoder-bot: AtCoder-detection (Recent) passed")
+    detection.detection(1)
     print("AtCoder-bot: ----- AtCoder-detection (Recent) End -----")
   
 # AtCoder Daily ランキング（毎日 0:00）
