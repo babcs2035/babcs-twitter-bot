@@ -181,7 +181,7 @@ def detection(type):
     print("AtCoder-detection: Downloaded contestsJsonData")
     
     checkContests = []
-    border = datetime.datetime.today() - datetime.timedelta(30)
+    border = datetime.datetime.today() - datetime.timedelta(14)
     for contest in contestsJsonData:
         date = epoch_to_datetime(contest["startTimeSeconds"] + contest["durationSeconds"])
         if type == 0:
