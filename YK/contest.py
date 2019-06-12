@@ -52,9 +52,9 @@ def contest():
     for contest in contestsList:
         contestListImg = Image.open("YK/data/contestsListImg (cell).jpg")
         contestListDraw = ImageDraw.Draw(contestListImg)
-        contestListDraw.text((10, 15), str(contest["Date"]), fill = (0, 0, 0), font = listFont)
-        contestListDraw.text((360, 15), str(contest["EndDate"]), fill = (0, 0, 0), font = listFont)
-        contestListDraw.text((710, 15), str(contest["Name"]), fill = (0, 0, 0), font = listFont)
+        contestListDraw.text((10, 7), str(contest["Date"]), fill = (0, 0, 0), font = listFont)
+        contestListDraw.text((360, 7), str(contest["EndDate"]), fill = (0, 0, 0), font = listFont)
+        contestListDraw.text((710, 7), str(contest["Name"]), fill = (0, 0, 0), font = listFont)
         contestsListImg.paste(contestListImg, (0, 68 + 64 * idx))
         idx = idx + 1
     contestsListImg.save("YK/contestsListImg_fixed.jpg")
