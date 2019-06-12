@@ -1,4 +1,4 @@
-# import
+﻿# import
 import os
 import tweepy
 import datetime
@@ -120,7 +120,7 @@ def ranking():
     # Unique AC 数ランキングを作成
     countRankNum = 1
     countNum = 1
-    rankingFont = ImageFont.truetype("YK/data/YuGothM.ttc", 32)
+    rankingFont = ImageFont.truetype("YK/data/fontR.ttc", 32)
     countRankingFirstImg = Image.open("YK/data/countRankingImg (first).jpg")
     countResImg = Image.new("RGB", (738, 65 + 63 * len(newACCount)))
     countResImg.paste(countRankingFirstImg, (0, 0))
