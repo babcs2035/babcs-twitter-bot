@@ -134,9 +134,9 @@ def ranking():
                 countNum = 1
             else:
                 countNum = countNum + 1
-        countRankingDraw.text((10, 19), str(countRankNum), fill = (0, 0, 0), font = rankingFont)
-        countRankingDraw.text((120, 19), newACCount[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
-        countRankingDraw.text((560, 19), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
+        countRankingDraw.text((10, 7), str(countRankNum), fill = (0, 0, 0), font = rankingFont)
+        countRankingDraw.text((120, 7), newACCount[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
+        countRankingDraw.text((560, 7), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
         countResImg.paste(countRankingImg, (0, 65 + 63 * idx))
     countResImg.save("CF/data/countRankingImg_fixed.jpg")
 
