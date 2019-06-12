@@ -1,4 +1,4 @@
-# import
+﻿# import
 import os
 import tweepy
 import datetime
@@ -44,7 +44,7 @@ def contest():
         return
 
     # 画像生成
-    listFont = ImageFont.truetype("YK/data/YuGothM.ttc", 32)
+    listFont = ImageFont.truetype("YK/data/fontR.ttc", 32)
     contestsListFirstImg = Image.open("YK/data/contestsListImg (first).jpg")
     contestsListImg = Image.new("RGB", (1772, 68 + 64 * len(contestsList)))
     contestsListImg.paste(contestsListFirstImg, (0, 0))
