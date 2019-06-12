@@ -82,9 +82,9 @@ def makeRanking(type, listData, unit):
         if rankNum + countNum - 1 <= 3:
             tweetText += str(rankNum) + " 位 " + listData[idx]["user"] + " ( @" + str(TwitterID[myIndex(listData[idx]["user"], CFID)]) + " ) " + str(listData[idx][str(type)]) + " " + str(unit) + "\n"
         
-        rankingDraw.text((10, 19), str(rankNum), fill = (0, 0, 0), font = rankingFont)
-        rankingDraw.text((120, 19), listData[idx]["user"], fill = (0, 0, 0), font = rankingFont)
-        rankingDraw.text((560, 19), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFont)
+        rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFont)
+        rankingDraw.text((120, 7), listData[idx]["user"], fill = (0, 0, 0), font = rankingFont)
+        rankingDraw.text((560, 7), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFont)
         resImg.paste(rankingImg, (738 * int(idx / 20), 65 + 63 * (idx % 20)))
     resImg.save("CF/data/result/" + str(type) + "RankingImg_fixed.jpg")
     tweetText = " ランキング TOP " + str(rankNum) + "\n" + tweetText
