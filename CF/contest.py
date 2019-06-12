@@ -45,7 +45,7 @@ def contest():
         return
 
     # 画像生成
-    listFont = ImageFont.truetype("CF/data/YuGothM.ttc", 32)
+    listFont = ImageFont.truetype("CF/data/fontR.ttc", 32)
     contestsListFirstImg = Image.open("CF/data/contest/contestsListImg (first).jpg")
     contestsListImg = Image.new("RGB", (1852, 68 + 64 * len(contestsList)))
     contestsListImg.paste(contestsListFirstImg, (0, 0))
