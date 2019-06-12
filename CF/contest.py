@@ -53,10 +53,10 @@ def contest():
     for contest in contestsList:
         contestListImg = Image.open("CF/data/contest/contestsListImg (cell).jpg")
         contestListDraw = ImageDraw.Draw(contestListImg)
-        contestListDraw.text((10, 15), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (0, 0, 0), font = listFont)
-        contestListDraw.text((360, 15), str(contest["name"]), fill = (0, 0, 0), font = listFont)
-        contestListDraw.text((1460, 15), str(sec_to_time(contest["durationSeconds"])), fill = (0, 0, 0), font = listFont)
-        contestListDraw.text((1660, 15), str(contest["type"]), fill = (0, 0, 0), font = listFont)
+        contestListDraw.text((10, 7), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (0, 0, 0), font = listFont)
+        contestListDraw.text((360, 7), str(contest["name"]), fill = (0, 0, 0), font = listFont)
+        contestListDraw.text((1460, 7), str(sec_to_time(contest["durationSeconds"])), fill = (0, 0, 0), font = listFont)
+        contestListDraw.text((1660, 7), str(contest["type"]), fill = (0, 0, 0), font = listFont)
         contestsListImg.paste(contestListImg, (0, 68 + 64 * idx))
         idx = idx + 1
     contestsListImg.save("CF/data/contest/contestsListImg_fixed.jpg")
