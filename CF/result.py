@@ -60,7 +60,7 @@ def makeRanking(type, listData, unit):
     flag = int(listData[0][str(type)]) > int(listData[len(listData) - 1][str(type)])
     rankNum = 1
     countNum = 1
-    rankingFont = ImageFont.truetype("CF/data/YuGothM.ttc", 32)
+    rankingFont = ImageFont.truetype("CF/data/fontR.ttc", 32)
     rankingFirstImg = Image.open("CF/data/result/" + str(type) + "RankingImg (first).jpg")
     resImg = Image.new("RGB", (738 * int((len(listData) + 19) / 20), 65 + 63 * min(len(listData), 20)))
     tweetText = ""
