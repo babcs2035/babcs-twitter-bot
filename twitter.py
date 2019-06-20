@@ -13,6 +13,7 @@ import AtCoder.detection
 import AOJ.register
 import CF.register
 import YK.register
+import info
 
 # グローバル変数
 lastTweetID = 0
@@ -169,6 +170,14 @@ def scheduled_job():
                     tweetText = YK.register.register(tweetSplited[2], str(userData["screen_name"]), 1)
                     api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
                     print("twitter: Tweeted " + tweetText)
+
+            if len(tweetSplited) == 2:
+
+                # info
+                if tweetSplited[1] == "info":
+                    tweetText = info.info()
+                    api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
+                    print("twitter; Tweeted " + tweetText)
 
         # 変更されたデータをアップロード
         lastTweetID = int(timeline[0]["id_str"])
