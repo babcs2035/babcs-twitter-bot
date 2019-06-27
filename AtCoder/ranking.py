@@ -239,16 +239,16 @@ def ranking(type):
         if user in acCount and user in nowACCount:
             if nowACCount[user] - acCount[user] > 0:
                 newACCount.append(({"user" : user, "count" : nowACCount[user] - acCount[user]}))
-                if type == 0 and int(nowACCount[user] / 50) > int(acCount[user] / 50):
-                    api.update_status(user + " ( @" + str(TwitterID[myIndex(user, AtCoderID)]) + " ) さんの AtCoder での AC 数が " + str(acCount[user]) + " -> " + str(nowACCount[user]) + " となり，" + str(int(nowACCount[user] / 50) * 50) + " を突破しました！\n" + userURL + "\n" + timeStamp)
-                    print("AtCoder-ranking: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s AC Count Reach (" + str(acCount[user]) + " -> " + str(nowACCount[user]) + ")")
+                # if type == 0 and int(nowACCount[user] / 50) > int(acCount[user] / 50):
+                #    api.update_status(user + " ( @" + str(TwitterID[myIndex(user, AtCoderID)]) + " ) さんの AtCoder での AC 数が " + str(acCount[user]) + " -> " + str(nowACCount[user]) + " となり，" + str(int(nowACCount[user] / 50) * 50) + " を突破しました！\n" + userURL + "\n" + timeStamp)
+                #    print("AtCoder-ranking: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s AC Count Reach (" + str(acCount[user]) + " -> " + str(nowACCount[user]) + ")")
         if user in acPoint and user in nowACPoint:
             if nowACPoint[user] - acPoint[user] > 0 and nowACCount[user] - acCount[user] > 0:
                 newACPoint.append(({"user" : user, "point" : nowACPoint[user] - acPoint[user]}))
                 newACPer.append(({"user" : user, "per": float(nowACPoint[user] - acPoint[user]) / float(nowACCount[user] - acCount[user])}))
-                if type == 0 and int(nowACPoint[user] / 5000) > int(acPoint[user] / 5000):
-                    api.update_status(user + " ( @" + str(TwitterID[myIndex(user, AtCoderID)]) + " ) さんの AtCoder での Rated Point Sum 数が " + str(acPoint[user]) + " -> " + str(nowACPoint[user]) + " となり，" + str(int(nowACPoint[user] / 5000) * 5000) + " を突破しました！\n" + userURL + "\n" + timeStamp)
-                    print("AtCoder-ranking: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s Rated Point Sum Reach (" + str(acPoint[user]) + " -> " + str(nowACPoint[user]) + ")")
+                # if type == 0 and int(nowACPoint[user] / 5000) > int(acPoint[user] / 5000):
+                #    api.update_status(user + " ( @" + str(TwitterID[myIndex(user, AtCoderID)]) + " ) さんの AtCoder での Rated Point Sum 数が " + str(acPoint[user]) + " -> " + str(nowACPoint[user]) + " となり，" + str(int(nowACPoint[user] / 5000) * 5000) + " を突破しました！\n" + userURL + "\n" + timeStamp)
+                #    print("AtCoder-ranking: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s Rated Point Sum Reach (" + str(acPoint[user]) + " -> " + str(nowACPoint[user]) + ")")
     newACCount.sort(key = lambda x: x["count"], reverse = True)
     newACPoint.sort(key = lambda x: x["point"], reverse = True)
     newACPer.sort(key = lambda x: x["per"], reverse = True)
