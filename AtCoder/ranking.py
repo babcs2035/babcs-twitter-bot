@@ -7,6 +7,7 @@ import dropbox
 import urllib
 from PIL import Image, ImageDraw, ImageFont
 import pickle
+import time
 
 # グローバル変数
 AtCoderID = []
@@ -14,6 +15,10 @@ TwitterID = []
 acCount = {}
 acPoint = {}
 ratings = {}
+
+# 定数
+acCountReachNum = 50
+acPointReachNum = 5000
 
 # Dropbox からダウンロード
 def downloadFromDropbox(type):
@@ -235,20 +240,13 @@ def ranking(type):
     newACPoint = []
     newACPer = []
     for user in AtCoderID:
-        userURL = "https://kenkoooo.com/atcoder/#/user/" + user
         if user in acCount and user in nowACCount:
             if nowACCount[user] - acCount[user] > 0:
                 newACCount.append(({"user" : user, "count" : nowACCount[user] - acCount[user]}))
-                # if type == 0 and int(nowACCount[user] / 50) > int(acCount[user] / 50):
-                #    api.update_status(user + " ( @" + str(TwitterID[myIndex(user, AtCoderID)]) + " ) さんの AtCoder での AC 数が " + str(acCount[user]) + " -> " + str(nowACCount[user]) + " となり，" + str(int(nowACCount[user] / 50) * 50) + " を突破しました！\n" + userURL + "\n" + timeStamp)
-                #    print("AtCoder-ranking: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s AC Count Reach (" + str(acCount[user]) + " -> " + str(nowACCount[user]) + ")")
         if user in acPoint and user in nowACPoint:
             if nowACPoint[user] - acPoint[user] > 0 and nowACCount[user] - acCount[user] > 0:
                 newACPoint.append(({"user" : user, "point" : nowACPoint[user] - acPoint[user]}))
                 newACPer.append(({"user" : user, "per": float(nowACPoint[user] - acPoint[user]) / float(nowACCount[user] - acCount[user])}))
-                # if type == 0 and int(nowACPoint[user] / 5000) > int(acPoint[user] / 5000):
-                #    api.update_status(user + " ( @" + str(TwitterID[myIndex(user, AtCoderID)]) + " ) さんの AtCoder での Rated Point Sum 数が " + str(acPoint[user]) + " -> " + str(nowACPoint[user]) + " となり，" + str(int(nowACPoint[user] / 5000) * 5000) + " を突破しました！\n" + userURL + "\n" + timeStamp)
-                #    print("AtCoder-ranking: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s Rated Point Sum Reach (" + str(acPoint[user]) + " -> " + str(nowACPoint[user]) + ")")
     newACCount.sort(key = lambda x: x["count"], reverse = True)
     newACPoint.sort(key = lambda x: x["point"], reverse = True)
     newACPer.sort(key = lambda x: x["per"], reverse = True)
@@ -280,9 +278,34 @@ def ranking(type):
     print("AtCoder-ranking: Tweeted " + dirType + " perRanking")
 
     # データをアップロード
+    oldACCount = acCount
+    oldACPoint = acPoint
     acCount = nowACCount
     acPoint = nowACPoint
     uploadToDropbox(type)
+
+    # AC 数・Rated Point Sum の通知
+    if type == 0:
+        for user in AtCoderID:
+            userURL = "https://kenkoooo.com/atcoder/#/user/" + user
+            if user in oldACCount and user in nowACCount:
+                if nowACCount[user] - oldACCount[user] > 0:
+                    if type == 0 and int(nowACCount[user] / acCountReachNum) > int(oldACCount[user] / acCountReachNum):
+                        try:
+                            api.update_status(user + " ( @" + str(TwitterID[myIndex(user, AtCoderID)]) + " ) さんの AtCoder での AC 数が " + str(oldACCount[user]) + " -> " + str(nowACCount[user]) + " となり，" + str(int(nowACCount[user] / acCountReachNum) * acCountReachNum) + " を突破しました！\n" + userURL + "\n" + timeStamp)
+                            print("AtCoder-ranking: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s AC Count Reach (" + str(oldACCount[user]) + " -> " + str(nowACCount[user]) + ")")
+                        except:
+                            print("AtCoder-ranking: Tweet Error")
+                        time.sleep(5)
+            if user in oldACPoint and user in nowACPoint:
+                if nowACPoint[user] - oldACPoint[user] > 0 and nowACCount[user] - oldACCount[user] > 0:
+                    if type == 0 and int(nowACPoint[user] / acPointReachNum) > int(oldACPoint[user] / acPointReachNum):
+                        try:
+                            api.update_status(user + " ( @" + str(TwitterID[myIndex(user, AtCoderID)]) + " ) さんの AtCoder での Rated Point Sum 数が " + str(oldACPoint[user]) + " -> " + str(nowACPoint[user]) + " となり，" + str(int(nowACPoint[user] / acPointReachNum) * acPointReachNum) + " を突破しました！\n" + userURL + "\n" + timeStamp)
+                            print("AtCoder-ranking: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s Rated Point Sum Reach (" + str(oldACPoint[user]) + " -> " + str(nowACPoint[user]) + ")")
+                        except:
+                            print("AtCoder-ranking: Tweet Error")
+                        time.sleep(5)
 
 if __name__ == '__main__':
     print("AtCoder-ranking: Running as debug...")
