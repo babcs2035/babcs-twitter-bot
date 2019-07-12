@@ -253,6 +253,14 @@ def detection(type):
                             except:
                                 print("AtCoder-detection: Tweet Error")
                         idx = idx + 1
+
+                # エラーであれば無条件に報告
+                if subData[6] == "IE" or subData[6] == "NG":
+                    try:
+                        api.update_status("AtCoder で " + subData[6]  + " となっている提出が検出されました！！！\nhttps://atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
+                        print("AtCoder-detection: detected an IE submission!!!")
+                    except:
+                        print("AtCoder-detection: Tweet Error")
             if skipFlag:
                 break
             sublistPageNum = sublistPageNum + 1
