@@ -2,12 +2,12 @@
 import os
 import tweepy
 import datetime
-import json
-import dropbox
-import urllib
-from PIL import Image, ImageDraw, ImageFont
-import pickle
 import time
+import dropbox
+import requests
+import pickle
+import json
+from PIL import Image, ImageDraw, ImageFont
 
 # グローバル変数
 AtCoderID = []
@@ -128,6 +128,7 @@ def makeRanking(type1, type2, listData, unit):
     global ratings
     
     colors = [[0, 0, 0], [128, 128, 128], [128, 64, 0], [0, 128, 0], [0, 192, 192], [0, 0, 255], [192, 192, 0], [255, 128, 0], [255, 0, 0]]
+    rows = 30
 
     flag = int(listData[0][str(type2)]) > int(listData[len(listData) - 1][str(type2)])
     rankNum = 1
@@ -136,11 +137,11 @@ def makeRanking(type1, type2, listData, unit):
     rankingFont = ImageFont.truetype("AtCoder/data/fontR.ttc", 32)
     rankingFontS = ImageFont.truetype("AtCoder/data/fontB.ttc", 32)
     rankingFirstImg = Image.open("AtCoder/data/" + str(type2) + "RankingImg (first).jpg")
-    resImg = Image.new("RGB", (850 * int((len(listData) + 19) / 20), 65 + 63 * min(len(listData), 20)))
-    tweetText = ""
+    resImg = Image.new("RGB", (850 * int((len(listData) + rows - 1) / rows), 65 + 63 * min(len(listData), rows)))
+    awardsList = []
     for idx in range(len(listData)):
-        if idx % 20 == 0:
-            resImg.paste(rankingFirstImg, (850 * int(idx / 20), 0))
+        if idx % rows == 0:
+            resImg.paste(rankingFirstImg, (850 * int(idx / rows), 0))
         rankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
         rankingDraw = ImageDraw.Draw(rankingImg)
         if idx > 0:
@@ -154,10 +155,7 @@ def makeRanking(type1, type2, listData, unit):
                 countIndex += 1
             else:
                 countNum = countNum + 1
-        
-        if rankNum + countNum - 1 <= 3:
-            tweetText += str(rankNum) + " 位 " + listData[idx]["user"] + " ( @" + str(TwitterID[myIndex(listData[idx]["user"], AtCoderID)]) + " ) " + str(listData[idx][str(type2)]) + " " + str(unit) + "\n"
-        
+
         colorIndex = 0
         for border in range(7, 0, -1):
             if str(listData[idx]["user"]) in ratings:
@@ -168,23 +166,15 @@ def makeRanking(type1, type2, listData, unit):
             rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFontS)
             rankingDraw.text((120, 7), listData[idx]["user"] + " (@" + str(TwitterID[myIndex(str(listData[idx]["user"]), AtCoderID)]) + ")", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFontS)
             rankingDraw.text((672, 7), str(listData[idx][str(type2)]), fill = (0, 0, 0), font = rankingFontS)
+            awardsList.append("@" + str(TwitterID[myIndex(listData[idx]["user"], AtCoderID)]))
         else:
             rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFont)
             rankingDraw.text((120, 7), listData[idx]["user"] + " (@" + str(TwitterID[myIndex(str(listData[idx]["user"]), AtCoderID)]) + ")", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFont)
             rankingDraw.text((672, 7), str(listData[idx][str(type2)]), fill = (0, 0, 0), font = rankingFont)
-        resImg.paste(rankingImg, (850 * int(idx / 20), 65 + 63 * (idx % 20)))
-
-        # ランキングポイント処理
-        point = 1
-        if countIndex == 0:
-            point = 5
-        elif countIndex == 1:
-            point = 4
-        elif countIndex == 2:
-            point = 3
+        resImg.paste(rankingImg, (850 * int(idx / rows), 65 + 63 * (idx % rows)))
 
     resImg.save("AtCoder/" + str(type1) + "RankingImg_fixed.jpg")
-    tweetText = " ランキング TOP " + str(rankNum) + "\n" + tweetText
+    tweetText = " ランキング TOP " + str(rankNum) + "\n入賞の " + " , ".join(awardsList) + " さん おめでとうございます！\n"
     return tweetText
 
 # ランキング生成 (type 0:Daily, 1:Mid Daily, 2:Weekly, 3:Monthly)
@@ -224,13 +214,11 @@ def ranking(type):
         dirType = "monthly"
 
     # AC 数を取得
-    header = { "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64)" }
-    request = urllib.request.Request(url = "https://kenkoooo.com/atcoder/resources/ac.json", headers = header)
-    acCountJson = urllib.request.urlopen(request)
-    request = urllib.request.Request(url = "https://kenkoooo.com/atcoder/resources/sums.json", headers = header)
-    acPointJson = urllib.request.urlopen(request)
-    acCountData = json.loads(acCountJson.read().decode("utf-8"))
-    acPointData = json.loads(acPointJson.read().decode("utf-8"))
+    session = requests.Session()
+    request = session.get(url = "https://kenkoooo.com/atcoder/resources/ac.json")
+    acCountData = json.loads(request.text)
+    request = session.get(url = "https://kenkoooo.com/atcoder/resources/sums.json")
+    acPointData = json.loads(request.text)
     nowACCount = {}
     nowACPoint = {}
     for user in acCountData:
@@ -254,7 +242,7 @@ def ranking(type):
     newACPoint.sort(key = lambda x: x["point"], reverse = True)
     newACPer.sort(key = lambda x: x["per"], reverse = True)
 
-    ## ランキングをツイート
+    # ランキングをツイート
     tweetTextType = ""
     if type == 0:
         tweetTextType = "Daily"
