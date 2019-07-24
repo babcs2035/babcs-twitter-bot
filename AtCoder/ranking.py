@@ -224,8 +224,11 @@ def ranking(type):
         dirType = "monthly"
 
     # AC 数を取得
-    acCountJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/resources/ac.json")
-    acPointJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/resources/sums.json")
+    header = { "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64)" }
+    request = urllib.request.Request(url = "https://kenkoooo.com/atcoder/resources/ac.json", headers = header)
+    acCountJson = urllib.request.urlopen(request)
+    request = urllib.request.Request(url = "https://kenkoooo.com/atcoder/resources/sums.json", headers = header)
+    acPointJson = urllib.request.urlopen(request)
     acCountData = json.loads(acCountJson.read().decode("utf-8"))
     acPointData = json.loads(acPointJson.read().decode("utf-8"))
     nowACCount = {}
