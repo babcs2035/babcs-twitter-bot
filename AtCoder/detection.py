@@ -3,12 +3,11 @@ import os
 import tweepy
 import datetime
 import time
-import json
 import dropbox
-import urllib
-from bs4 import BeautifulSoup
 import requests
 import pickle
+import json
+from bs4 import BeautifulSoup
 
 # グローバル変数
 AtCoderID = []
@@ -176,8 +175,9 @@ def detection(type):
         lastSubID = lastSubID_Recent
 
     # コンテストごとに提出を解析
-    contestsJsonRes = urllib.request.urlopen("https://atcoder-api.appspot.com/contests")
-    contestsJsonData = json.loads(contestsJsonRes.read().decode("utf-8"))
+    session = requests.Session()
+    request = session.get(url = "https://atcoder-api.appspot.com/contests")
+    contestsJsonData = json.loads(request.text)
     print("AtCoder-detection: Downloaded contestsJsonData")
     
     checkContests = []
@@ -187,8 +187,6 @@ def detection(type):
         if type == 0:
             if date < border:
                 checkContests.append(contest)
-            else:
-                print(contest["id"])
         if type == 1:
             if border <= date and date <= datetime.datetime.today():
                 checkContests.append(contest)
@@ -257,8 +255,8 @@ def detection(type):
                 # エラーであれば無条件に報告
                 if subData[6] == "IE" or subData[6] == "NG":
                     try:
-                        api.update_status("AtCoder で " + subData[6]  + " となっている提出が検出されました！！！\nhttps://atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
-                        print("AtCoder-detection: detected an IE submission!!!")
+                        api.update_status("AtCoder で " + subData[6]  + " となっている提出が検出されました！\nhttps://atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
+                        print("AtCoder-detection: detected " + subData[6] + " submission!")
                     except:
                         print("AtCoder-detection: Tweet Error")
             if skipFlag:
