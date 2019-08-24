@@ -7,6 +7,7 @@ import ranking
 import contest
 import vcontest
 import result
+import statistics
 
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
@@ -82,6 +83,22 @@ def scheduled_job():
     print("AtCoder-bot: ----- AtCoder-result Start -----")
     result.result()
     print("AtCoder-bot: ----- AtCoder-result End -----")
+
+# AtCoder 1 時間ごとの統計情報（毎時 0 分）
+@sched.scheduled_job('cron', minute = '0', hour = '*/1')
+def scheduled_job():
+
+    print("AtCoder-bot: ----- AtCoder-statistics (hour) Start -----")
+    statistics.statistics(0)
+    print("AtCoder-bot: ----- AtCoder-detection (hour) End -----")
+
+# AtCoder 1 日ごとの統計情報（毎時 0:00）
+@sched.scheduled_job('cron', minute = '0', hour = '0')
+def scheduled_job():
+
+    print("AtCoder-bot: ----- AtCoder-statistics (day) Start -----")
+    statistics.statistics(1)
+    print("AtCoder-bot: ----- AtCoder-detection (day) End -----")
 
 # おまじない
 sched.start()
