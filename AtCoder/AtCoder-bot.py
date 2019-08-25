@@ -92,8 +92,8 @@ def scheduled_job():
     statistics.statistics(0)
     print("AtCoder-bot: ----- AtCoder-detection (hour) End -----")
 
-# AtCoder 1 日ごとの統計情報（毎時 0:00）
-@sched.scheduled_job('cron', minute = '0', hour = '0')
+# AtCoder 1 日ごとの統計情報（毎日 0:20）
+@sched.scheduled_job('cron', minute = '20', hour = '0')
 def scheduled_job():
 
     print("AtCoder-bot: ----- AtCoder-statistics (day) Start -----")
