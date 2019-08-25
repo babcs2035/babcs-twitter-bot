@@ -134,13 +134,18 @@ def statistics(type):
     xs = []
     ys = []
     subCount.append((timeStamp, maxSubID))
+    if (type == 0 and len(subCount) == 49) or (type == 1 and len(subCount) == 15):
+        del subCount[0]
     for i in range(1, len(subCount)):
-        xs.append(str(subCount[i - 1][0]) + " ~ " + str(subCount[i][0]))
+        if type == 0:
+            xs.append(str(subCount[i - 1][0][-5:]) + " ~ " + str(subCount[i][0][-5:]))
+        if type == 1:
+            xs.append(str(subCount[i - 1][0][5:10]) + " ~ " + str(subCount[i][0][5:10]))
         ys.append(int(subCount[i][1] - subCount[i - 1][1]))
     fig, ax = plt.subplots()
-    fig = plt.figure(figsize=(8.0, 8.0))
+    fig = plt.figure(figsize=(16.0, 8.0))
     ax = fig.add_subplot(111)
-    plt.setp(ax.get_xticklabels(), rotation = 30)
+    plt.setp(ax.get_xticklabels(), rotation = 45)
     plt.subplots_adjust(left = 0.1, right = 0.95, bottom = 0.2, top = 0.95)
     plt.bar(xs, ys)
     prefix = ""
