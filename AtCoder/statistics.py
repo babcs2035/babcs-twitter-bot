@@ -138,16 +138,17 @@ def statistics(type):
         del subCount[0]
     for i in range(1, len(subCount)):
         if type == 0:
-            xs.append(str(subCount[i - 1][0][-5:]) + " ~ " + str(subCount[i][0][-5:]))
+            xs.append(str(subCount[i - 1][0][5:10]) + "\n" + str(subCount[i - 1][0][11:16]) + "\n~\n" + str(subCount[i][0][5:10]) + "\n" + str(subCount[i][0][11:16]))
         if type == 1:
-            xs.append(str(subCount[i - 1][0][5:10]) + " ~ " + str(subCount[i][0][5:10]))
+            xs.append(str(subCount[i - 1][0][5:10]) + "\n~\n" + str(subCount[i][0][5:10]))
         ys.append(int(subCount[i][1] - subCount[i - 1][1]))
     fig, ax = plt.subplots()
-    fig = plt.figure(figsize=(16.0, 8.0))
+    fig = plt.figure(figsize=(20.0, 8.0))
     ax = fig.add_subplot(111)
-    plt.setp(ax.get_xticklabels(), rotation = 45)
     plt.subplots_adjust(left = 0.1, right = 0.95, bottom = 0.2, top = 0.95)
     plt.bar(xs, ys)
+    ticks = 6
+    plt.xticks(range(0, len(xs), ticks), xs[::ticks])
     prefix = ""
     if type == 0:
         prefix = "hour"
