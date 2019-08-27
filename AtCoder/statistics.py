@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import random
+import re
 
 # グローバル変数
 subCount = []
@@ -155,7 +155,7 @@ def statistics(type):
     if type == 1:
         prefix = "day"
     plt.savefig("AtCoder/subCount_" + prefix + ".png")
-    api.update_with_media(filename = "AtCoder/subCount_" + prefix + ".png", status = "AtCoder で " + str(xs[len(xs) - 1]) + " の間に " + str(ys[len(ys) - 1]) + " 回提出がありました．\n" + timeStamp)
+    api.update_with_media(filename = "AtCoder/subCount_" + prefix + ".png", status = "AtCoder で " + str(xs[len(xs) - 1]).replace("\n", " ") + " の間に " + str(ys[len(ys) - 1]).replace("\n", " ") + " 回提出がありました．\n" + timeStamp)
     print("AtCoder-statistics: Tweeted subCount_" + prefix + ".png")
 
     # データをアップロード
