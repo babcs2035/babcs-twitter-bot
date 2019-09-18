@@ -1,2 +1,2 @@
 <?php
-echo 'Hello World!';
+echo '競プロer Bot のホームページへようこそ';
