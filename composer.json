@@ -1,8 +1,6 @@
 {
   "require": {
     "php": "~7.3.0",
-    "phpunit/phpunit": "~4.0",
-    "phpspec/phpspec": "~2.1",
     "heroku/heroku-buildpack-php": "*"
   }
 }
