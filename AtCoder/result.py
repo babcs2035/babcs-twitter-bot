@@ -11,37 +11,25 @@ from bs4 import BeautifulSoup
 from PIL import Image, ImageDraw, ImageFont
 
 # グローバル変数
-AtCoderID = []
-TwitterID = []
+AtCoderIDs = []
 ratings = {}
 
 # Dropbox からダウンロード
 def downloadFromDropbox():
     
     # グローバル変数
-    global AtCoderID
-    global TwitterID
+    global AtCoderIDs
     global ratings
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
 
-    # AtCoderID をダウンロード
-    dbx.files_download_to_file("AtCoder/AtCoderID.txt", "/AtCoder/AtCoderID.txt")
-    with open("AtCoder/AtCoderID.txt", "r") as f:
-        AtCoderID.clear()
-        for id in f:
-            AtCoderID.append(id.rstrip("\n"))
-    print("AtCoder-result: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
-    
-    # TwitterID をダウンロード
-    dbx.files_download_to_file("AtCoder/TwitterID.txt", "/AtCoder/TwitterID.txt")
-    with open("AtCoder/TwitterID.txt", "r") as f:
-        TwitterID.clear()
-        for id in f:
-            TwitterID.append(id.rstrip("\n"))
-    print("AtCoder-result: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+    # AtCoderIDs をダウンロード
+    dbx.files_download_to_file("AtCoder/AtCoderIDs.txt", "/AtCoder/AtCoderIDs.txt")
+    with open("AtCoder/AtCoderIDs.txt", "rb") as f:
+        AtCoderIDs = pickle.load(f)
+    print("AtCoder-result: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
 
     # ratings をダウンロード
     dbx.files_download_to_file("AtCoder/ratings.txt", "/AtCoder/ratings.txt")
@@ -70,17 +58,9 @@ def uploadToDropbox():
 def epoch_to_datetime(epoch):
     return datetime.datetime(*time.localtime(epoch)[:6])
 
-# list 内の要素の添え字を返す（無い場合は -1）
-def myIndex(x, l):
-    if x in l:
-        return l.index(x)
-    else:
-        return -1
-
 def makeRanking(type, listData, unit):
 
-    global AtCoderID
-    global TwitterID
+    global AtCoderIDs
     global ratings
     
     colors = [[0, 0, 0], [128, 128, 128], [128, 64, 0], [0, 128, 0], [0, 192, 192], [0, 0, 255], [192, 192, 0], [255, 128, 0], [255, 0, 0]]
@@ -111,18 +91,18 @@ def makeRanking(type, listData, unit):
 
         colorIndex = 0
         for border in range(7, 0, -1):
-            if str(listData[idx]["user"]) in ratings:
-                if ratings[str(listData[idx]["user"])] >= border * 400:
+            if str(listData[idx]["atcoderID"]) in ratings:
+                if ratings[str(listData[idx]["atcoderID"])] >= border * 400:
                     colorIndex = border + 1
                     break   
         if rankNum <= 8:
             rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFontS)
-            rankingDraw.text((120, 7), listData[idx]["user"], fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFontS)
+            rankingDraw.text((120, 7), listData[idx]["atcoderID"] + " ( @" + listData[idx]["twitterID"] + " )", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFontS)
             rankingDraw.text((560, 7), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFontS)
-            awardsList.append("@" + str(TwitterID[myIndex(listData[idx]["user"], AtCoderID)]))
+            awardsList.append("@" + listData[idx]["twitterID"])
         else:
             rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFont)
-            rankingDraw.text((120, 7), listData[idx]["user"], fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFont)
+            rankingDraw.text((120, 7), listData[idx]["atcoderID"] + " ( @" + listData[idx]["twitterID"] + " )", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFont)
             rankingDraw.text((560, 7), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFont)
         resImg.paste(rankingImg, (738 * int(idx / rows), 65 + 63 * (idx % rows)))
     resImg.save("AtCoder/data/result/" + str(type) + "RankingImg_fixed.jpg")
@@ -131,8 +111,7 @@ def makeRanking(type, listData, unit):
 def result():
     
     # グローバル変数
-    global AtCoderID
-    global TwitterID
+    global AtCoderIDs
     global contestFlag
     global ratings
 
@@ -155,10 +134,10 @@ def result():
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
 
     ## 色が変化したユーザーに通知
-    for user in AtCoderID:
+    for atcoderID, twitterID in AtCoderIDs:
         
         # 現在の色を取得
-        profileURL = "https://atcoder.jp/users/" + str(user)
+        profileURL = "https://atcoder.jp/users/" + atcoderID
         profileHTML = requests.get(profileURL)
         try:
             profileHTML.raise_for_status()
@@ -166,7 +145,7 @@ def result():
         except:
             print("AtCoder-result: profileHTML Error")
             continue
-        print("AtCoder-result: Downloaded " + str(user) + "'s profileData")
+        print("AtCoder-result: Downloaded " + atcoderID + "'s profileData")
         profileTable = profileData.find_all("table", class_ = "dl-table")
         try:
             nowRating = int(profileTable[1].contents[3].contents[1].contents[0].contents[0])
@@ -175,13 +154,13 @@ def result():
 
         # 色が変わったか調べる
         strs = ["灰色", "茶色", "緑", "水色", "青", "黄色", "オレンジ", "レッド"]
-        if user in ratings:
+        if atcoderID in ratings:
             for border in range(7, 0, -1):
-                if ratings[str(user)] < border * 400 and border * 400 <= nowRating:
-                    api.update_status(str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " ) さんの AtCoder レートが " + str(ratings[str(user)]) + " -> " + str(nowRating) + " となり，" + strs[border] + "コーダーになりました！おめでとうございます！！！\n" + profileURL + "\n" + timeStamp)
-                    print("AtCoder-result: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s rating change")
+                if ratings[str(atcoderID)] < border * 400 and border * 400 <= nowRating:
+                    api.update_status(atcoderID + " ( @" + twitterID + " ) さんの AtCoder レートが " + str(ratings[atcoderID]) + " -> " + str(nowRating) + " となり，" + strs[border] + "コーダーになりました！おめでとうございます！！！\n" + profileURL + "\n" + timeStamp)
+                    print("AtCoder-result: Tweeted " + atcoderID + " ( @" + twitterID + " )'s rating change")
                     break
-        ratings[str(user)] = nowRating
+        ratings[atcoderID] = nowRating
 
     ## コンテスト結果のランキング処理
     # 取得すべきコンテストを取得
@@ -194,7 +173,7 @@ def result():
     for contest in contestsJsonData:
         date = epoch_to_datetime(contest["startTimeSeconds"] + contest["durationSeconds"])
         if yesterday <= date and date < datetime.datetime.today():
-            newcontests.append(str(contest["title"]))
+            newcontests.append(str(contest["title"].replace("◉ ", "")))
 
     # コンテストごとに処理
     for contest in newcontests:
@@ -203,8 +182,8 @@ def result():
         diffList = []
 
         # ユーザーの成績を取得
-        for user in AtCoderID:
-            reslistURL = "https://atcoder.jp/users/" + str(user) + "/history"
+        for atcoderID, twitterID in AtCoderIDs:
+            reslistURL = "https://atcoder.jp/users/" + str(atcoderID) + "/history"
             reslistHTML = requests.get(reslistURL)
             try:
                 reslistHTML.raise_for_status()
@@ -212,7 +191,7 @@ def result():
             except:
                 print("AtCoder-result: reslistHTML Error")
                 continue
-            print("AtCoder-result: Downloaded " + str(user) + "'s reslistData")
+            print("AtCoder-result: Downloaded " + atcoderID + "'s reslistData")
             reslistTable = reslistData.find_all("table")
             if len(reslistTable) == 0:
                 continue
@@ -221,14 +200,14 @@ def result():
             for row in reslistRows:
                 if str(contest) == str(row.contents[3].contents[0].contents[0]):
                     if str(row.contents[5].contents[0].contents[0]) != "-":
-                        rankList.append({ "user" : str(user), "rank" : int(row.contents[5].contents[0].contents[0]) })
+                        rankList.append({"atcoderID" : atcoderID, "twitterID" : twitterID, "rank" : int(row.contents[5].contents[0].contents[0])})
                     if str(row.contents[7].contents[0]) != "-":
-                        perfList.append({ "user" : str(user), "perf" : int(row.contents[7].contents[0]) })
+                        perfList.append({"atcoderID" : atcoderID, "twitterID" : twitterID, "perf" : int(row.contents[7].contents[0])})
                     if str(row.contents[11].contents[0]) != "-":
                         if str(row.contents[11].contents[0]) == "±0":
-                            diffList.append({ "user" : str(user), "diff" : int(0) })
+                            diffList.append({"atcoderID" : atcoderID, "twitterID" : twitterID, "diff" : int(0)})
                         else:
-                            diffList.append({ "user" : str(user), "diff" : int(row.contents[11].contents[0]) })
+                            diffList.append({"atcoderID" : atcoderID, "twitterID" : twitterID, "diff" : int(row.contents[11].contents[0])})
                     break
         print("AtCoder-result: Checked " + str(contest) + " result")
 
