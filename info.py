@@ -1,8 +1,9 @@
 # import
 import os
 import dropbox
+import pickle
 
-AtCoderID = []
+AtCoderIDs = []
 AOJID = []
 CFID = []
 YKID = []
@@ -11,20 +12,20 @@ YKID = []
 def downloadFromDropbox():
     
     # グローバル変数
-    global AtCoderID
-    global AtCoder_TwitterID
+    global AtCoderIDs
+    global AOJID
+    global CFID
+    global YKID
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
 
-    # AtCoderID をダウンロード
-    dbx.files_download_to_file("AtCoder/AtCoderID.txt", "/AtCoder/AtCoderID.txt")
-    with open("AtCoder/AtCoderID.txt", "r") as f:
-        AtCoderID.clear()
-        for id in f:
-            AtCoderID.append(id.rstrip("\n"))
-    print("info: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
+    # AtCoderIDs をダウンロード
+    dbx.files_download_to_file("AtCoder/AtCoderIDs.txt", "/AtCoder/AtCoderIDs.txt")
+    with open("AtCoder/AtCoderIDs.txt", "rb") as f:
+        AtCoderIDs = pickle.load(f)
+    print("info: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
     
     # AOJID をダウンロード
     dbx.files_download_to_file("AOJ/AOJID.txt", "/AOJ/AOJID.txt")
@@ -51,11 +52,17 @@ def downloadFromDropbox():
     print("info: Downloaded YKID (size : ", str(len(YKID)), ")")
 
 def info():
+    
+    # グローバル変数
+    global AtCoderIDs
+    global AOJID
+    global CFID
+    global YKID
 
     downloadFromDropbox()
 
     tweetText = ""
-    tweetText += "AtCoder ID 登録数：" + str(len(AtCoderID)) + "\n"
+    tweetText += "AtCoder ID 登録数：" + str(len(AtCoderIDs)) + "\n"
     tweetText += "AOJ ID 登録数：" + str(len(AOJID)) + "\n"
     tweetText += "Codeforces ID 登録数：" + str(len(CFID)) + "\n"
     tweetText += "yukicoder ID 登録数：" + str(len(YKID)) + "\n"
