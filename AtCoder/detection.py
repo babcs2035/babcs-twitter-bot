@@ -53,6 +53,7 @@ def downloadFromDropbox(type):
         
         # lastSubID をダウンロード
         dbx.files_download_to_file("AtCoder/lastSubID.txt", "/AtCoder/lastSubID.txt")
+        dbx.files_delete("/AtCoder/lastSubID.txt")
         with open("AtCoder/lastSubID.txt", "rb") as f:
             lastSubID_All = pickle.load(f)
         print("AtCoder-detection: Downloaded lastSubID (size : ", str(len(lastSubID_All)), ")")
@@ -61,6 +62,7 @@ def downloadFromDropbox(type):
         
         # lastSubID_recent をダウンロード
         dbx.files_download_to_file("AtCoder/lastSubID_recent.txt", "/AtCoder/lastSubID_recent.txt")
+        dbx.files_delete("/AtCoder/lastSubID_recent.txt")
         with open("AtCoder/lastSubID_recent.txt", "rb") as f:
             lastSubID_Recent = pickle.load(f)
         print("AtCoder-detection: Downloaded lastSubID_recent (size : ", str(len(lastSubID_Recent)), ")")
@@ -92,7 +94,6 @@ def uploadToDropbox(type):
         with open("AtCoder/lastSubID.txt", "wb") as f:
             pickle.dump(lastSubID_All, f)
         with open("AtCoder/lastSubID.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/lastSubID.txt")
             dbx.files_upload(f.read(), "/AtCoder/lastSubID.txt")
         print("AtCoder-detection: Uploaded lastSubID (size : ", str(len(lastSubID_All)), ")")
 
@@ -102,17 +103,18 @@ def uploadToDropbox(type):
         with open("AtCoder/lastSubID_recent.txt", "wb") as f:
             pickle.dump(lastSubID_Recent, f)
         with open("AtCoder/lastSubID_recent.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/lastSubID_recent.txt")
             dbx.files_upload(f.read(), "/AtCoder/lastSubID_recent.txt")
         print("AtCoder-detection: Uploaded lastSubID_recent (size : ", str(len(lastSubID_Recent)), ")")
 
-    # noticeFlag をアップロード
-    with open("AtCoder/noticeFlag.txt", "wb") as f:
-        pickle.dump(noticeFlag, f)
-    with open("AtCoder/noticeFlag.txt", "rb") as f:
-        dbx.files_delete("/AtCoder/noticeFlag.txt")
-        dbx.files_upload(f.read(), "/AtCoder/noticeFlag.txt")
-    print("AtCoder-detection: Uploaded noticeFlag (size : ", str(len(noticeFlag)), ")")
+    if type == 2:
+
+        # noticeFlag をアップロード
+        with open("AtCoder/noticeFlag.txt", "wb") as f:
+            pickle.dump(noticeFlag, f)
+        with open("AtCoder/noticeFlag.txt", "rb") as f:
+            dbx.files_delete("/AtCoder/noticeFlag.txt")
+            dbx.files_upload(f.read(), "/AtCoder/noticeFlag.txt")
+        print("AtCoder-detection: Uploaded noticeFlag (size : ", str(len(noticeFlag)), ")")
 
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
@@ -184,6 +186,7 @@ def detection(type):
     border = datetime.datetime.today() - datetime.timedelta(14)
     for contest in contestsJsonData:
         date = epoch_to_datetime(contest["startTimeSeconds"] + contest["durationSeconds"])
+        contest["title"] = contest["title"].replace("◉ ", "")
         if type == 0:
             if date < border:
                 checkContests.append(contest)
