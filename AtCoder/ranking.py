@@ -10,8 +10,7 @@ import json
 from PIL import Image, ImageDraw, ImageFont
 
 # グローバル変数
-AtCoderID = []
-TwitterID = []
+AtCoderIDs = []
 acCount = {}
 acPoint = {}
 ratings = {}
@@ -24,8 +23,7 @@ acPointReachNum = 5000
 def downloadFromDropbox(type):
     
     # グローバル変数
-    global AtCoderID
-    global TwitterID
+    global AtCoderIDs
     global acCount
     global acPoint
     global ratings
@@ -34,21 +32,11 @@ def downloadFromDropbox(type):
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
 
-    # AtCoderID をダウンロード
-    dbx.files_download_to_file("AtCoder/AtCoderID.txt", "/AtCoder/AtCoderID.txt")
-    with open("AtCoder/AtCoderID.txt", "r") as f:
-        AtCoderID.clear()
-        for id in f:
-            AtCoderID.append(id.rstrip("\n"))
-    print("AtCoder-ranking: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
-    
-    # TwitterID をダウンロード
-    dbx.files_download_to_file("AtCoder/TwitterID.txt", "/AtCoder/TwitterID.txt")
-    with open("AtCoder/TwitterID.txt", "r") as f:
-        TwitterID.clear()
-        for id in f:
-            TwitterID.append(id.rstrip("\n"))
-    print("AtCoder-ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+    # AtCoderIDs をダウンロード
+    dbx.files_download_to_file("AtCoder/AtCoderIDs.txt", "/AtCoder/AtCoderIDs.txt")
+    with open("AtCoder/AtCoderIDs.txt", "rb") as f:
+        AtCoderIDs = pickle.load(f)
+    print("AtCoder-detection: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
     
     dirType = ""
     if type == 0 or type == 1:
@@ -114,17 +102,9 @@ def uploadToDropbox(type):
             dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_acPoint.txt")
         print("AtCoder-ranking: Uploaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
 
-# list 内の要素の添え字を返す（無い場合は -1）
-def myIndex(x, l):
-    if x in l:
-        return l.index(x)
-    else:
-        return -1
-
 def makeRanking(type1, type2, listData, unit):
     
-    global AtCoderID
-    global TwitterID
+    global AtCoderIDa
     global ratings
     
     colors = [[0, 0, 0], [128, 128, 128], [128, 64, 0], [0, 128, 0], [0, 192, 192], [0, 0, 255], [192, 192, 0], [255, 128, 0], [255, 0, 0]]
@@ -158,18 +138,18 @@ def makeRanking(type1, type2, listData, unit):
 
         colorIndex = 0
         for border in range(7, 0, -1):
-            if str(listData[idx]["user"]) in ratings:
-                if ratings[str(listData[idx]["user"])] >= border * 400:
+            if str(listData[idx]["atcoderID"]) in ratings:
+                if ratings[str(listData[idx]["atcoderID"])] >= border * 400:
                     colorIndex = border + 1
                     break
         if rankNum <= 8:
             rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFontS)
-            rankingDraw.text((120, 7), listData[idx]["user"] + " (@" + str(TwitterID[myIndex(str(listData[idx]["user"]), AtCoderID)]) + ")", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFontS)
+            rankingDraw.text((120, 7), listData[idx]["atcoderID"] + " (@" + listData[idx]["twitterID"] + ")", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFontS)
             rankingDraw.text((672, 7), str(listData[idx][str(type2)]), fill = (0, 0, 0), font = rankingFontS)
-            awardsList.append("@" + str(TwitterID[myIndex(listData[idx]["user"], AtCoderID)]))
+            awardsList.append("@" + listData[idx]["twitterID"])
         else:
             rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFont)
-            rankingDraw.text((120, 7), listData[idx]["user"] + " (@" + str(TwitterID[myIndex(str(listData[idx]["user"]), AtCoderID)]) + ")", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFont)
+            rankingDraw.text((120, 7), listData[idx]["atcoderID"] + " (@" + listData[idx]["twitterID"] + ")", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFont)
             rankingDraw.text((672, 7), str(listData[idx][str(type2)]), fill = (0, 0, 0), font = rankingFont)
         resImg.paste(rankingImg, (850 * int(idx / rows), 65 + 63 * (idx % rows)))
 
@@ -222,22 +202,24 @@ def ranking(type):
     nowACCount = {}
     nowACPoint = {}
     for user in acCountData:
-        if user["user_id"] in AtCoderID:
-            nowACCount[str(user["user_id"])] = int(user["problem_count"])
+        for atcoderID, twitterID in AtCoderIDs:
+            if user["user_id"] == atcoderID:
+                nowACCount[str(user["user_id"])] = int(user["problem_count"])
     for user in acPointData:
-        if user["user_id"] in AtCoderID:
-            nowACPoint[str(user["user_id"])] = int(user["point_sum"])
+        for atcoderID, twitterID in AtCoderIDs:
+            if user["user_id"] == atcoderID:
+                nowACPoint[str(user["user_id"])] = int(user["point_sum"])
     newACCount = []
     newACPoint = []
     newACPer = []
-    for user in AtCoderID:
-        if user in acCount and user in nowACCount:
-            if nowACCount[user] - acCount[user] > 0:
-                newACCount.append(({"user" : user, "count" : nowACCount[user] - acCount[user]}))
-        if user in acPoint and user in nowACPoint:
-            if nowACPoint[user] - acPoint[user] > 0 and nowACCount[user] - acCount[user] > 0:
-                newACPoint.append(({"user" : user, "point" : nowACPoint[user] - acPoint[user]}))
-                newACPer.append(({"user" : user, "per": float(nowACPoint[user] - acPoint[user]) / float(nowACCount[user] - acCount[user])}))
+    for atcoderID, twitterID in AtCoderIDs:
+        if atcoderID in acCount and atcoderID in nowACCount:
+            if nowACCount[atcoderID] - acCount[atcoderID] > 0:
+                newACCount.append(({"atcoderID" : atcoderID, "twitterID" : twitterID, "count" : nowACCount[atcoderID] - acCount[atcoderID]}))
+        if atcoderID in acPoint and atcoderID in nowACPoint:
+            if nowACPoint[atcoderID] - acPoint[atcoderID] > 0 and nowACCount[atcoderID] - acCount[atcoderID] > 0:
+                newACPoint.append(({"atcoderID" : atcoderID, "twitterID" : twitterID, "point" : nowACPoint[atcoderID] - acPoint[atcoderID]}))
+                newACPer.append(({"atcoderID" : atcoderID, "twitterID" : twitterID, "per": float(nowACPoint[atcoderID] - acPoint[atcoderID]) / float(nowACCount[atcoderID] - acCount[atcoderID])}))
     newACCount.sort(key = lambda x: x["count"], reverse = True)
     newACPoint.sort(key = lambda x: x["point"], reverse = True)
     newACPer.sort(key = lambda x: x["per"], reverse = True)
@@ -277,23 +259,23 @@ def ranking(type):
 
     # AC 数・Rated Point Sum の通知
     if type == 0:
-        for user in AtCoderID:
-            userURL = "https://kenkoooo.com/atcoder/#/user/" + user
-            if user in oldACCount and user in nowACCount:
-                if nowACCount[user] - oldACCount[user] > 0:
-                    if type == 0 and int(nowACCount[user] / acCountReachNum) > int(oldACCount[user] / acCountReachNum):
+        for atcoderID, twitterID in AtCoderIDs:
+            userURL = "https://kenkoooo.com/atcoder/#/user/" + atcoderID
+            if atcoderID in oldACCount and atcoderID in nowACCount:
+                if nowACCount[atcoderID] - oldACCount[atcoderID] > 0:
+                    if type == 0 and int(nowACCount[atcoderID] / acCountReachNum) > int(oldACCount[atcoderID] / acCountReachNum):
                         try:
-                            api.update_status(user + " ( @" + str(TwitterID[myIndex(user, AtCoderID)]) + " ) さんの AtCoder での AC 数が " + str(oldACCount[user]) + " -> " + str(nowACCount[user]) + " となり，" + str(int(nowACCount[user] / acCountReachNum) * acCountReachNum) + " を突破しました！\n" + userURL + "\n" + timeStamp)
-                            print("AtCoder-ranking: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s AC Count Reach (" + str(oldACCount[user]) + " -> " + str(nowACCount[user]) + ")")
+                            api.update_status(atcoderID + " ( @" + twitterID + " ) さんの AtCoder での AC 数が " + str(oldACCount[atcoderID]) + " -> " + str(nowACCount[atcoderID]) + " となり，" + str(int(nowACCount[atcoderID] / acCountReachNum) * acCountReachNum) + " を突破しました！\n" + userURL + "\n" + timeStamp)
+                            print("AtCoder-ranking: Tweeted " + atcoderID + " ( @" + twitterID + " )'s AC Count Reach (" + str(oldACCount[atcoderID]) + " -> " + str(nowACCount[atcoderID]) + ")")
                         except:
                             print("AtCoder-ranking: Tweet Error")
                         time.sleep(5)
-            if user in oldACPoint and user in nowACPoint:
-                if nowACPoint[user] - oldACPoint[user] > 0 and nowACCount[user] - oldACCount[user] > 0:
-                    if type == 0 and int(nowACPoint[user] / acPointReachNum) > int(oldACPoint[user] / acPointReachNum):
+            if atcoderID in oldACPoint and atcoderID in nowACPoint:
+                if nowACPoint[atcoderID] - oldACPoint[atcoderID] > 0 and nowACCount[atcoderID] - oldACCount[atcoderID] > 0:
+                    if type == 0 and int(nowACPoint[atcoderID] / acPointReachNum) > int(oldACPoint[atcoderID] / acPointReachNum):
                         try:
-                            api.update_status(user + " ( @" + str(TwitterID[myIndex(user, AtCoderID)]) + " ) さんの AtCoder での Rated Point Sum 数が " + str(oldACPoint[user]) + " -> " + str(nowACPoint[user]) + " となり，" + str(int(nowACPoint[user] / acPointReachNum) * acPointReachNum) + " を突破しました！\n" + userURL + "\n" + timeStamp)
-                            print("AtCoder-ranking: Tweeted " + str(user) + " ( @" + TwitterID[myIndex(user, AtCoderID)] + " )'s Rated Point Sum Reach (" + str(oldACPoint[user]) + " -> " + str(nowACPoint[user]) + ")")
+                            api.update_status(atcoderID + " ( @" + twitterID + " ) さんの AtCoder での Rated Point Sum 数が " + str(oldACPoint[atcoderID]) + " -> " + str(nowACPoint[atcoderID]) + " となり，" + str(int(nowACPoint[atcoderID] / acPointReachNum) * acPointReachNum) + " を突破しました！\n" + userURL + "\n" + timeStamp)
+                            print("AtCoder-ranking: Tweeted " + atcoderID + " ( @" + twitterID + " )'s Rated Point Sum Reach (" + str(oldACPoint[atcoderID]) + " -> " + str(nowACPoint[atcoderID]) + ")")
                         except:
                             print("AtCoder-ranking: Tweet Error")
                         time.sleep(5)
