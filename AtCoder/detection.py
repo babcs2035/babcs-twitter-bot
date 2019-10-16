@@ -10,8 +10,7 @@ import json
 from bs4 import BeautifulSoup
 
 # グローバル変数
-AtCoderID = []
-TwitterID = []
+AtCoderIDs = []
 lastSubID_All = {}
 lastSubID_Recent = {}
 noticeFlag = {}
@@ -23,8 +22,7 @@ noticeFlag = {}
 def downloadFromDropbox(type):
     
     # グローバル変数
-    global AtCoderID
-    global TwitterID
+    global AtCoderIDs
     global lastSubID_All
     global lastSubID_Recent
     global noticeFlag
@@ -32,23 +30,13 @@ def downloadFromDropbox(type):
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
+    
+    # AtCoderIDs をダウンロード
+    dbx.files_download_to_file("AtCoder/AtCoderIDs.txt", "/AtCoder/AtCoderIDs.txt")
+    with open("AtCoder/AtCoderIDs.txt", "rb") as f:
+        AtCoderIDs = pickle.load(f)
+    print("AtCoder-detection: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
 
-    # AtCoderID をダウンロード
-    dbx.files_download_to_file("AtCoder/AtCoderID.txt", "/AtCoder/AtCoderID.txt")
-    with open("AtCoder/AtCoderID.txt", "r") as f:
-        AtCoderID.clear()
-        for id in f:
-            AtCoderID.append(id.rstrip("\n"))
-    print("AtCoder-detection: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
-    
-    # TwitterID をダウンロード
-    dbx.files_download_to_file("AtCoder/TwitterID.txt", "/AtCoder/TwitterID.txt")
-    with open("AtCoder/TwitterID.txt", "r") as f:
-        TwitterID.clear()
-        for id in f:
-            TwitterID.append(id.rstrip("\n"))
-    print("AtCoder-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
-    
     if type == 0:
         
         # lastSubID をダウンロード
@@ -116,29 +104,21 @@ def uploadToDropbox(type):
             dbx.files_upload(f.read(), "/AtCoder/noticeFlag.txt")
         print("AtCoder-detection: Uploaded noticeFlag (size : ", str(len(noticeFlag)), ")")
 
-# list 内の要素の添え字を返す（無い場合は -1）
-def myIndex(x, l):
-    if x in l:
-        return l.index(x)
-    else:
-        return -1
-
 # 通知の on/off 切り替え
 def setFlag(atcoderID, twitterID, f):
 
     # グローバル変数
-    global AtCoderID
-    global TwitterID
+    global AtCoderIDs
     global noticeFlag
 
     downloadFromDropbox(2)
 
-    if atcoderID in AtCoderID and twitterID in TwitterID and myIndex(atcoderID, AtCoderID) == myIndex(twitterID, TwitterID):
+    if (atcoderID, twitterID) in AtCoderIDs and (f == "on" or f == "off"): 
         noticeFlag[str(atcoderID)] = str(f)
         uploadToDropbox(2)
         return "AtCoder での AC 通知を " + str(f) + " にしました！\n"
     else:
-        return "この AtCoder ID は登録されていません！\n"
+        return "この AtCoder ID が登録されていないか，無効な引数が与えられました！\n"
 
 def epoch_to_datetime(epoch):
     return datetime.datetime(*time.localtime(epoch)[:6])
@@ -148,8 +128,7 @@ def epoch_to_datetime(epoch):
 def detection(type):
     
     # グローバル変数
-    global AtCoderID
-    global TwitterID
+    global AtCoderIDs
     global lastSubID_All
     global lastSubID_Recent
     
@@ -240,21 +219,19 @@ def detection(type):
 
                 # ユーザーの AC 提出かどうか判定
                 if subData[6] == "AC":
-                    idx = 0
-                    for ids in AtCoderID:
-                        if userID == ids:
-                            if ids in noticeFlag:
-                                if noticeFlag[str(ids)] == "off":
+                    for atcoderID, twitterID in AtCoderIDs:
+                        if atcoderID == userID:
+                            if atcoderID in noticeFlag:
+                                if noticeFlag[atcoderID] == "off":
                                     break
                             else:
-                                noticeFlag[str(ids)] = "on"
+                                noticeFlag[atcoderID] = "on"
                             try:
-                                api.update_status(userID + " ( @" + TwitterID[idx] + " ) さんが <AtCoder> " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\nhttps://atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
-                                print("AtCoder-detection: " + userID + " ( @" + TwitterID[idx] + " ) 's new AC submission (contest : " + str(contest["title"]) + ", problem : " + str(subData[1]) + ")")
+                                api.update_status(atcoderID + " ( @" + twitterID + " ) さんが <AtCoder> " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\nhttps://atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
+                                print("AtCoder-detection: " + atcoderID + " ( @" + twitterID + " ) 's new AC submission (contest : " + str(contest["title"]) + ", problem : " + str(subData[1]) + ")")
                             except:
                                 print("AtCoder-detection: Tweet Error")
-                        idx = idx + 1
-
+                
                 # エラーであれば無条件に報告
                 if subData[6] == "IE" or subData[6] == "NG":
                     try:
