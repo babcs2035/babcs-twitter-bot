@@ -56,7 +56,7 @@ def status(atcoderID):
         if int(userData["accepted_count"]) - int(acCount[atcoderID]) > 0:
             tweetText += "今日の Rated Point Sum / Unique AC 数 : " + str((int(userData["rated_point_sum"]) - int(acPoint[atcoderID])) / (int(userData["accepted_count"]) - int(acCount[atcoderID]))) + "\n"
     else:
-        tweetText += "この AtCoder ID は登録されていません！\n"
+        tweetText += "この AtCoder ID は登録されていないか，まだ統計情報がありません（ID を登録してから日付をまたぐ必要があります）．\n"
     return tweetText
 
 if __name__ == '__main__':
