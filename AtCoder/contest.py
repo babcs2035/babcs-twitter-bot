@@ -56,16 +56,20 @@ def contest():
         contestListImg = Image.open("AtCoder/data/contestsListImg (cell).jpg")
         contestListDraw = ImageDraw.Draw(contestListImg)
         startTime = epoch_to_datetime(contest["startTimeSeconds"])
-        if startTime <= datetime.datetime.today() + datetime.timedelta(2):
-            contestListDraw.text((10, 7), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (200, 20, 20), font = listFontB)
-            contestListDraw.text((360, 7), str(contest["title"]), fill = (200, 20, 20), font = listFontB)
-            contestListDraw.text((1460, 7), str(sec_to_time(contest["durationSeconds"])), fill = (200, 20, 20), font = listFontB)
-            contestListDraw.text((1660, 7), str(contest["ratedRange"]), fill = (200, 20, 20), font = listFontB)
+        contestListDraw.text((10, 7), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (0, 0, 0), font = listFontR)
+        if str(contest["ratedRange"]) == " ~ 1999":
+            contestListDraw.text((360, 7), str(contest["title"].replace("◉ ", "")), fill = (0, 0, 255), font = listFontB)
+            contestListDraw.text((1660, 7), str(contest["ratedRange"]), fill = (0, 0, 255), font = listFontB)
+        elif str(contest["ratedRange"]) == " ~ 2799":
+            contestListDraw.text((360, 7), str(contest["title"].replace("◉ ", "")), fill = (255, 150, 50), font = listFontB)
+            contestListDraw.text((1660, 7), str(contest["ratedRange"]), fill = (255, 150, 50), font = listFontB)
+        elif str(contest["ratedRange"]) == "All":
+            contestListDraw.text((360, 7), str(contest["title"].replace("◉ ", "")), fill = (255, 0, 0), font = listFontB)
+            contestListDraw.text((1660, 7), str(contest["ratedRange"]), fill = (255, 0, 0), font = listFontB)
         else:
-            contestListDraw.text((10, 7), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (0, 0, 0), font = listFontR)
-            contestListDraw.text((360, 7), str(contest["title"]), fill = (0, 0, 0), font = listFontR)
-            contestListDraw.text((1460, 7), str(sec_to_time(contest["durationSeconds"])), fill = (0, 0, 0), font = listFontR)
+            contestListDraw.text((360, 7), str(contest["title"].replace("◉ ", "")), fill = (0, 0, 0), font = listFontR)
             contestListDraw.text((1660, 7), str(contest["ratedRange"]), fill = (0, 0, 0), font = listFontR)
+        contestListDraw.text((1460, 7), str(sec_to_time(contest["durationSeconds"])), fill = (0, 0, 0), font = listFontR)
         contestsListImg.paste(contestListImg, (0, 68 + 64 * idx))
         idx = idx + 1
     contestsListImg.save("AtCoder/contestsListImg_fixed.jpg")
