@@ -11,18 +11,19 @@ def epoch_to_datetime(epoch):
 def get():
 
     # コンテスト一覧から取得
-    session = requests.Session()
-    request = session.get(url = "https://atcoder-api.appspot.com/contests")
-    contestsJsonData = json.loads(request.text)
-    print("atcontest_bc-getLiveContestID: Downloaded contestsJsonData")
-    
     results = []
-    for contest in contestsJsonData:
-        date1 = epoch_to_datetime(contest["startTimeSeconds"])
-        date2 = epoch_to_datetime(contest["startTimeSeconds"] + contest["durationSeconds"])
-        now = datetime.datetime.today()
-        if date1 <= now and now <= date2:
-            results.append(contest["id"])
+    contestsHTML = requests.get("https://atcoder.jp/contests/")
+    try:
+        contestsHTML.raise_for_status()
+        contestsData = BeautifulSoup(contestsHTML.text, "html.parser")
+    except:
+        print("atcontest_bc-getLiveContestID: contestsHTML Error")
+        return
+    divs = contestsData.find_all("div", class_ = "col-lg-9 col-md-8")
+    if str(divs[0].contents[1].contents[1].contents[0]) == "Active Contests":
+        a = divs[0].contents[1].find_all("a")
+        for index in range(1, len(a), 2):
+            results.append(str(a[index].attrs["href"][10:]))
 
     print("atcontest_bc-getLiveContestID: found " + str(len(results)) + " contests")
     return results
