@@ -91,7 +91,7 @@ def scheduled_job():
     downloadFromDropbox()
 
     # ツイートを解析
-    myTwitterID = "babcs_bot"
+    myTwitterID = "cper_bot"
     defSubID = 0
     idFixedFlag = False
     if timeline_json.status_code == 200:
