@@ -6,7 +6,6 @@ import os
 
 app = Flask(__name__)
 
-# ŠÂ‹«•Ï”Žæ“¾
 CHANNEL_ACCESS_TOKEN = os.environ["CHANNEL_ACCESS_TOKEN"]
 CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
 
