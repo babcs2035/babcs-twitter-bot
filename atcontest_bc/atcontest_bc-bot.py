@@ -40,7 +40,7 @@ def scheduled_job():
     global liveContestIDs
     FA.FA(liveContestIDs)
 
-    print("atcontest_bc-bot: ----- detect FA Start -----")
+    print("atcontest_bc-bot: ----- detect FA End -----")
 
 # おまじない
 sched.start()
