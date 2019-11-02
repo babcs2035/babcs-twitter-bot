@@ -12,7 +12,7 @@ def get():
 
     # コンテスト一覧から取得
     results = []
-    contestsHTML = requests.get("https://atcoder.jp/contests/")
+    contestsHTML = requests.get("https://atcoder.jp/contests/?lang=ja")
     try:
         contestsHTML.raise_for_status()
         contestsData = BeautifulSoup(contestsHTML.text, "html.parser")
@@ -20,7 +20,7 @@ def get():
         print("atcontest_bc-getLiveContestID: contestsHTML Error")
         return
     divs = contestsData.find_all("div", class_ = "col-lg-9 col-md-8")
-    if str(divs[0].contents[1].contents[1].contents[0]) == "Active Contests":
+    if str(divs[0].contents[1].contents[1].contents[0]) == "開催中のコンテスト":
         a = divs[0].contents[1].find_all("a")
         for index in range(1, len(a), 2):
             results.append(str(a[index].attrs["href"][10:]))
