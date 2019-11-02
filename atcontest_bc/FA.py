@@ -1,6 +1,8 @@
 # import
 import os
 import tweepy
+import dropbox
+import pickle
 import datetime
 import requests
 from bs4 import BeautifulSoup
@@ -10,6 +12,40 @@ def sec_to_time(sec):
     return str(int(sec / 60)) + ":" + str(int(sec % 60)).zfill(2)
 
 FAFlags = {}
+
+# Dropbox からダウンロード
+def downloadFromDropbox():
+    
+    # グローバル変数
+    global FAFlags
+
+    # Dropbox オブジェクトの生成
+    dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
+    dbx.users_get_current_account()
+    
+    # FAFlags をダウンロード
+    dbx.files_download_to_file("atcontest_bc/FAFlags.txt", "/atcontest_bc/FAFlags.txt")
+    dbx.files_delete("/atcontest_bc/FAFlags.txt")
+    with open("atcontest_bc/FAFlags.txt", "rb") as f:
+        FAFlags = pickle.load(f)
+    print("atcontest_bc-top20: Downloaded FAFlags (size : ", str(len(FAFlags)), ")")
+
+# Dropbox にアップロード
+def uploadToDropbox():
+    
+    # グローバル変数
+    global FAFlags
+
+    # Dropbox オブジェクトの生成
+    dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
+    dbx.users_get_current_account()
+    
+    # FAFlags をアップロード
+    with open("atcontest_bc/FAFlags.txt", "wb") as f:
+        pickle.dump(FAFlags, f)
+    with open("atcontest_bc/FAFlags.txt", "rb") as f:
+        dbx.files_upload(f.read(), "/atcontest_bc/FAFlags.txt")
+    print("atcontest_bc-top20: Uploaded FAFlags (size : ", str(len(FAFlags)), ")")
 
 def FA(contests):
 
@@ -29,6 +65,8 @@ def FA(contests):
     # 時刻表示を作成
     timeStamp = datetime.datetime.today()
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
+
+    downloadFromDropbox()
 
     # 順位表から FA を見つける
     for contest in contests:
@@ -67,10 +105,12 @@ def FA(contests):
             if minTime != -1:
                 FAFlags[task["TaskScreenName"]] = True
                 minTime /= 1000000000
-                api.update_status("〔" + contestName + " 実況〕\n" + task["Assignment"] + " 問題の FA を " + str(sec_to_time(minTime)) + " で " + minUser + " さんが獲得しました！！！おめでとうございます！\nhttps://atcoder.jp/users/" + minUser + "\n" + timeStamp)
+                api.update_status("〔" + contestName + " 実況〕\n" + task["Assignment"] + " 問題の FA を " + str(sec_to_time(minTime)) + " で " + minUser + " さんが獲得しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
                 print("atcontest_bc-FA: detected " + str(task["TaskScreenName"]) + " FA (" + minUser + ")")
+
+    uploadToDropbox()
 
 if __name__ == '__main__':
     print("atcontest_bc-FA: Running as debug...")
-    FA("abc001")
+    FA(["abc001"])
     print("atcontest_bc-FA: Debug finished")

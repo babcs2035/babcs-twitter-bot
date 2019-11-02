@@ -7,6 +7,7 @@ import followBack
 import getLiveContestID
 import FA
 import updateHighestScore
+import top20
 
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
@@ -42,7 +43,7 @@ def scheduled_job():
     FA.FA(liveContestIDs)
 
     print("atcontest_bc-bot: ----- detect FA End -----")
-
+    
 # 問題ごとの最高得点更新を検知
 @sched.scheduled_job('interval', seconds = 60)
 def scheduled_job():
@@ -53,6 +54,17 @@ def scheduled_job():
     updateHighestScore.updateHighestScore(liveContestIDs)
 
     print("atcontest_bc-bot: ----- updateHighestScore End -----")
+
+# 20 位以内に浮上したユーザーを検知
+@sched.scheduled_job('interval', seconds = 60)
+def scheduled_job():
+    
+    print("atcontest_bc-bot: ----- top20 Start -----")
+
+    global liveContestIDs
+    top20.top20(liveContestIDs)
+
+    print("atcontest_bc-bot: ----- top20 End -----")
 
 # おまじない
 sched.start()
