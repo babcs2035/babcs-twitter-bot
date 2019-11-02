@@ -99,7 +99,7 @@ def updateHighestScore(contests):
                     maxUser = str(rows["UserScreenName"])
             if maxScore > scores[task["TaskScreenName"]]:
                 scores[task["TaskScreenName"]] = maxScore
-                api.update_status("〔" + contestName + " 実況〕\n" + maxUser + " さんが " +  task["Assignment"] + " 問題で " + str(maxScore) + " 点を獲得し，最高得点を更新しました！\nhttps://atcoder.jp/users/" + maxUser + "\n" + timeStamp)
+                api.update_status("〔" + contestName + " 実況〕\n" + maxUser + " さんが " +  task["Assignment"] + " 問題で " + str(maxScore / 100) + " 点を獲得し，最高得点を更新しました！\nhttps://atcoder.jp/users/" + maxUser + "\n" + timeStamp)
                 print("atcontest_bc-updateHighestScore: detected " + str(task["TaskScreenName"]) + " updated the highest score (" + maxUser + ")")
 
     uploadToDropbox()
