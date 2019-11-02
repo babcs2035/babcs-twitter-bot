@@ -6,6 +6,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 import followBack
 import getLiveContestID
 import FA
+import updateHighestScore
 
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
@@ -21,7 +22,7 @@ def scheduled_job():
 liveContestIDs = []
 
 # 開催中のコンテストを取得
-@sched.scheduled_job('interval', seconds = 15)
+@sched.scheduled_job('interval', seconds = 30)
 def scheduled_job():
     
     print("atcontest_bc-bot: ----- detect live contests Start -----")
@@ -32,7 +33,7 @@ def scheduled_job():
     print("atcontest_bc-bot: ----- detect live contests End -----")
 
 # FA を見つける
-@sched.scheduled_job('interval', seconds = 30)
+@sched.scheduled_job('interval', seconds = 60)
 def scheduled_job():
     
     print("atcontest_bc-bot: ----- detect FA Start -----")
@@ -41,6 +42,17 @@ def scheduled_job():
     FA.FA(liveContestIDs)
 
     print("atcontest_bc-bot: ----- detect FA End -----")
+
+# 問題ごとの最高得点更新を検知
+@sched.scheduled_job('interval', seconds = 60)
+def scheduled_job():
+    
+    print("atcontest_bc-bot: ----- updateHighestScore Start -----")
+
+    global liveContestIDs
+    updateHighestScore.updateHighestScore(liveContestIDs)
+
+    print("atcontest_bc-bot: ----- updateHighestScore End -----")
 
 # おまじない
 sched.start()
