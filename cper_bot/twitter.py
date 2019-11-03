@@ -66,7 +66,7 @@ def scheduled_job():
     global lastTweetID
     global idFixedFlag
 
-    print("twitter: ----- twitter Start -----")
+    print("cper_bot-twitter: ----- twitter Start -----")
 
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
@@ -112,7 +112,7 @@ def scheduled_job():
                     tweetText = "@" + str(userData["screen_name"]) + "\n"
                     tweetText += AtCoder.detection.setFlag(tweetSplited[2], str(userData["screen_name"]), tweetSplited[3])
                     api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
-                    print("twitter: Tweeted " + tweetSplited[2] + "'s AtCoder detection flag change")
+                    print("cper_bot-twitter: Tweeted " + tweetSplited[2] + "'s AtCoder detection flag change")
 
             if len(tweetSplited) >= 3:
                 
@@ -121,55 +121,55 @@ def scheduled_job():
                     tweetText = "@" + str(userData["screen_name"]) + "\n"
                     tweetText += AtCoder.status.status(tweetSplited[2])
                     api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
-                    print("twitter: Tweeted " + tweetSplited[2] + "'s AtCoder status")
+                    print("cper_bot-twitter: Tweeted " + tweetSplited[2] + "'s AtCoder status")
                     
                 # AtCoder-register (register)
                 if tweetSplited[1] == "reg_atcoder":
                     tweetText = AtCoder.register.register(tweetSplited[2], str(userData["screen_name"]), 0)
                     api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
-                    print("twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
                 # AtCoder-register (unregister)
                 if tweetSplited[1] == "del_atcoder":
                     tweetText = AtCoder.register.register(tweetSplited[2], str(userData["screen_name"]), 1)
                     api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
-                    print("twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
                 # AOJ-register (register)
                 if tweetSplited[1] == "reg_aoj":
                     tweetText = AOJ.register.register(tweetSplited[2], str(userData["screen_name"]), 0)
                     api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
-                    print("twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
                 # AOJ-register (unregister)
                 if tweetSplited[1] == "del_aoj":
                     tweetText = AOJ.register.register(tweetSplited[2], str(userData["screen_name"]), 1)
                     api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
-                    print("twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
                 # CF-register (register)
                 if tweetSplited[1] == "reg_cf":
                     tweetText = CF.register.register(tweetSplited[2], str(userData["screen_name"]), 0)
                     api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
-                    print("twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
                 # CF-register (unregister)
                 if tweetSplited[1] == "del_cf":
                     tweetText = CF.register.register(tweetSplited[2], str(userData["screen_name"]), 1)
                     api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
-                    print("twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
                 # YK-register (register)
                 if tweetSplited[1] == "reg_yk":
                     tweetText = YK.register.register(tweetSplited[2], str(userData["screen_name"]), 0)
                     api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
-                    print("twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
                 # YK-register (unregister)
                 if tweetSplited[1] == "del_yk":
                     tweetText = YK.register.register(tweetSplited[2], str(userData["screen_name"]), 1)
                     api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
-                    print("twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
             if len(tweetSplited) == 2:
 
@@ -177,16 +177,16 @@ def scheduled_job():
                 if tweetSplited[1] == "info":
                     tweetText = info.info()
                     api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
-                    print("twitter; Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
         # 変更されたデータをアップロード
         lastTweetID = int(timeline[0]["id_str"])
         uploadToDropbox()
 
     else:
-        print("twitter: Twitter API Error: %d" % timeline_json.status_code)
+        print("cper_bot-twitter: Twitter API Error: %d" % timeline_json.status_code)
 
-    print("twitter: ----- twitter End -----")
+    print("cper_bot-twitter: ----- twitter End -----")
 
 # おまじない
 sched.start()

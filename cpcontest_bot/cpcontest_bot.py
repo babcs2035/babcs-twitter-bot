@@ -1,6 +1,5 @@
 ﻿# import
 import subprocess
-import os
 import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
 import followBack
@@ -16,9 +15,9 @@ sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
 @sched.scheduled_job('cron', minute = '0, 20, 40', hour = '*/1')
 def scheduled_job():
 
-    print("atcontest_bc-bot: ----- followBack Start -----")
+    print("cpcontest_bot: ----- followBack Start -----")
     followBack.followBack()
-    print("atcontest_bc-bot: ----- followBack End -----")
+    print("cpcontest_bot: ----- followBack End -----")
 
 liveContestIDs = []
 
@@ -26,45 +25,48 @@ liveContestIDs = []
 @sched.scheduled_job('interval', seconds = 30)
 def scheduled_job():
     
-    print("atcontest_bc-bot: ----- detect live contests Start -----")
+    print("cpcontest_bot: ----- getLiveContestID Start -----")
 
     global liveContestIDs
     liveContestIDs = getLiveContestID.get()
 
-    print("atcontest_bc-bot: ----- detect live contests End -----")
+    print("cpcontest_bot: ----- getLiveContestID End -----")
 
 # FA を見つける
 @sched.scheduled_job('interval', seconds = 60)
 def scheduled_job():
     
-    print("atcontest_bc-bot: ----- detect FA Start -----")
+    print("cpcontest_bot: ----- FA Start -----")
 
     global liveContestIDs
-    FA.FA(liveContestIDs)
+    if len(liveContestIDs) > 0:
+        FA.FA(liveContestIDs)
 
-    print("atcontest_bc-bot: ----- detect FA End -----")
+    print("cpcontest_bot: ----- FA End -----")
     
 # 問題ごとの最高得点更新を検知
 @sched.scheduled_job('interval', seconds = 60)
 def scheduled_job():
     
-    print("atcontest_bc-bot: ----- updateHighestScore Start -----")
+    print("cpcontest_bot: ----- updateHighestScore Start -----")
 
     global liveContestIDs
-    updateHighestScore.updateHighestScore(liveContestIDs)
+    if len(liveContestIDs) > 0:
+        updateHighestScore.updateHighestScore(liveContestIDs)
 
-    print("atcontest_bc-bot: ----- updateHighestScore End -----")
+    print("cpcontest_bot: ----- updateHighestScore End -----")
 
 # 20 位以内に浮上したユーザーを検知
 @sched.scheduled_job('interval', seconds = 60)
 def scheduled_job():
     
-    print("atcontest_bc-bot: ----- top20 Start -----")
+    print("cpcontest_bot: ----- top20 Start -----")
 
     global liveContestIDs
-    top20.top20(liveContestIDs)
+    if len(liveContestIDs) > 0:
+        top20.top20(liveContestIDs)
 
-    print("atcontest_bc-bot: ----- top20 End -----")
+    print("cpcontest_bot: ----- top20 End -----")
 
 # おまじない
 sched.start()
