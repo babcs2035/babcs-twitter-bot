@@ -24,3 +24,4 @@ subprocess.Popen(["python", "YK/YK-bot.py"])
 
 # おまじない
 sched.start()
+print("cper_bot: started cper_bot")
