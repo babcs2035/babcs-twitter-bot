@@ -21,11 +21,11 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
     
     # top20s をダウンロード
-    dbx.files_download_to_file("atcontest_bc/top20s.txt", "/atcontest_bc/top20s.txt")
-    dbx.files_delete("/atcontest_bc/top20s.txt")
-    with open("atcontest_bc/top20s.txt", "rb") as f:
+    dbx.files_download_to_file("cpcontest_bot/top20s.txt", "/cpcontest_bot/top20s.txt")
+    dbx.files_delete("/cpcontest_bot/top20s.txt")
+    with open("cpcontest_bot/top20s.txt", "rb") as f:
         top20s = pickle.load(f)
-    print("atcontest_bc-top20: Downloaded top20s (size : ", str(len(top20s)), ")")
+    print("cpcontest_bot-top20: Downloaded top20s (size : ", str(len(top20s)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -38,11 +38,11 @@ def uploadToDropbox():
     dbx.users_get_current_account()
     
     # top20s をアップロード
-    with open("atcontest_bc/top20s.txt", "wb") as f:
+    with open("cpcontest_bot/top20s.txt", "wb") as f:
         pickle.dump(top20s, f)
-    with open("atcontest_bc/top20s.txt", "rb") as f:
-        dbx.files_upload(f.read(), "/atcontest_bc/top20s.txt")
-    print("atcontest_bc-top20: Uploaded top20s (size : ", str(len(top20s)), ")")
+    with open("cpcontest_bot/top20s.txt", "rb") as f:
+        dbx.files_upload(f.read(), "/cpcontest_bot/top20s.txt")
+    print("cpcontest_bot-top20: Uploaded top20s (size : ", str(len(top20s)), ")")
 
 def top20(contests):
 
@@ -74,7 +74,7 @@ def top20(contests):
             topHTML.raise_for_status()
             topData = BeautifulSoup(topHTML.text, "html.parser")
         except:
-            print("atcontest_bc-top20: topHTML Error")
+            print("cpcontest_bot-top20: topHTML Error")
             break
         contestName = str(topData.contents[3].contents[1].contents[1].contents[0])[0:-10]
 
@@ -82,7 +82,7 @@ def top20(contests):
         session = requests.Session()
         request = session.get(url = "https://atcoder.jp/contests/" + str(contest) + "/standings/json")
         standingsJsonData = json.loads(request.text)
-        print("atcontest_bc-top20: Downloaded standingsJsonData")
+        print("cpcontest_bot-top20: Downloaded standingsJsonData")
 
         newData = {}
         for rows in standingsJsonData["StandingsData"]:
@@ -90,12 +90,12 @@ def top20(contests):
                 if rows["UserScreenName"] in top20s[contest]:
                     if top20s[contest][rows["UserScreenName"]] > rows["Rank"] and rows["Rank"] <= 20:
                         api.update_status("〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " さんが " + str(top20s[contest][rows["UserScreenName"]]) + " 位から " + str(rows["Rank"]) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
-                        print("atcontest_bc-top20: detected top20 updated (" + rows["UserScreenName"] + ")")
+                        print("cpcontest_bot-top20: detected top20 updated (" + rows["UserScreenName"] + ")")
             newData[rows["UserScreenName"]] = rows["Rank"]
         top20s[contest] = newData
     uploadToDropbox()
 
 if __name__ == '__main__':
-    print("atcontest_bc-top20: Running as debug...")
+    print("cpcontest_bot-top20: Running as debug...")
     top20(["abc001"])
-    print("atcontest_bc-top20: Debug finished")
+    print("cpcontest_bot-top20: Debug finished")

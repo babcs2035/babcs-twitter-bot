@@ -24,11 +24,11 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
     
     # FAFlags をダウンロード
-    dbx.files_download_to_file("atcontest_bc/FAFlags.txt", "/atcontest_bc/FAFlags.txt")
-    dbx.files_delete("/atcontest_bc/FAFlags.txt")
-    with open("atcontest_bc/FAFlags.txt", "rb") as f:
+    dbx.files_download_to_file("cpcontest_bot/FAFlags.txt", "/cpcontest_bot/FAFlags.txt")
+    dbx.files_delete("/cpcontest_bot/FAFlags.txt")
+    with open("cpcontest_bot/FAFlags.txt", "rb") as f:
         FAFlags = pickle.load(f)
-    print("atcontest_bc-top20: Downloaded FAFlags (size : ", str(len(FAFlags)), ")")
+    print("cpcontest_bot-top20: Downloaded FAFlags (size : ", str(len(FAFlags)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -41,11 +41,11 @@ def uploadToDropbox():
     dbx.users_get_current_account()
     
     # FAFlags をアップロード
-    with open("atcontest_bc/FAFlags.txt", "wb") as f:
+    with open("cpcontest_bot/FAFlags.txt", "wb") as f:
         pickle.dump(FAFlags, f)
-    with open("atcontest_bc/FAFlags.txt", "rb") as f:
-        dbx.files_upload(f.read(), "/atcontest_bc/FAFlags.txt")
-    print("atcontest_bc-top20: Uploaded FAFlags (size : ", str(len(FAFlags)), ")")
+    with open("cpcontest_bot/FAFlags.txt", "rb") as f:
+        dbx.files_upload(f.read(), "/cpcontest_bot/FAFlags.txt")
+    print("cpcontest_bot-top20: Uploaded FAFlags (size : ", str(len(FAFlags)), ")")
 
 def FA(contests):
 
@@ -77,7 +77,7 @@ def FA(contests):
             topHTML.raise_for_status()
             topData = BeautifulSoup(topHTML.text, "html.parser")
         except:
-            print("atcontest_bc-FA: topHTML Error")
+            print("cpcontest_bot-FA: topHTML Error")
             break
         contestName = str(topData.contents[3].contents[1].contents[1].contents[0])[0:-10]
 
@@ -85,7 +85,7 @@ def FA(contests):
         session = requests.Session()
         request = session.get(url = "https://atcoder.jp/contests/" + str(contest) + "/standings/json")
         standingsJsonData = json.loads(request.text)
-        print("atcontest_bc-FA: Downloaded standingsJsonData")
+        print("cpcontest_bot-FA: Downloaded standingsJsonData")
 
         for task in standingsJsonData["TaskInfo"]:
             if task["TaskScreenName"] not in FAFlags:
@@ -106,11 +106,11 @@ def FA(contests):
                 FAFlags[task["TaskScreenName"]] = True
                 minTime /= 1000000000
                 api.update_status("〔" + contestName + " 実況〕\n" + task["Assignment"] + " 問題の FA を " + str(sec_to_time(minTime)) + " で " + minUser + " さんが獲得しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
-                print("atcontest_bc-FA: detected " + str(task["TaskScreenName"]) + " FA (" + minUser + ")")
+                print("cpcontest_bot-FA: detected " + str(task["TaskScreenName"]) + " FA (" + minUser + ")")
 
     uploadToDropbox()
 
 if __name__ == '__main__':
-    print("atcontest_bc-FA: Running as debug...")
+    print("cpcontest_bot-FA: Running as debug...")
     FA(["abc001"])
-    print("atcontest_bc-FA: Debug finished")
+    print("cpcontest_bot-FA: Debug finished")

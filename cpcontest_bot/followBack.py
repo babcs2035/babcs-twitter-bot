@@ -19,8 +19,8 @@ def followBack():
     api = tweepy.API(auth)
     
     # フォロバ
-    followers = api.followers_ids("atcontest_bc")
-    friends = api.friends_ids("atcontest_bc")
+    followers = api.followers_ids("cpcontest_bot")
+    friends = api.friends_ids("cpcontest_bot")
     set_apr = set(followers) - set(friends)
     list_apr = list(set_apr)
     followedCnt = 0
@@ -28,7 +28,7 @@ def followBack():
     for user in list_apr:
         try:
             api.create_friendship(user)
-            print("followBack: Created friendship with %s" % user) 
+            print("cpcontest_bot-followBack: Created friendship with %s" % user) 
             followedCnt = followedCnt + 1
             # OAuth でツイートを取得
             api_OAuth = OAuth1Session(CK, CS, AT, AS)
@@ -36,7 +36,7 @@ def followBack():
             user_data = json.loads(user_json.text)
             followedList.append({"user_name" : user_data["name"], "user_id" : user_data["screen_name"]})
         except tweepy.error.TweepError:
-            print("followBack: Could not create friendship with %s" % user)
+            print("cpcontest_bot-followBack: Could not create friendship with %s" % user)
     followStr = "新しく " + str(followedCnt) + " 人をフォローしました：\n"
     for user in followedList:
         followStr += str(user["user_name"]) + " ( @" + str(user["user_id"]) + " )\n"
@@ -48,9 +48,9 @@ def followBack():
     # ツイート
     if followedCnt > 0:
         api.update_status(followStr + "\n" + timeStamp)
-    print("atcontest_bc-followBack: 新規フォロー " + str(followedCnt) + " 人")
+    print("cpcontest_bot-followBack: 新規フォロー " + str(followedCnt) + " 人")
 
 if __name__ == '__main__':
-    print("atcontest_bc-followBack: Running as debug...")
+    print("cpcontest_bot-followBack: Running as debug...")
     followBack()
-    print("atcontest_bc-followBack: Debug finished")
+    print("cpcontest_bot-followBack: Debug finished")

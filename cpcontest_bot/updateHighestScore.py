@@ -21,11 +21,11 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
     
     # scores をダウンロード
-    dbx.files_download_to_file("atcontest_bc/scores.txt", "/atcontest_bc/scores.txt")
-    dbx.files_delete("/atcontest_bc/scores.txt")
-    with open("atcontest_bc/scores.txt", "rb") as f:
+    dbx.files_download_to_file("cpcontest_bot/scores.txt", "/cpcontest_bot/scores.txt")
+    dbx.files_delete("/cpcontest_bot/scores.txt")
+    with open("cpcontest_bot/scores.txt", "rb") as f:
         scores = pickle.load(f)
-    print("atcontest_bc-updateHighestScore: Downloaded scores (size : ", str(len(scores)), ")")
+    print("cpcontest_bot-updateHighestScore: Downloaded scores (size : ", str(len(scores)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -38,11 +38,11 @@ def uploadToDropbox():
     dbx.users_get_current_account()
     
     # scores をアップロード
-    with open("atcontest_bc/scores.txt", "wb") as f:
+    with open("cpcontest_bot/scores.txt", "wb") as f:
         pickle.dump(scores, f)
-    with open("atcontest_bc/scores.txt", "rb") as f:
-        dbx.files_upload(f.read(), "/atcontest_bc/scores.txt")
-    print("atcontest_bc-updateHighestScore: Uploaded scores (size : ", str(len(scores)), ")")
+    with open("cpcontest_bot/scores.txt", "rb") as f:
+        dbx.files_upload(f.read(), "/cpcontest_bot/scores.txt")
+    print("cpcontest_bot-updateHighestScore: Uploaded scores (size : ", str(len(scores)), ")")
 
 def updateHighestScore(contests):
 
@@ -74,7 +74,7 @@ def updateHighestScore(contests):
             topHTML.raise_for_status()
             topData = BeautifulSoup(topHTML.text, "html.parser")
         except:
-            print("atcontest_bc-updateHighestScore: topHTML Error")
+            print("cpcontest_bot-updateHighestScore: topHTML Error")
             break
         contestName = str(topData.contents[3].contents[1].contents[1].contents[0])[0:-10]
 
@@ -82,7 +82,7 @@ def updateHighestScore(contests):
         session = requests.Session()
         request = session.get(url = "https://atcoder.jp/contests/" + str(contest) + "/standings/json")
         standingsJsonData = json.loads(request.text)
-        print("atcontest_bc-updateHighestScore: Downloaded standingsJsonData")
+        print("cpcontest_bot-updateHighestScore: Downloaded standingsJsonData")
 
         for task in standingsJsonData["TaskInfo"]:
             if task["TaskScreenName"] not in scores:
@@ -100,11 +100,11 @@ def updateHighestScore(contests):
             if maxScore > scores[task["TaskScreenName"]]:
                 scores[task["TaskScreenName"]] = maxScore
                 api.update_status("〔" + contestName + " 実況〕\n" + maxUser + " さんが " +  task["Assignment"] + " 問題で " + str(maxScore / 100) + " 点を獲得し，最高得点を更新しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
-                print("atcontest_bc-updateHighestScore: detected " + str(task["TaskScreenName"]) + " updated the highest score (" + maxUser + ")")
+                print("cpcontest_bot-updateHighestScore: detected " + str(task["TaskScreenName"]) + " updated the highest score (" + maxUser + ")")
 
     uploadToDropbox()
 
 if __name__ == '__main__':
-    print("atcontest_bc-FA: Running as debug...")
-    updateHighestScore("abc001")
-    print("atcontest_bc-FA: Debug finished")
+    print("cpcontest_bot-FA: Running as debug...")
+    updateHighestScore(["abc001"])
+    print("cpcontest_bot-FA: Debug finished")
