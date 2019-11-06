@@ -1,5 +1,7 @@
 ﻿# import
 import subprocess
+import datetime
+from apscheduler.schedulers.blocking import BlockingScheduler
 
 # 各 Bot を開始
 subprocess.Popen(["python", "cper_bot/cper_bot.py"])
