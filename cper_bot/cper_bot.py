@@ -15,13 +15,5 @@ def scheduled_job():
     followBack.followBack()
     print("cper_bot: ----- followBack End -----")
 
-# 各種 Bot を呼び出す
-subprocess.Popen(["python", "cper_bot/twitter.py"])
-subprocess.Popen(["python", "cper_bot/AtCoder/AtCoder-bot.py"])
-subprocess.Popen(["python", "cper_bot/AOJ/AOJ-bot.py"])
-subprocess.Popen(["python", "cper_bot/CF/CF-bot.py"])
-subprocess.Popen(["python", "cper_bot/YK/YK-bot.py"])
-
 # おまじない
 sched.start()
-print("cper_bot: started cper_bot")

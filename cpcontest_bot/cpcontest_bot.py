@@ -70,4 +70,3 @@ def scheduled_job():
 
 # おまじない
 sched.start()
-print("cpcontest_bot: started cpcontest_bot")

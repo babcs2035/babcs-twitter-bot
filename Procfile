@@ -1,2 +1,2 @@
-bot: python cpcontest_bot/cpcontest_bot.py
+bot: python main.py
 web: python web/server.py
