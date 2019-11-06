@@ -1,2 +1,2 @@
-bot: python cper_bot/cper_bot.py
+bot: python main.py
 web: python web/server.py
