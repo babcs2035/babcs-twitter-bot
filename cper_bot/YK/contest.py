@@ -44,26 +44,26 @@ def contest():
         return
 
     # 画像生成
-    listFont = ImageFont.truetype("YK/data/fontR.ttc", 32)
-    contestsListFirstImg = Image.open("YK/data/contestsListImg (first).jpg")
+    listFont = ImageFont.truetype("cper_bot/YK/data/fontR.ttc", 32)
+    contestsListFirstImg = Image.open("cper_bot/YK/data/contestsListImg (first).jpg")
     contestsListImg = Image.new("RGB", (1772, 68 + 64 * len(contestsList)))
     contestsListImg.paste(contestsListFirstImg, (0, 0))
     idx = 0
     for contest in contestsList:
-        contestListImg = Image.open("YK/data/contestsListImg (cell).jpg")
+        contestListImg = Image.open("cper_bot/YK/data/contestsListImg (cell).jpg")
         contestListDraw = ImageDraw.Draw(contestListImg)
         contestListDraw.text((10, 7), str(contest["Date"]), fill = (0, 0, 0), font = listFont)
         contestListDraw.text((360, 7), str(contest["EndDate"]), fill = (0, 0, 0), font = listFont)
         contestListDraw.text((710, 7), str(contest["Name"]), fill = (0, 0, 0), font = listFont)
         contestsListImg.paste(contestListImg, (0, 68 + 64 * idx))
         idx = idx + 1
-    contestsListImg.save("YK/contestsListImg_fixed.jpg")
+    contestsListImg.save("cper_bot/YK/contestsListImg_fixed.jpg")
 
     # リストをツイート
     listTweetText = "現在 " + str(len(contestsList)) + " の yukicoder コンテストが予定されています．\nhttps://yukicoder.me/contests\n"
-    api.update_with_media(filename = "YK/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
+    api.update_with_media(filename = "cper_bot/YK/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
 
 if __name__ == '__main__':
-    print("YK-contest: Running as debug...")
+    print("cper_bot-YK-contest: Running as debug...")
     contest()
-    print("YK-contest: Debug finished")
+    print("cper_bot-YK-contest: Debug finished")

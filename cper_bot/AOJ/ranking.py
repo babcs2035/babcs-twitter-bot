@@ -26,26 +26,26 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # AOJID をダウンロード
-    dbx.files_download_to_file("AOJID.txt", "/AOJ/AOJID.txt")
-    with open("AOJID.txt", "r") as f:
+    dbx.files_download_to_file("cper_bot/AOJ/AOJID.txt", "/cper_bot/AOJ/AOJID.txt")
+    with open("cper_bot/AOJ/AOJID.txt", "r") as f:
         AOJID.clear()
         for id in f:
             AOJID.append(id.rstrip("\n"))
-    print("AOJ-ranking: Downloaded AOJID (size : ", str(len(AOJID)), ")")
+    print("cper_bot-AOJ-ranking: Downloaded AOJID (size : ", str(len(AOJID)), ")")
     
     # TwitterID をダウンロード
-    dbx.files_download_to_file("TwitterID.txt", "/AOJ/TwitterID.txt")
-    with open("TwitterID.txt", "r") as f:
+    dbx.files_download_to_file("cper_bot/AOJ/TwitterID.txt", "/cper_bot/AOJ/TwitterID.txt")
+    with open("cper_bot/AOJ/TwitterID.txt", "r") as f:
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
-    print("AOJ-ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+    print("cper_bot-AOJ-ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     # acCount をダウンロード
-    dbx.files_download_to_file("acCount.txt", "/AOJ/acCount.txt")
-    with open("acCount.txt", "rb") as f:
+    dbx.files_download_to_file("cper_bot/AOJ/acCount.txt", "/cper_bot/AOJ/acCount.txt")
+    with open("cper_bot/AOJ/acCount.txt", "rb") as f:
         acCount = pickle.load(f)
-    print("AOJ-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
+    print("cper_bot-AOJ-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -58,12 +58,12 @@ def uploadToDropbox():
     dbx.users_get_current_account()
     
     # acCount をアップロード
-    with open("acCount.txt", "wb") as f:
+    with open("cper_bot/AOJ/acCount.txt", "wb") as f:
         pickle.dump(acCount, f)
-    with open("acCount.txt", "rb") as f:
-        dbx.files_delete("/AOJ/acCount.txt")
-        dbx.files_upload(f.read(), "/AOJ/acCount.txt")
-    print("AOJ-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
+    with open("cper_bot/AOJ/acCount.txt", "rb") as f:
+        dbx.files_delete("/cper_bot/AOJ/acCount.txt")
+        dbx.files_upload(f.read(), "/cper_bot/AOJ/acCount.txt")
+    print("cper_bot-AOJ-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
     
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
@@ -158,6 +158,6 @@ def ranking():
     uploadToDropbox()
 
 if __name__ == '__main__':
-    print("AOJ-ranking: Running as debug...")
+    print("cper_bot-AOJ-ranking: Running as debug...")
     ranking()
-    print("AOJ-ranking: Debug finished")
+    print("cper_bot-AOJ-ranking: Debug finished")

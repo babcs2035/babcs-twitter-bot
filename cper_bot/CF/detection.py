@@ -26,26 +26,26 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # CFID をダウンロード
-    dbx.files_download_to_file("CF/CFID.txt", "/CF/CFID.txt")
-    with open("CF/CFID.txt", "r") as f:
+    dbx.files_download_to_file("cper_bot/CF/CFID.txt", "/cper_bot/CF/CFID.txt")
+    with open("cper_bot/CF/CFID.txt", "r") as f:
         CFID.clear()
         for id in f:
             CFID.append(id.rstrip("\n"))
-    print("CF-detection: Downloaded CFID (size : ", str(len(CFID)), ")")
+    print("cper_bot-CF-detection: Downloaded CFID (size : ", str(len(CFID)), ")")
     
     # TwitterID をダウンロード
-    dbx.files_download_to_file("CF/TwitterID.txt", "/CF/TwitterID.txt")
-    with open("CF/TwitterID.txt", "r") as f:
+    dbx.files_download_to_file("cper_bot/CF/TwitterID.txt", "/cper_bot/CF/TwitterID.txt")
+    with open("cper_bot/CF/TwitterID.txt", "r") as f:
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
-    print("CF-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+    print("cper_bot-CF-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     # lastSubID をダウンロード
-    dbx.files_download_to_file("CF/lastSubID.txt", "/CF/lastSubID.txt")
-    with open("CF/lastSubID.txt", "rb") as f:
+    dbx.files_download_to_file("cper_bot/CF/lastSubID.txt", "/cper_bot/CF/lastSubID.txt")
+    with open("cper_bot/CF/lastSubID.txt", "rb") as f:
         lastSubID = pickle.load(f)
-    print("CF-detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
+    print("cper_bot-CF-detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -58,12 +58,12 @@ def uploadToDropbox():
     dbx.users_get_current_account()
     
     # lastSubID をアップロード
-    with open("CF/lastSubID.txt", "wb") as f:
+    with open("cper_bot/CF/lastSubID.txt", "wb") as f:
         pickle.dump(lastSubID, f)
-    with open("CF/lastSubID.txt", "rb") as f:
-        dbx.files_delete("/CF/lastSubID.txt")
-        dbx.files_upload(f.read(), "/CF/lastSubID.txt")
-    print("CF-detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
+    with open("cper_bot/CF/lastSubID.txt", "rb") as f:
+        dbx.files_delete("/cper_bot/CF/lastSubID.txt")
+        dbx.files_upload(f.read(), "/cper_bot/CF/lastSubID.txt")
+    print("cper_bot-CF-detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 def detection():
     
@@ -103,9 +103,9 @@ def detection():
                     if str(sub["verdict"]) == "OK":
                         try:
                             api.update_status(user + " ( @" + TwitterID[idx] + " ) さんが <Codeforces> " + str(sub["problem"]["name"]) + " を AC しました！\n" + "https://codeforces.com/contest/" + str(sub["contestId"]) + "/submission/" + str(sub["id"]) + "\n" + timeStamp)
-                            print("CF-detection: " + user + " ( @" + TwitterID[idx] + " ) 's new AC submission (problem : " + str(sub["problem"]["name"]) + ")")
+                            print("cper_bot-CF-detection: " + user + " ( @" + TwitterID[idx] + " ) 's new AC submission (problem : " + str(sub["problem"]["name"]) + ")")
                         except:
-                            print("CF-detection: Tweet Error")
+                            print("cper_bot-CF-detection: Tweet Error")
         lastSubID[user] = int(subsJsonData["result"][0]["id"])
         idx = idx + 1
 
@@ -113,6 +113,6 @@ def detection():
     uploadToDropbox()
 
 if __name__ == '__main__':
-    print("CF-detection: Running as debug...")
+    print("cper_bot-CF-detection: Running as debug...")
     detection()
-    print("CF-detection: Debug finished")
+    print("cper_bot-CF-detection: Debug finished")

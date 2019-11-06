@@ -31,18 +31,18 @@ def downloadFromDropbox(type):
     if type == 0:
 
         # subCount_hour をダウンロード
-        dbx.files_download_to_file("AtCoder/subCount_hour.txt", "/AtCoder/subCount_hour.txt")
-        with open("AtCoder/subCount_hour.txt", "rb") as f:
+        dbx.files_download_to_file("cper_bot/AtCoder/subCount_hour.txt", "/cper_bot/AtCoder/subCount_hour.txt")
+        with open("cper_bot/AtCoder/subCount_hour.txt", "rb") as f:
             subCount = pickle.load(f)
-        print("AtCoder-statistics: Downloaded subCount_hour (size : ", str(len(subCount)), ")")
+        print("cper_bot-AtCoder-statistics: Downloaded subCount_hour (size : ", str(len(subCount)), ")")
 
     if type == 1:
 
         # subCount_day をダウンロード
-        dbx.files_download_to_file("AtCoder/subCount_day.txt", "/AtCoder/subCount_day.txt")
-        with open("AtCoder/subCount_day.txt", "rb") as f:
+        dbx.files_download_to_file("cper_bot/AtCoder/subCount_day.txt", "/cper_bot/AtCoder/subCount_day.txt")
+        with open("cper_bot/AtCoder/subCount_day.txt", "rb") as f:
             subCount = pickle.load(f)
-        print("AtCoder-statistics: Downloaded subCount_day (size : ", str(len(subCount)), ")")
+        print("cper_bot-AtCoder-statistics: Downloaded subCount_day (size : ", str(len(subCount)), ")")
     
 # Dropbox にアップロード
 # type = 0 : 1 hour
@@ -59,22 +59,22 @@ def uploadToDropbox(type):
     if type == 0:
 
         # subCount_hour をアップロード
-        with open("AtCoder/subCount_hour.txt", "wb") as f:
+        with open("cper_bot/AtCoder/subCount_hour.txt", "wb") as f:
             pickle.dump(subCount, f)
-        with open("AtCoder/subCount_hour.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/subCount_hour.txt")
-            dbx.files_upload(f.read(), "/AtCoder/subCount_hour.txt")
-        print("AtCoder-statistics: Uploaded subCount_hour (size : ", str(len(subCount)), ")")
+        with open("cper_bot/AtCoder/subCount_hour.txt", "rb") as f:
+            dbx.files_delete("/cper_bot/AtCoder/subCount_hour.txt")
+            dbx.files_upload(f.read(), "/cper_bot/AtCoder/subCount_hour.txt")
+        print("cper_bot-AtCoder-statistics: Uploaded subCount_hour (size : ", str(len(subCount)), ")")
 
     if type == 1:
 
         # subCount_day をアップロード
-        with open("AtCoder/subCount_day.txt", "wb") as f:
+        with open("cper_bot/AtCoder/subCount_day.txt", "wb") as f:
             pickle.dump(subCount, f)
-        with open("AtCoder/subCount_day.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/subCount_day.txt")
-            dbx.files_upload(f.read(), "/AtCoder/subCount_day.txt")
-        print("AtCoder-statistics: Uploaded subCount_day (size : ", str(len(subCount)), ")")
+        with open("cper_bot/AtCoder/subCount_day.txt", "rb") as f:
+            dbx.files_delete("/cper_bot/AtCoder/subCount_day.txt")
+            dbx.files_upload(f.read(), "/cper_bot/AtCoder/subCount_day.txt")
+        print("cper_bot-AtCoder-statistics: Uploaded subCount_day (size : ", str(len(subCount)), ")")
 
 # type = 0 : 1 hour
 # type = 1 : 1 day
@@ -105,7 +105,7 @@ def statistics(type):
     session = requests.Session()
     request = session.get(url = "https://atcoder-api.appspot.com/contests")
     contestsJsonData = json.loads(request.text)
-    print("AtCoder-statistics: Downloaded contestsJsonData")
+    print("cper_bot-AtCoder-statistics: Downloaded contestsJsonData")
     maxSubID = -1
     for contest in contestsJsonData:
 
@@ -116,7 +116,7 @@ def statistics(type):
             sublistHTML.raise_for_status()
             sublistData = BeautifulSoup(sublistHTML.text, "html.parser")
         except:
-            print("AtCoder-statistics: sublistHTML Error")
+            print("cper_bot-AtCoder-statistics: sublistHTML Error")
             continue
         sublistTable = sublistData.find_all("table", class_ = "table table-bordered table-striped small th-center")
         if len(sublistTable) == 0:
@@ -128,7 +128,7 @@ def statistics(type):
         links = sublistRows[0].find_all("a")
         subID = int(str(links[3].get("href")).split("/")[4])
         maxSubID = max(maxSubID, subID)
-        print("AtCoder-statistics: Checked " + contest["title"] + " (lastSubID : " + str(subID) + ")")
+        print("cper_bot-AtCoder-statistics: Checked " + contest["title"] + " (lastSubID : " + str(subID) + ")")
 
     # グラフを描画・ツイート
     xs = []
@@ -154,14 +154,14 @@ def statistics(type):
         prefix = "hour"
     if type == 1:
         prefix = "day"
-    plt.savefig("AtCoder/subCount_" + prefix + ".png")
-    api.update_with_media(filename = "AtCoder/subCount_" + prefix + ".png", status = "AtCoder で " + str(xs[len(xs) - 1]).replace("\n", " ") + " の間に " + str(ys[len(ys) - 1]).replace("\n", " ") + " 回提出がありました．\n" + timeStamp)
-    print("AtCoder-statistics: Tweeted subCount_" + prefix + ".png")
+    plt.savefig("cper_bot/AtCoder/subCount_" + prefix + ".png")
+    api.update_with_media(filename = "cper_bot/AtCoder/subCount_" + prefix + ".png", status = "AtCoder で " + str(xs[len(xs) - 1]).replace("\n", " ") + " の間に " + str(ys[len(ys) - 1]).replace("\n", " ") + " 回提出がありました．\n" + timeStamp)
+    print("cper_bot-AtCoder-statistics: Tweeted subCount_" + prefix + ".png")
 
     # データをアップロード
     uploadToDropbox(type)
 
 if __name__ == '__main__':
-    print("AtCoder-statistics: Running as debug...")
+    print("cper_bot-AtCoder-statistics: Running as debug...")
     statistics(0)
-    print("AtCoder-statistics: Debug finished")
+    print("cper_bot-AtCoder-statistics: Debug finished")

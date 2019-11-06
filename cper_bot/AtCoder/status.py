@@ -21,16 +21,16 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # acCount をダウンロード
-    dbx.files_download_to_file("AtCoder/daily_acCount.txt", "/AtCoder/daily_acCount.txt")
-    with open("AtCoder/daily_acCount.txt", "rb") as f:
+    dbx.files_download_to_file("cper_bot/AtCoder/daily_acCount.txt", "/cper_bot/AtCoder/daily_acCount.txt")
+    with open("cper_bot/AtCoder/daily_acCount.txt", "rb") as f:
         acCount = pickle.load(f)
-    print("AtCoder-status: Downloaded daily acCount (size : ", str(len(acCount)), ")")
+    print("cper_bot-AtCoder-status: Downloaded daily acCount (size : ", str(len(acCount)), ")")
     
     # acPoint をダウンロード
-    dbx.files_download_to_file("AtCoder/daily_acPoint.txt", "/AtCoder/daily_acPoint.txt")
-    with open("AtCoder/daily_acPoint.txt", "rb") as f:
+    dbx.files_download_to_file("cper_bot/AtCoder/daily_acPoint.txt", "/cper_bot/AtCoder/daily_acPoint.txt")
+    with open("cper_bot/AtCoder/daily_acPoint.txt", "rb") as f:
         acPoint = pickle.load(f)
-    print("AtCoder-status: Downloaded daily acPoint (size : ", str(len(acPoint)), ")")
+    print("cper_bot-AtCoder-status: Downloaded daily acPoint (size : ", str(len(acPoint)), ")")
 
 def status(atcoderID):
 
@@ -45,7 +45,7 @@ def status(atcoderID):
     session = requests.Session()
     request = session.get(url = "https://kenkoooo.com/atcoder/atcoder-api/v2/user_info?user=" + atcoderID)
     userData = json.loads(request.text)
-    print("AtCoder-status: Downloaded " + atcoderID + "'s userData")
+    print("cper_bot-AtCoder-status: Downloaded " + atcoderID + "'s userData")
 
     tweetText = ""
     if atcoderID in acCount:
@@ -60,6 +60,6 @@ def status(atcoderID):
     return tweetText
 
 if __name__ == '__main__':
-    print("AtCoder-status: Running as debug...")
+    print("cper_bot-AtCoder-status: Running as debug...")
     print(status("Bwambocos"))
-    print("AtCoder-status: Debug finished")
+    print("cper_bot-AtCoder-status: Debug finished")

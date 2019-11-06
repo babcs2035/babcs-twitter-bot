@@ -33,10 +33,10 @@ def downloadFromDropbox(type):
     dbx.users_get_current_account()
 
     # AtCoderIDs をダウンロード
-    dbx.files_download_to_file("AtCoder/AtCoderIDs.txt", "/AtCoder/AtCoderIDs.txt")
-    with open("AtCoder/AtCoderIDs.txt", "rb") as f:
+    dbx.files_download_to_file("cper_bot/AtCoder/AtCoderIDs.txt", "/cper_bot/AtCoder/AtCoderIDs.txt")
+    with open("cper_bot/AtCoder/AtCoderIDs.txt", "rb") as f:
         AtCoderIDs = pickle.load(f)
-    print("AtCoder-detection: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
+    print("cper_bot-AtCoder-detection: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
     
     dirType = ""
     if type == 0 or type == 1:
@@ -47,22 +47,22 @@ def downloadFromDropbox(type):
         dirType += "monthly"
 
     # acCount をダウンロード
-    dbx.files_download_to_file("AtCoder/" + dirType + "_acCount.txt", "/AtCoder/" + dirType + "_acCount.txt")
-    with open("AtCoder/" + dirType + "_acCount.txt", "rb") as f:
+    dbx.files_download_to_file("cper_bot/AtCoder/" + dirType + "_acCount.txt", "/cper_bot/AtCoder/" + dirType + "_acCount.txt")
+    with open("cper_bot/AtCoder/" + dirType + "_acCount.txt", "rb") as f:
         acCount = pickle.load(f)
-    print("AtCoder-ranking: Downloaded " + dirType + " acCount (size : ", str(len(acCount)), ")")
+    print("cper_bot-AtCoder-ranking: Downloaded " + dirType + " acCount (size : ", str(len(acCount)), ")")
     
     # acPoint をダウンロード
-    dbx.files_download_to_file("AtCoder/" + dirType + "_acPoint.txt", "/AtCoder/" + dirType + "_acPoint.txt")
-    with open("AtCoder/" + dirType + "_acPoint.txt", "rb") as f:
+    dbx.files_download_to_file("cper_bot/AtCoder/" + dirType + "_acPoint.txt", "/cper_bot/AtCoder/" + dirType + "_acPoint.txt")
+    with open("cper_bot/AtCoder/" + dirType + "_acPoint.txt", "rb") as f:
         acPoint = pickle.load(f)
-    print("AtCoder-ranking: Downloaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
+    print("cper_bot-AtCoder-ranking: Downloaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
 
     # ratings をダウンロード
-    dbx.files_download_to_file("AtCoder/ratings.txt", "/AtCoder/ratings.txt")
-    with open("AtCoder/ratings.txt", "rb") as f:
+    dbx.files_download_to_file("cper_bot/AtCoder/ratings.txt", "/cper_bot/AtCoder/ratings.txt")
+    with open("cper_bot/AtCoder/ratings.txt", "rb") as f:
         ratings = pickle.load(f)
-    print("AtCoder-ranking: Downloaded ratings (size : ", str(len(ratings)), ")")
+    print("cper_bot-AtCoder-ranking: Downloaded ratings (size : ", str(len(ratings)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox(type):
@@ -87,20 +87,20 @@ def uploadToDropbox(type):
     
     if type != 1:
         # acCount をアップロード
-        with open("AtCoder/" + dirType + "_acCount.txt", "wb") as f:
+        with open("cper_bot/AtCoder/" + dirType + "_acCount.txt", "wb") as f:
             pickle.dump(acCount, f)
-        with open("AtCoder/" + dirType + "_acCount.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/" + dirType + "_acCount.txt")
-            dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_acCount.txt")
-        print("AtCoder-ranking: Uploaded " + dirType + " acCount (size : ", str(len(acCount)), ")")
+        with open("cper_bot/AtCoder/" + dirType + "_acCount.txt", "rb") as f:
+            dbx.files_delete("/cper_bot/AtCoder/" + dirType + "_acCount.txt")
+            dbx.files_upload(f.read(), "/cper_bot/AtCoder/" + dirType + "_acCount.txt")
+        print("cper_bot-AtCoder-ranking: Uploaded " + dirType + " acCount (size : ", str(len(acCount)), ")")
 
         # acPoint をアップロード
-        with open("AtCoder/" + dirType + "_acPoint.txt", "wb") as f:
+        with open("cper_bot/AtCoder/" + dirType + "_acPoint.txt", "wb") as f:
             pickle.dump(acPoint, f)
-        with open("AtCoder/" + dirType + "_acPoint.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/" + dirType + "_acPoint.txt")
-            dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_acPoint.txt")
-        print("AtCoder-ranking: Uploaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
+        with open("cper_bot/AtCoder/" + dirType + "_acPoint.txt", "rb") as f:
+            dbx.files_delete("/cper_bot/AtCoder/" + dirType + "_acPoint.txt")
+            dbx.files_upload(f.read(), "/cper_bot/AtCoder/" + dirType + "_acPoint.txt")
+        print("cper_bot-AtCoder-ranking: Uploaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
 
 def makeRanking(type1, type2, listData, unit):
     
@@ -114,15 +114,15 @@ def makeRanking(type1, type2, listData, unit):
     rankNum = 1
     countNum = 1
     countIndex = 0
-    rankingFont = ImageFont.truetype("AtCoder/data/fontR.ttc", 32)
-    rankingFontS = ImageFont.truetype("AtCoder/data/fontB.ttc", 32)
-    rankingFirstImg = Image.open("AtCoder/data/" + str(type2) + "RankingImg (first).jpg")
+    rankingFont = ImageFont.truetype("cper_bot/AtCoder/data/fontR.ttc", 32)
+    rankingFontS = ImageFont.truetype("cper_bot/AtCoder/data/fontB.ttc", 32)
+    rankingFirstImg = Image.open("cper_bot/AtCoder/data/" + str(type2) + "RankingImg (first).jpg")
     resImg = Image.new("RGB", (850 * int((len(listData) + rows - 1) / rows), 65 + 63 * min(len(listData), rows)))
     awardsList = []
     for idx in range(len(listData)):
         if idx % rows == 0:
             resImg.paste(rankingFirstImg, (850 * int(idx / rows), 0))
-        rankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
+        rankingImg = Image.open("cper_bot/AtCoder/data/rankingImg (cell).jpg")
         rankingDraw = ImageDraw.Draw(rankingImg)
         if idx > 0:
             if flag and int(listData[idx - 1][str(type2)]) > int(listData[idx][str(type2)]):
@@ -153,7 +153,7 @@ def makeRanking(type1, type2, listData, unit):
             rankingDraw.text((672, 7), str(listData[idx][str(type2)]), fill = (0, 0, 0), font = rankingFont)
         resImg.paste(rankingImg, (850 * int(idx / rows), 65 + 63 * (idx % rows)))
 
-    resImg.save("AtCoder/" + str(type1) + "RankingImg_fixed.jpg")
+    resImg.save("cper_bot/AtCoder/" + str(type1) + "RankingImg_fixed.jpg")
     tweetText = " ランキング TOP " + str(rankNum) + "\n入賞の " + " , ".join(awardsList) + " さん おめでとうございます！\n"
     return tweetText
 
@@ -237,18 +237,18 @@ def ranking(type):
 
     # Unique AC 数ランキングをツイート
     countTweetText = "AtCoder Unique AC 数 " + tweetTextType
-    api.update_with_media(filename = "AtCoder/" + dirType + "_countRankingImg_fixed.jpg", status = countTweetText + makeRanking(dirType + "_count", "count", newACCount, "Unique AC") + "\n" + timeStamp)
-    print("AtCoder-ranking: Tweeted " + dirType + " countRanking")
+    api.update_with_media(filename = "cper_bot/AtCoder/" + dirType + "_countRankingImg_fixed.jpg", status = countTweetText + makeRanking(dirType + "_count", "count", newACCount, "Unique AC") + "\n" + timeStamp)
+    print("cper_bot-AtCoder-ranking: Tweeted " + dirType + " countRanking")
 
     # Point Sum ランキングをツイート
     pointTweetText = "AtCoder Point Sum " + tweetTextType
-    api.update_with_media(filename = "AtCoder/" + dirType + "_pointRankingImg_fixed.jpg", status = pointTweetText + makeRanking(dirType + "_point", "point", newACPoint, "Point") + "\n" + timeStamp)
-    print("AtCoder-ranking: Tweeted " + dirType + " pointRanking")
+    api.update_with_media(filename = "cper_bot/AtCoder/" + dirType + "_pointRankingImg_fixed.jpg", status = pointTweetText + makeRanking(dirType + "_point", "point", newACPoint, "Point") + "\n" + timeStamp)
+    print("cper_bot-AtCoder-ranking: Tweeted " + dirType + " pointRanking")
 
     # Point Per Count ランキングをツイート
     perTweetText = "AtCoder Point / Count " + tweetTextType
-    api.update_with_media(filename = "AtCoder/" + dirType + "_perRankingImg_fixed.jpg", status = perTweetText + makeRanking(dirType + "_per", "per", newACPer, "P./C.") + "\n" + timeStamp)
-    print("AtCoder-ranking: Tweeted " + dirType + " perRanking")
+    api.update_with_media(filename = "cper_bot/AtCoder/" + dirType + "_perRankingImg_fixed.jpg", status = perTweetText + makeRanking(dirType + "_per", "per", newACPer, "P./C.") + "\n" + timeStamp)
+    print("cper_bot-AtCoder-ranking: Tweeted " + dirType + " perRanking")
 
     # データをアップロード
     oldACCount = acCount
@@ -266,21 +266,21 @@ def ranking(type):
                     if type == 0 and int(nowACCount[atcoderID] / acCountReachNum) > int(oldACCount[atcoderID] / acCountReachNum):
                         try:
                             api.update_status(atcoderID + " ( @" + twitterID + " ) さんの AtCoder での AC 数が " + str(oldACCount[atcoderID]) + " -> " + str(nowACCount[atcoderID]) + " となり，" + str(int(nowACCount[atcoderID] / acCountReachNum) * acCountReachNum) + " を突破しました！\n" + userURL + "\n" + timeStamp)
-                            print("AtCoder-ranking: Tweeted " + atcoderID + " ( @" + twitterID + " )'s AC Count Reach (" + str(oldACCount[atcoderID]) + " -> " + str(nowACCount[atcoderID]) + ")")
+                            print("cper_bot-AtCoder-ranking: Tweeted " + atcoderID + " ( @" + twitterID + " )'s AC Count Reach (" + str(oldACCount[atcoderID]) + " -> " + str(nowACCount[atcoderID]) + ")")
                         except:
-                            print("AtCoder-ranking: Tweet Error")
+                            print("cper_bot-AtCoder-ranking: Tweet Error")
                         time.sleep(5)
             if atcoderID in oldACPoint and atcoderID in nowACPoint:
                 if nowACPoint[atcoderID] - oldACPoint[atcoderID] > 0 and nowACCount[atcoderID] - oldACCount[atcoderID] > 0:
                     if type == 0 and int(nowACPoint[atcoderID] / acPointReachNum) > int(oldACPoint[atcoderID] / acPointReachNum):
                         try:
                             api.update_status(atcoderID + " ( @" + twitterID + " ) さんの AtCoder での Rated Point Sum 数が " + str(oldACPoint[atcoderID]) + " -> " + str(nowACPoint[atcoderID]) + " となり，" + str(int(nowACPoint[atcoderID] / acPointReachNum) * acPointReachNum) + " を突破しました！\n" + userURL + "\n" + timeStamp)
-                            print("AtCoder-ranking: Tweeted " + atcoderID + " ( @" + twitterID + " )'s Rated Point Sum Reach (" + str(oldACPoint[atcoderID]) + " -> " + str(nowACPoint[atcoderID]) + ")")
+                            print("cper_bot-AtCoder-ranking: Tweeted " + atcoderID + " ( @" + twitterID + " )'s Rated Point Sum Reach (" + str(oldACPoint[atcoderID]) + " -> " + str(nowACPoint[atcoderID]) + ")")
                         except:
-                            print("AtCoder-ranking: Tweet Error")
+                            print("cper_bot-AtCoder-ranking: Tweet Error")
                         time.sleep(5)
 
 if __name__ == '__main__':
-    print("AtCoder-ranking: Running as debug...")
+    print("cper_bot-AtCoder-ranking: Running as debug...")
     ranking(1)
-    print("AtCoder-ranking: Debug finished")
+    print("cper_bot-AtCoder-ranking: Debug finished")

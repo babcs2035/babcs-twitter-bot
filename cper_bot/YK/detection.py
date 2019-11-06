@@ -27,26 +27,26 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # YKID をダウンロード
-    dbx.files_download_to_file("YK/YKID.txt", "/YK/YKID.txt")
-    with open("YK/YKID.txt", "r") as f:
+    dbx.files_download_to_file("cper_bot/YK/YKID.txt", "/cper_bot/YK/YKID.txt")
+    with open("cper_bot/YK/YKID.txt", "r") as f:
         YKID.clear()
         for id in f:
             YKID.append(id.rstrip("\n"))
-    print("YK-detection: Downloaded YKID (size : ", str(len(YKID)), ")")
+    print("cper_bot-YK-detection: Downloaded YKID (size : ", str(len(YKID)), ")")
     
     # TwitterID をダウンロード
-    dbx.files_download_to_file("YK/TwitterID.txt", "/YK/TwitterID.txt")
-    with open("YK/TwitterID.txt", "r") as f:
+    dbx.files_download_to_file("cper_bot/YK/TwitterID.txt", "/cper_bot/YK/TwitterID.txt")
+    with open("cper_bot/YK/TwitterID.txt", "r") as f:
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
-    print("YK-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+    print("cper_bot-YK-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     # lastSubID をダウンロード
-    dbx.files_download_to_file("YK/lastSubID.txt", "/YK/lastSubID.txt")
-    with open("YK/lastSubID.txt", "r") as f:
+    dbx.files_download_to_file("cper_bot/YK/lastSubID.txt", "/cper_bot/YK/lastSubID.txt")
+    with open("cper_bot/YK/lastSubID.txt", "r") as f:
         lastSubID = f.readline()
-    print("YK-detection: Downloaded lastSubID : ", str(lastSubID))
+    print("cper_bot-YK-detection: Downloaded lastSubID : ", str(lastSubID))
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -59,12 +59,12 @@ def uploadToDropbox():
     dbx.users_get_current_account()
     
     # lastSubID をアップロード
-    with open("YK/lastSubID.txt", "w") as f:
+    with open("cper_bot/YK/lastSubID.txt", "w") as f:
         f.write(str(lastSubID))
-    with open("YK/lastSubID.txt", "rb") as f:
-        dbx.files_delete("/YK/lastSubID.txt")
-        dbx.files_upload(f.read(), "/YK/lastSubID.txt")
-    print("YK-detection: Uploaded lastSubID : ", str(lastSubID))
+    with open("cper_bot/YK/lastSubID.txt", "rb") as f:
+        dbx.files_delete("/cper_bot/YK/lastSubID.txt")
+        dbx.files_upload(f.read(), "/cper_bot/YK/lastSubID.txt")
+    print("cper_bot-YK-detection: Uploaded lastSubID : ", str(lastSubID))
 
 def detection():
     
@@ -102,7 +102,7 @@ def detection():
             sublistHTML.raise_for_status()
             sublistData = BeautifulSoup(sublistHTML.text, "html.parser")
         except:
-            print("YK-detection: sublistHTML Error")
+            print("cper_bot-YK-detection: sublistHTML Error")
             break
         sublistRows = sublistData.find_all("tr")
         del sublistRows[0]
@@ -130,9 +130,9 @@ def detection():
                     if userID == ids:
                         try:
                             api.update_status(userID + " ( @" + TwitterID[idx] + " ) さんが <yukicoder> " + str(problemName) + " を AC しました！\n" + "https://yukicoder.me/submissions/" + str(subID) + "\n" + timeStamp)
-                            print("YK-detection: " + userID + " ( @" + TwitterID[idx] + " ) 's new AC submission (problem : " + str(problemName) + ")")
+                            print("cper_bot-YK-detection: " + userID + " ( @" + TwitterID[idx] + " ) 's new AC submission (problem : " + str(problemName) + ")")
                         except:
-                            print("YK-detection: Tweet Error")
+                            print("cper_bot-YK-detection: Tweet Error")
                     idx = idx + 1
         if skipFlag:
             break
