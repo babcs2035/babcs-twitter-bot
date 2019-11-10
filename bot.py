@@ -10,4 +10,4 @@ subprocess.Popen(["python", "cper_bot/CF/CF-bot.py"])
 subprocess.Popen(["python", "cper_bot/YK/YK-bot.py"])
 
 # cpcontest_bot
-# subprocess.Popen(["python", "cpcontest_bot/cpcontest_bot.py"])
+subprocess.Popen(["python", "cpcontest_bot/cpcontest_bot.py"])
