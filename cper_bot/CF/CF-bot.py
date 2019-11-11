@@ -8,7 +8,7 @@ import ranking
 import result
 
 # インスタンス化
-sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
+sched = BlockingScheduler(job_defaults = {'max_instances' : 10})
 
 # Codeforces コンテスト一覧（毎日 0:00, 6:00, 12:00, 18:00）
 @sched.scheduled_job('cron', minute = '0', hour = '0, 6, 12, 18')

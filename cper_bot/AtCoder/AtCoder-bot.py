@@ -10,7 +10,7 @@ import result
 import statistics
 
 # インスタンス化
-sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
+sched = BlockingScheduler(job_defaults = {'max_instances' : 10})
 
 # AtCoder AC 全検出（毎時 0, 15, 30, 45 分）
 @sched.scheduled_job('cron', minute = '0, 15, 30, 45', hour = '*/1')

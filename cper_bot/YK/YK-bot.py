@@ -7,7 +7,7 @@ import ranking
 import contest
 
 # インスタンス化
-sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
+sched = BlockingScheduler(job_defaults = {'max_instances' : 10})
 
 # yukicoder AC 検出（1 分ごと）
 @sched.scheduled_job('interval', minutes = 1)
