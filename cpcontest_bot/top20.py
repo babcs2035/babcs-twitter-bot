@@ -66,6 +66,7 @@ def top20(contests):
     downloadFromDropbox()
 
     # 順位表から順位の浮上を見つける
+    newTop20s = {}
     for contest in contests:
 
         # コンテスト名を取得
@@ -92,7 +93,9 @@ def top20(contests):
                         api.update_status("〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " さんが " + str(top20s[contest][rows["UserScreenName"]]) + " 位から " + str(rows["Rank"]) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
                         print("cpcontest_bot-top20: detected top20 updated (" + rows["UserScreenName"] + ")")
             newData[rows["UserScreenName"]] = rows["Rank"]
-        top20s[contest] = newData
+        newTop20s[contest] = newData
+    
+    top20s = newTop20s
     uploadToDropbox()
 
 if __name__ == '__main__':
