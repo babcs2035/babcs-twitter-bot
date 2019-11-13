@@ -27,7 +27,7 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # YKID をダウンロード
-    dbx.files_download_to_file("YKID.txt", "/cper_bot/YK/YKID.txt")
+    dbx.files_download_to_file("YKID.txt", "/YK/YKID.txt")
     with codecs.open("YKID.txt", "r", "utf-8") as f:
         YKID.clear()
         for id in f:
@@ -35,7 +35,7 @@ def downloadFromDropbox():
     print("cper_bot-YK-ranking: Downloaded YKID (size : ", str(len(YKID)), ")")
     
     # TwitterID をダウンロード
-    dbx.files_download_to_file("TwitterID.txt", "/cper_bot/YK/TwitterID.txt")
+    dbx.files_download_to_file("TwitterID.txt", "/YK/TwitterID.txt")
     with open("TwitterID.txt", "r") as f:
         TwitterID.clear()
         for id in f:
@@ -43,7 +43,7 @@ def downloadFromDropbox():
     print("cper_bot-YK-ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     # acCount をダウンロード
-    dbx.files_download_to_file("acCount.txt", "/cper_bot/YK/acCount.txt")
+    dbx.files_download_to_file("acCount.txt", "/YK/acCount.txt")
     with open("acCount.txt", "rb") as f:
         acCount = pickle.load(f)
     print("cper_bot-YK-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
@@ -62,8 +62,8 @@ def uploadToDropbox():
     with open("acCount.txt", "wb") as f:
         pickle.dump(acCount, f)
     with open("acCount.txt", "rb") as f:
-        dbx.files_delete("/cper_bot/YK/acCount.txt")
-        dbx.files_upload(f.read(), "/cper_bot/YK/acCount.txt")
+        dbx.files_delete("/YK/acCount.txt")
+        dbx.files_upload(f.read(), "/YK/acCount.txt")
     print("cper_bot-YK-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
 
 # list 内の要素の添え字を返す（無い場合は -1）
@@ -120,12 +120,12 @@ def ranking():
     # Unique AC 数ランキングを作成
     countRankNum = 1
     countNum = 1
-    rankingFont = ImageFont.truetype("cper_bot/YK/data/fontR.ttc", 32)
-    countRankingFirstImg = Image.open("cper_bot/YK/data/countRankingImg (first).jpg")
+    rankingFont = ImageFont.truetype("YK/data/fontR.ttc", 32)
+    countRankingFirstImg = Image.open("YK/data/countRankingImg (first).jpg")
     countResImg = Image.new("RGB", (738, 65 + 63 * len(newACCount)))
     countResImg.paste(countRankingFirstImg, (0, 0))
     for idx in range(len(newACCount)):
-        countRankingImg = Image.open("cper_bot/YK/data/rankingImg (cell).jpg")
+        countRankingImg = Image.open("YK/data/rankingImg (cell).jpg")
         countRankingDraw = ImageDraw.Draw(countRankingImg)
         if idx > 0:
             if int(newACCount[idx - 1]["count"]) > int(newACCount[idx]["count"]):
@@ -137,7 +137,7 @@ def ranking():
         countRankingDraw.text((120, 7), newACCount[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
         countRankingDraw.text((560, 7), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
         countResImg.paste(countRankingImg, (0, 65 + 63 * idx))
-    countResImg.save("cper_bot/YK/data/countRankingImg_fixed.jpg")
+    countResImg.save("YK/data/countRankingImg_fixed.jpg")
 
     # ランキングをツイート
     countTweetText = "yukicoder Unique AC 数ランキング TOP " + str(countRankNum) + "\n"
@@ -154,7 +154,7 @@ def ranking():
             countTweetText += str(countRankNum) + " 位 " + newACCount[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACCount[idx]["user_id"],YKID)]) + " ) " + str(newACCount[idx]["count"]) + " Unique AC\n"
         else:
             break
-    api.update_with_media(filename = "cper_bot/YK/data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
+    api.update_with_media(filename = "YK/data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
     
     # データをアップロード
     acCount = nowACCount

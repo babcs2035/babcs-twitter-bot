@@ -53,14 +53,14 @@ def vcontest():
         return
 
     # 画像生成
-    listFontR = ImageFont.truetype("cper_bot/AtCoder/data/fontR.ttc", 32)
-    listFontB = ImageFont.truetype("cper_bot/AtCoder/data/fontB.ttc", 32)
-    vcontestsListFirstImg = Image.open("cper_bot/AtCoder/data/vcontest/vcontestsListImg (first).jpg")
+    listFontR = ImageFont.truetype("AtCoder/data/fontR.ttc", 32)
+    listFontB = ImageFont.truetype("AtCoder/data/fontB.ttc", 32)
+    vcontestsListFirstImg = Image.open("AtCoder/data/vcontest/vcontestsListImg (first).jpg")
     vcontestsListImg = Image.new("RGB", (1772, 68 + 64 * len(list1 + list2)))
     vcontestsListImg.paste(vcontestsListFirstImg, (0, 0))
     idx = 0
     for vcontest in list1:
-        vcontestListImg = Image.open("cper_bot/AtCoder/data/vcontest/vcontestsListImg (cell).jpg")
+        vcontestListImg = Image.open("AtCoder/data/vcontest/vcontestsListImg (cell).jpg")
         vcontestListDraw = ImageDraw.Draw(vcontestListImg)
         vcontestListDraw.text((10, 7), str(vcontest["beginTime"]), fill = (200, 20, 20), font = listFontB)
         vcontestListDraw.text((360, 7), str(vcontest["endTime"]), fill = (200, 20, 20), font = listFontB)
@@ -68,18 +68,18 @@ def vcontest():
         vcontestsListImg.paste(vcontestListImg, (0, 68 + 64 * idx))
         idx += 1
     for vcontest in list2:
-        vcontestListImg = Image.open("cper_bot/AtCoder/data/vcontest/vcontestsListImg (cell).jpg")
+        vcontestListImg = Image.open("AtCoder/data/vcontest/vcontestsListImg (cell).jpg")
         vcontestListDraw = ImageDraw.Draw(vcontestListImg)
         vcontestListDraw.text((10, 7), str(vcontest["beginTime"]), fill = (0, 0, 0), font = listFontR)
         vcontestListDraw.text((360, 7), str(vcontest["endTime"]), fill = (0, 0, 0), font = listFontR)
         vcontestListDraw.text((710, 7), str(vcontest["name"]), fill = (0, 0, 0), font = listFontR)
         vcontestsListImg.paste(vcontestListImg, (0, 68 + 64 * idx))
         idx += 1
-    vcontestsListImg.save("cper_bot/AtCoder/vcontestsListImg_fixed.jpg")
+    vcontestsListImg.save("AtCoder/vcontestsListImg_fixed.jpg")
 
     # リストをツイート
     listTweetText = "現在 " + str(idx) + " の AtCoder バーチャルコンテストが行われて or 予定されています．\nhttps://not-522.appspot.com/\n"
-    api.update_with_media(filename = "cper_bot/AtCoder/vcontestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
+    api.update_with_media(filename = "AtCoder/vcontestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
     print("cper_bot-AtCoder-vcontest: Tweeted vcontestsListImg_fixed")
 
 if __name__ == '__main__':

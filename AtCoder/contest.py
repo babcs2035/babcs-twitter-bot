@@ -46,14 +46,14 @@ def contest():
         return
 
     # 画像生成
-    listFontR = ImageFont.truetype("cper_bot/AtCoder/data/fontR.ttc", 32)
-    listFontB = ImageFont.truetype("cper_bot/AtCoder/data/fontB.ttc", 32)
-    contestsListFirstImg = Image.open("cper_bot/AtCoder/data/contestsListImg (first).jpg")
+    listFontR = ImageFont.truetype("AtCoder/data/fontR.ttc", 32)
+    listFontB = ImageFont.truetype("AtCoder/data/fontB.ttc", 32)
+    contestsListFirstImg = Image.open("AtCoder/data/contestsListImg (first).jpg")
     contestsListImg = Image.new("RGB", (1852, 68 + 64 * len(contestsList)))
     contestsListImg.paste(contestsListFirstImg, (0, 0))
     idx = 0
     for contest in contestsList:
-        contestListImg = Image.open("cper_bot/AtCoder/data/contestsListImg (cell).jpg")
+        contestListImg = Image.open("AtCoder/data/contestsListImg (cell).jpg")
         contestListDraw = ImageDraw.Draw(contestListImg)
         startTime = epoch_to_datetime(contest["startTimeSeconds"])
         contestListDraw.text((10, 7), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (0, 0, 0), font = listFontR)
@@ -72,11 +72,11 @@ def contest():
         contestListDraw.text((1460, 7), str(sec_to_time(contest["durationSeconds"])), fill = (0, 0, 0), font = listFontR)
         contestsListImg.paste(contestListImg, (0, 68 + 64 * idx))
         idx = idx + 1
-    contestsListImg.save("cper_bot/AtCoder/contestsListImg_fixed.jpg")
+    contestsListImg.save("AtCoder/contestsListImg_fixed.jpg")
 
     # リストをツイート
     listTweetText = "現在 " + str(len(contestsList)) + " の AtCoder コンテストが予定されています．\nhttps://atcoder.jp/contests/\n"
-    api.update_with_media(filename = "cper_bot/AtCoder/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
+    api.update_with_media(filename = "AtCoder/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
     print("cper_bot-AtCoder-contest: Tweeted contestsListImg_fixed")
 
 if __name__ == '__main__':

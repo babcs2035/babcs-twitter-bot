@@ -26,24 +26,24 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # CFID をダウンロード
-    dbx.files_download_to_file("cper_bot/CF/CFID.txt", "/cper_bot/CF/CFID.txt")
-    with open("cper_bot/CF/CFID.txt", "r") as f:
+    dbx.files_download_to_file("CF/CFID.txt", "/CF/CFID.txt")
+    with open("CF/CFID.txt", "r") as f:
         CFID.clear()
         for id in f:
             CFID.append(id.rstrip("\n"))
     print("cper_bot-CF-ranking: Downloaded CFID (size : ", str(len(CFID)), ")")
     
     # TwitterID をダウンロード
-    dbx.files_download_to_file("cper_bot/CF/TwitterID.txt", "/cper_bot/CF/TwitterID.txt")
-    with open("cper_bot/CF/TwitterID.txt", "r") as f:
+    dbx.files_download_to_file("CF/TwitterID.txt", "/CF/TwitterID.txt")
+    with open("CF/TwitterID.txt", "r") as f:
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
     print("cper_bot-CF-ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     # acCount をダウンロード
-    dbx.files_download_to_file("cper_bot/CF/acCount.txt", "/cper_bot/CF/acCount.txt")
-    with open("cper_bot/CF/acCount.txt", "rb") as f:
+    dbx.files_download_to_file("CF/acCount.txt", "/CF/acCount.txt")
+    with open("CF/acCount.txt", "rb") as f:
         acCount = pickle.load(f)
     print("cper_bot-CF-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
 
@@ -58,11 +58,11 @@ def uploadToDropbox():
     dbx.users_get_current_account()
     
     # acCount をアップロード
-    with open("cper_bot/CF/acCount.txt", "wb") as f:
+    with open("CF/acCount.txt", "wb") as f:
         pickle.dump(acCount, f)
-    with open("cper_bot/CF/acCount.txt", "rb") as f:
-        dbx.files_delete("/cper_bot/CF/acCount.txt")
-        dbx.files_upload(f.read(), "/cper_bot/CF/acCount.txt")
+    with open("CF/acCount.txt", "rb") as f:
+        dbx.files_delete("/CF/acCount.txt")
+        dbx.files_upload(f.read(), "/CF/acCount.txt")
     print("cper_bot-CF-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
 
 # list 内の要素の添え字を返す（無い場合は -1）
@@ -121,12 +121,12 @@ def ranking():
     # AC 提出数ランキングを作成
     countRankNum = 1
     countNum = 1
-    rankingFont = ImageFont.truetype("cper_bot/CF/data/fontR.ttc", 32)
-    countRankingFirstImg = Image.open("cper_bot/CF/data/countRankingImg (first).jpg")
+    rankingFont = ImageFont.truetype("CF/data/fontR.ttc", 32)
+    countRankingFirstImg = Image.open("CF/data/countRankingImg (first).jpg")
     countResImg = Image.new("RGB", (738, 65 + 63 * len(newACCount)))
     countResImg.paste(countRankingFirstImg, (0, 0))
     for idx in range(len(newACCount)):
-        countRankingImg = Image.open("cper_bot/CF/data/rankingImg (cell).jpg")
+        countRankingImg = Image.open("CF/data/rankingImg (cell).jpg")
         countRankingDraw = ImageDraw.Draw(countRankingImg)
         if idx > 0:
             if int(newACCount[idx - 1]["count"]) > int(newACCount[idx]["count"]):
@@ -138,7 +138,7 @@ def ranking():
         countRankingDraw.text((120, 7), newACCount[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
         countRankingDraw.text((560, 7), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
         countResImg.paste(countRankingImg, (0, 65 + 63 * idx))
-    countResImg.save("cper_bot/CF/data/countRankingImg_fixed.jpg")
+    countResImg.save("CF/data/countRankingImg_fixed.jpg")
 
     # ランキングをツイート
     countTweetText = "Codeforces AC 提出数ランキング TOP " + str(countRankNum) + "\n"
@@ -155,7 +155,7 @@ def ranking():
             countTweetText += str(countRankNum) + " 位 " + newACCount[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACCount[idx]["user_id"],CFID)]) + " ) " + str(newACCount[idx]["count"]) + " AC\n"
         else:
             break
-    api.update_with_media(filename = "cper_bot/CF/data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
+    api.update_with_media(filename = "CF/data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
     
     # データをアップロード
     acCount = nowACCount

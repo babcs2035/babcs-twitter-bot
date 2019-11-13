@@ -21,14 +21,14 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # acCount をダウンロード
-    dbx.files_download_to_file("cper_bot/AtCoder/daily_acCount.txt", "/cper_bot/AtCoder/daily_acCount.txt")
-    with open("cper_bot/AtCoder/daily_acCount.txt", "rb") as f:
+    dbx.files_download_to_file("AtCoder/daily_acCount.txt", "/AtCoder/daily_acCount.txt")
+    with open("AtCoder/daily_acCount.txt", "rb") as f:
         acCount = pickle.load(f)
     print("cper_bot-AtCoder-status: Downloaded daily acCount (size : ", str(len(acCount)), ")")
     
     # acPoint をダウンロード
-    dbx.files_download_to_file("cper_bot/AtCoder/daily_acPoint.txt", "/cper_bot/AtCoder/daily_acPoint.txt")
-    with open("cper_bot/AtCoder/daily_acPoint.txt", "rb") as f:
+    dbx.files_download_to_file("AtCoder/daily_acPoint.txt", "/AtCoder/daily_acPoint.txt")
+    with open("AtCoder/daily_acPoint.txt", "rb") as f:
         acPoint = pickle.load(f)
     print("cper_bot-AtCoder-status: Downloaded daily acPoint (size : ", str(len(acPoint)), ")")
 

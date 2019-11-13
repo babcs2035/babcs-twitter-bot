@@ -31,8 +31,8 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # AtCoderIDs をダウンロード
-    dbx.files_download_to_file("cper_bot/AtCoder/AtCoderIDs.txt", "/cper_bot/AtCoder/AtCoderIDs.txt")
-    with open("cper_bot/AtCoder/AtCoderIDs.txt", "rb") as f:
+    dbx.files_download_to_file("AtCoder/AtCoderIDs.txt", "/AtCoder/AtCoderIDs.txt")
+    with open("AtCoder/AtCoderIDs.txt", "rb") as f:
         AtCoderIDs = pickle.load(f)
     print("cper_bot-AtCoder-register: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
 
@@ -50,11 +50,11 @@ def uploadToDropbox():
     if AtCoderIDsFixedFlag:
 
         # AtCoderIDs をアップロード
-        with open("cper_bot/AtCoder/AtCoderIDs.txt", "wb") as f:
+        with open("AtCoder/AtCoderIDs.txt", "wb") as f:
             pickle.dump(AtCoderIDs, f)
-        with open("cper_bot/AtCoder/AtCoderIDs.txt", "rb") as f:
-            dbx.files_delete("/cper_bot/AtCoder/AtCoderIDs.txt")
-            dbx.files_upload(f.read(), "/cper_bot/AtCoder/AtCoderIDs.txt")
+        with open("AtCoder/AtCoderIDs.txt", "rb") as f:
+            dbx.files_delete("/AtCoder/AtCoderIDs.txt")
+            dbx.files_upload(f.read(), "/AtCoder/AtCoderIDs.txt")
         print("cper_bot-AtCoder-register: Uploaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
     
 # AtCoder ID 登録・解除

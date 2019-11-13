@@ -32,32 +32,32 @@ def downloadFromDropbox(type):
     dbx.users_get_current_account()
     
     # AtCoderIDs をダウンロード
-    dbx.files_download_to_file("cper_bot/AtCoder/AtCoderIDs.txt", "/cper_bot/AtCoder/AtCoderIDs.txt")
-    with open("cper_bot/AtCoder/AtCoderIDs.txt", "rb") as f:
+    dbx.files_download_to_file("AtCoder/AtCoderIDs.txt", "/AtCoder/AtCoderIDs.txt")
+    with open("AtCoder/AtCoderIDs.txt", "rb") as f:
         AtCoderIDs = pickle.load(f)
     print("cper_bot-AtCoder-detection: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
 
     if type == 0:
         
         # lastSubID をダウンロード
-        dbx.files_download_to_file("cper_bot/AtCoder/lastSubID.txt", "/cper_bot/AtCoder/lastSubID.txt")
-        dbx.files_delete("/cper_bot/AtCoder/lastSubID.txt")
-        with open("cper_bot/AtCoder/lastSubID.txt", "rb") as f:
+        dbx.files_download_to_file("AtCoder/lastSubID.txt", "/AtCoder/lastSubID.txt")
+        dbx.files_delete("/AtCoder/lastSubID.txt")
+        with open("AtCoder/lastSubID.txt", "rb") as f:
             lastSubID_All = pickle.load(f)
         print("cper_bot-AtCoder-detection: Downloaded lastSubID (size : ", str(len(lastSubID_All)), ")")
 
     if type == 1:
         
         # lastSubID_recent をダウンロード
-        dbx.files_download_to_file("cper_bot/AtCoder/lastSubID_recent.txt", "/cper_bot/AtCoder/lastSubID_recent.txt")
-        dbx.files_delete("/cper_bot/AtCoder/lastSubID_recent.txt")
-        with open("cper_bot/AtCoder/lastSubID_recent.txt", "rb") as f:
+        dbx.files_download_to_file("AtCoder/lastSubID_recent.txt", "/AtCoder/lastSubID_recent.txt")
+        dbx.files_delete("/AtCoder/lastSubID_recent.txt")
+        with open("AtCoder/lastSubID_recent.txt", "rb") as f:
             lastSubID_Recent = pickle.load(f)
         print("cper_bot-AtCoder-detection: Downloaded lastSubID_recent (size : ", str(len(lastSubID_Recent)), ")")
     
     # noticeFlag をダウンロード
-    dbx.files_download_to_file("cper_bot/AtCoder/noticeFlag.txt", "/cper_bot/AtCoder/noticeFlag.txt")
-    with open("cper_bot/AtCoder/noticeFlag.txt", "rb") as f:
+    dbx.files_download_to_file("AtCoder/noticeFlag.txt", "/AtCoder/noticeFlag.txt")
+    with open("AtCoder/noticeFlag.txt", "rb") as f:
         noticeFlag = pickle.load(f)
     print("cper_bot-AtCoder-detection: Downloaded noticeFlag (size : ", str(len(noticeFlag)), ")")
 
@@ -79,29 +79,29 @@ def uploadToDropbox(type):
     if type == 0:
 
         # lastSubID をアップロード
-        with open("cper_bot/AtCoder/lastSubID.txt", "wb") as f:
+        with open("AtCoder/lastSubID.txt", "wb") as f:
             pickle.dump(lastSubID_All, f)
-        with open("cper_bot/AtCoder/lastSubID.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/cper_bot/AtCoder/lastSubID.txt")
+        with open("AtCoder/lastSubID.txt", "rb") as f:
+            dbx.files_upload(f.read(), "/AtCoder/lastSubID.txt")
         print("cper_bot-AtCoder-detection: Uploaded lastSubID (size : ", str(len(lastSubID_All)), ")")
 
     if type == 1:
 
         # lastSubID_recent をアップロード
-        with open("cper_bot/AtCoder/lastSubID_recent.txt", "wb") as f:
+        with open("AtCoder/lastSubID_recent.txt", "wb") as f:
             pickle.dump(lastSubID_Recent, f)
-        with open("cper_bot/AtCoder/lastSubID_recent.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/cper_bot/AtCoder/lastSubID_recent.txt")
+        with open("AtCoder/lastSubID_recent.txt", "rb") as f:
+            dbx.files_upload(f.read(), "/AtCoder/lastSubID_recent.txt")
         print("cper_bot-AtCoder-detection: Uploaded lastSubID_recent (size : ", str(len(lastSubID_Recent)), ")")
 
     if type == 2:
 
         # noticeFlag をアップロード
-        with open("cper_bot/AtCoder/noticeFlag.txt", "wb") as f:
+        with open("AtCoder/noticeFlag.txt", "wb") as f:
             pickle.dump(noticeFlag, f)
-        with open("cper_bot/AtCoder/noticeFlag.txt", "rb") as f:
-            dbx.files_delete("/cper_bot/AtCoder/noticeFlag.txt")
-            dbx.files_upload(f.read(), "/cper_bot/AtCoder/noticeFlag.txt")
+        with open("AtCoder/noticeFlag.txt", "rb") as f:
+            dbx.files_delete("/AtCoder/noticeFlag.txt")
+            dbx.files_upload(f.read(), "/AtCoder/noticeFlag.txt")
         print("cper_bot-AtCoder-detection: Uploaded noticeFlag (size : ", str(len(noticeFlag)), ")")
 
 # 通知の on/off 切り替え

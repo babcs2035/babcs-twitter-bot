@@ -26,14 +26,14 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # AtCoderIDs をダウンロード
-    dbx.files_download_to_file("cper_bot/AtCoder/AtCoderIDs.txt", "/cper_bot/AtCoder/AtCoderIDs.txt")
-    with open("cper_bot/AtCoder/AtCoderIDs.txt", "rb") as f:
+    dbx.files_download_to_file("AtCoder/AtCoderIDs.txt", "/AtCoder/AtCoderIDs.txt")
+    with open("AtCoder/AtCoderIDs.txt", "rb") as f:
         AtCoderIDs = pickle.load(f)
     print("cper_bot-AtCoder-result: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
 
     # ratings をダウンロード
-    dbx.files_download_to_file("cper_bot/AtCoder/ratings.txt", "/cper_bot/AtCoder/ratings.txt")
-    with open("cper_bot/AtCoder/ratings.txt", "rb") as f:
+    dbx.files_download_to_file("AtCoder/ratings.txt", "/AtCoder/ratings.txt")
+    with open("AtCoder/ratings.txt", "rb") as f:
         ratings = pickle.load(f)
     print("cper_bot-AtCoder-result: Downloaded ratings (size : ", str(len(ratings)), ")")
 
@@ -48,11 +48,11 @@ def uploadToDropbox():
     dbx.users_get_current_account()
 
     # ratings をアップロード
-    with open("cper_bot/AtCoder/ratings.txt", "wb") as f:
+    with open("AtCoder/ratings.txt", "wb") as f:
         pickle.dump(ratings, f)
-    with open("cper_bot/AtCoder/ratings.txt", "rb") as f:
-        dbx.files_delete("/cper_bot/AtCoder/ratings.txt")
-        dbx.files_upload(f.read(), "/cper_bot/AtCoder/ratings.txt")
+    with open("AtCoder/ratings.txt", "rb") as f:
+        dbx.files_delete("/AtCoder/ratings.txt")
+        dbx.files_upload(f.read(), "/AtCoder/ratings.txt")
     print("cper_bot-AtCoder-result: Uploaded ratings (size : ", str(len(ratings)), ")")
 
 def epoch_to_datetime(epoch):
@@ -69,15 +69,15 @@ def makeRanking(type, listData, unit):
     flag = int(listData[0][str(type)]) > int(listData[len(listData) - 1][str(type)])
     rankNum = 1
     countNum = 1
-    rankingFont = ImageFont.truetype("cper_bot/AtCoder/data/fontR.ttc", 32)
-    rankingFontS = ImageFont.truetype("cper_bot/AtCoder/data/fontB.ttc", 32)
-    rankingFirstImg = Image.open("cper_bot/AtCoder/data/result/" + str(type) + "RankingImg (first).jpg")
+    rankingFont = ImageFont.truetype("AtCoder/data/fontR.ttc", 32)
+    rankingFontS = ImageFont.truetype("AtCoder/data/fontB.ttc", 32)
+    rankingFirstImg = Image.open("AtCoder/data/result/" + str(type) + "RankingImg (first).jpg")
     resImg = Image.new("RGB", (738 * int((len(listData) + rows - 1) / rows), 65 + 63 * min(len(listData), rows)))
     awardsList = []
     for idx in range(len(listData)):
         if idx % rows == 0:
             resImg.paste(rankingFirstImg, (738 * int(idx / rows), 0))
-        rankingImg = Image.open("cper_bot/AtCoder/data/result/rankingImg (cell).jpg")
+        rankingImg = Image.open("AtCoder/data/result/rankingImg (cell).jpg")
         rankingDraw = ImageDraw.Draw(rankingImg)
         if idx > 0:
             if flag and int(listData[idx - 1][str(type)]) > int(listData[idx][str(type)]):
@@ -105,7 +105,7 @@ def makeRanking(type, listData, unit):
             rankingDraw.text((120, 7), listData[idx]["atcoderID"] + " ( @" + listData[idx]["twitterID"] + " )", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFont)
             rankingDraw.text((560, 7), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFont)
         resImg.paste(rankingImg, (738 * int(idx / rows), 65 + 63 * (idx % rows)))
-    resImg.save("cper_bot/AtCoder/data/result/" + str(type) + "RankingImg_fixed.jpg")
+    resImg.save("AtCoder/data/result/" + str(type) + "RankingImg_fixed.jpg")
     return " ランキング TOP " + str(rankNum) + "\n入賞の " + " , ".join(awardsList) + " さん おめでとうございます！\n"
 
 def result():
@@ -215,17 +215,17 @@ def result():
         if len(rankList) > 0:
             rankList.sort(key = lambda x: x["rank"])
             tweetText = str(contest) + " 順位表" + makeRanking("rank", rankList, "位")
-            api.update_with_media(filename = "cper_bot/AtCoder/data/result/rankRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
+            api.update_with_media(filename = "AtCoder/data/result/rankRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
             print("cper_bot-AtCoder-result: Tweeted " + str(contest) + " rankRanking")
         if len(perfList) > 0:
             perfList.sort(key = lambda x: x["perf"], reverse = True)
             tweetText = str(contest) + " パフォーマンス値" + makeRanking("perf", perfList, "perf.")
-            api.update_with_media(filename = "cper_bot/AtCoder/data/result/perfRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
+            api.update_with_media(filename = "AtCoder/data/result/perfRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
             print("cper_bot-AtCoder-result: Tweeted " + str(contest) + " perfRanking")
         if len(diffList) > 0:
             diffList.sort(key = lambda x: x["diff"], reverse = True)
             tweetText = str(contest) + " レート変動値" + makeRanking("diff", diffList, "")
-            api.update_with_media(filename = "cper_bot/AtCoder/data/result/diffRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
+            api.update_with_media(filename = "AtCoder/data/result/diffRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
             print("cper_bot-AtCoder-result: Tweeted " + str(contest) + " diffRanking")
 
     # データをアップロード

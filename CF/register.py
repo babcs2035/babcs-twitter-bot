@@ -32,16 +32,16 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # CFID をダウンロード
-    dbx.files_download_to_file("cper_bot/CF/CFID.txt", "/cper_bot/CF/CFID.txt")
-    with open("cper_bot/CF/CFID.txt", "r") as f:
+    dbx.files_download_to_file("CF/CFID.txt", "/CF/CFID.txt")
+    with open("CF/CFID.txt", "r") as f:
         CFID.clear()
         for id in f:
             CFID.append(id.rstrip("\n"))
     print("cper_bot-CF-register: Downloaded CFID (size : ", str(len(CFID)), ")")
     
     # CF_TwitterID をダウンロード
-    dbx.files_download_to_file("cper_bot/CF/TwitterID.txt", "/cper_bot/CF/TwitterID.txt")
-    with open("cper_bot/CF/TwitterID.txt", "r") as f:
+    dbx.files_download_to_file("CF/TwitterID.txt", "/CF/TwitterID.txt")
+    with open("CF/TwitterID.txt", "r") as f:
         CF_TwitterID.clear()
         for id in f:
             CF_TwitterID.append(id.rstrip("\n"))
@@ -61,26 +61,26 @@ def uploadToDropbox():
         
     if CF_listFixedFlag:
         # CFID をアップロード
-        with open("cper_bot/CF/CFID.txt", "w") as f:
+        with open("CF/CFID.txt", "w") as f:
             for id in CFID:
                 f.write(str(id) + "\n")
-        with open("cper_bot/CF/CFID.txt", "rb") as f:
-            dbx.files_delete("/cper_bot/CF/CFID.txt")
-            dbx.files_upload(f.read(), "/cper_bot/CF/CFID.txt")
+        with open("CF/CFID.txt", "rb") as f:
+            dbx.files_delete("/CF/CFID.txt")
+            dbx.files_upload(f.read(), "/CF/CFID.txt")
             print("cper_bot-CF-register: Uploaded CFID (size : ", str(len(CFID)), ")")
-        with open("cper_bot/CF/CFID.txt", "rb") as f:
+        with open("CF/CFID.txt", "rb") as f:
             dbx.files_upload(f.read(), "/_backup/CF/CFID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
             print("cper_bot-CF-register: Uploaded CFID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(CFID)), ")")
 
         # CF_TwitterID をアップロード
-        with open("cper_bot/CF/TwitterID.txt", "w") as f:
+        with open("CF/TwitterID.txt", "w") as f:
             for id in CF_TwitterID:
                 f.write(str(id) + "\n")
-        with open("cper_bot/CF/TwitterID.txt", "rb") as f:
-            dbx.files_delete("/cper_bot/CF/TwitterID.txt")
-            dbx.files_upload(f.read(), "/cper_bot/CF/TwitterID.txt")
+        with open("CF/TwitterID.txt", "rb") as f:
+            dbx.files_delete("/CF/TwitterID.txt")
+            dbx.files_upload(f.read(), "/CF/TwitterID.txt")
             print("cper_bot-CF-register: Uploaded CF_TwitterID (size : ", str(len(CF_TwitterID)), ")")
-        with open("cper_bot/CF/TwitterID.txt", "rb") as f:
+        with open("CF/TwitterID.txt", "rb") as f:
             dbx.files_upload(f.read(), "/_backup/CF/TwitterID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
             print("cper_bot-CF-register: Uploaded CF_TwitterID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(CF_TwitterID)), ")")
     

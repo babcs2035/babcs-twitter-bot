@@ -32,16 +32,16 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # YKID をダウンロード
-    dbx.files_download_to_file("cper_bot/YK/YKID.txt", "/cper_bot/YK/YKID.txt")
-    with open("cper_bot/YK/YKID.txt", "r") as f:
+    dbx.files_download_to_file("YK/YKID.txt", "/YK/YKID.txt")
+    with open("YK/YKID.txt", "r") as f:
         YKID.clear()
         for id in f:
             YKID.append(id.rstrip("\n"))
     print("cper_bot-YK-register: Downloaded YKID (size : ", str(len(YKID)), ")")
     
     # YK_TwitterID をダウンロード
-    dbx.files_download_to_file("cper_bot/YK/TwitterID.txt", "/cper_bot/YK/TwitterID.txt")
-    with open("cper_bot/YK/TwitterID.txt", "r") as f:
+    dbx.files_download_to_file("YK/TwitterID.txt", "/YK/TwitterID.txt")
+    with open("YK/TwitterID.txt", "r") as f:
         YK_TwitterID.clear()
         for id in f:
             YK_TwitterID.append(id.rstrip("\n"))
@@ -61,26 +61,26 @@ def uploadToDropbox():
         
     if YK_listFixedFlag:
         # YKID をアップロード
-        with open("cper_bot/YK/YKID.txt", "w") as f:
+        with open("YK/YKID.txt", "w") as f:
             for id in YKID:
                 f.write(str(id) + "\n")
-        with open("cper_bot/YK/YKID.txt", "rb") as f:
-            dbx.files_delete("/cper_bot/YK/YKID.txt")
-            dbx.files_upload(f.read(), "/cper_bot/YK/YKID.txt")
+        with open("YK/YKID.txt", "rb") as f:
+            dbx.files_delete("/YK/YKID.txt")
+            dbx.files_upload(f.read(), "/YK/YKID.txt")
             print("cper_bot-YK-register: Uploaded YKID (size : ", str(len(YKID)), ")")
-        with open("cper_bot/YK/YKID.txt", "rb") as f:
+        with open("YK/YKID.txt", "rb") as f:
             dbx.files_upload(f.read(), "/_backup/YK/YKID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
             print("cper_bot-YK-register: Uploaded YKID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(YKID)), ")")
 
         # YK_TwitterID をアップロード
-        with open("cper_bot/YK/TwitterID.txt", "w") as f:
+        with open("YK/TwitterID.txt", "w") as f:
             for id in YK_TwitterID:
                 f.write(str(id) + "\n")
-        with open("cper_bot/YK/TwitterID.txt", "rb") as f:
-            dbx.files_delete("/cper_bot/YK/TwitterID.txt")
-            dbx.files_upload(f.read(), "/cper_bot/YK/TwitterID.txt")
+        with open("YK/TwitterID.txt", "rb") as f:
+            dbx.files_delete("/YK/TwitterID.txt")
+            dbx.files_upload(f.read(), "/YK/TwitterID.txt")
             print("cper_bot-YK-register: Uploaded YK_TwitterID (size : ", str(len(YK_TwitterID)), ")")
-        with open("cper_bot/YK/TwitterID.txt", "rb") as f:
+        with open("YK/TwitterID.txt", "rb") as f:
             dbx.files_upload(f.read(), "/_backup/YK/TwitterID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
             print("cper_bot-YK-register: Uploaded YK_TwitterID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(YK_TwitterID)), ")")
     

@@ -32,16 +32,16 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # AOJID をダウンロード
-    dbx.files_download_to_file("cper_bot/AOJ/AOJID.txt", "/cper_bot/AOJ/AOJID.txt")
-    with open("cper_bot/AOJ/AOJID.txt", "r") as f:
+    dbx.files_download_to_file("AOJ/AOJID.txt", "/AOJ/AOJID.txt")
+    with open("AOJ/AOJID.txt", "r") as f:
         AOJID.clear()
         for id in f:
             AOJID.append(id.rstrip("\n"))
     print("cper_bot-AOJ-register: Downloaded AOJID (size : ", str(len(AOJID)), ")")
     
     # AOJ_TwitterID をダウンロード
-    dbx.files_download_to_file("cper_bot/AOJ/TwitterID.txt", "/cper_bot/AOJ/TwitterID.txt")
-    with open("cper_bot/AOJ/TwitterID.txt", "r") as f:
+    dbx.files_download_to_file("AOJ/TwitterID.txt", "/AOJ/TwitterID.txt")
+    with open("AOJ/TwitterID.txt", "r") as f:
         AOJ_TwitterID.clear()
         for id in f:
             AOJ_TwitterID.append(id.rstrip("\n"))
@@ -61,27 +61,27 @@ def uploadToDropbox():
         
     if AOJ_listFixedFlag:
         # AOJID をアップロード
-        with open("cper_bot/AOJ/AOJID.txt", "w") as f:
+        with open("AOJ/AOJID.txt", "w") as f:
             for id in AOJID:
                 f.write(str(id) + "\n")
-        with open("cper_bot/AOJ/AOJID.txt", "rb") as f:
-            dbx.files_delete("/cper_bot/AOJ/AOJID.txt")
-            dbx.files_upload(f.read(), "/cper_bot/AOJ/AOJID.txt")
+        with open("AOJ/AOJID.txt", "rb") as f:
+            dbx.files_delete("/AOJ/AOJID.txt")
+            dbx.files_upload(f.read(), "/AOJ/AOJID.txt")
             print("cper_bot-AOJ-register: Uploaded AOJID (size : ", str(len(AOJID)), ")")
-        with open("cper_bot/AOJ/AOJID.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/cper_bot/_backup/AOJ/AOJID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
+        with open("AOJ/AOJID.txt", "rb") as f:
+            dbx.files_upload(f.read(), "/_backup/AOJ/AOJID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
             print("cper_bot-AOJ-register: Uploaded AOJID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(AOJID)), ")")
 
         # AOJ_TwitterID をアップロード
-        with open("cper_bot/AOJ/TwitterID.txt", "w") as f:
+        with open("AOJ/TwitterID.txt", "w") as f:
             for id in AOJ_TwitterID:
                 f.write(str(id) + "\n")
-        with open("cper_bot/AOJ/TwitterID.txt", "rb") as f:
-            dbx.files_delete("/cper_bot/AOJ/TwitterID.txt")
-            dbx.files_upload(f.read(), "/cper_bot/AOJ/TwitterID.txt")
+        with open("AOJ/TwitterID.txt", "rb") as f:
+            dbx.files_delete("/AOJ/TwitterID.txt")
+            dbx.files_upload(f.read(), "/AOJ/TwitterID.txt")
             print("cper_bot-AOJ-register: Uploaded AOJ_TwitterID (size : ", str(len(AOJ_TwitterID)), ")")
-        with open("cper_bot/AOJ/TwitterID.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/cper_bot/_backup/AOJ/TwitterID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
+        with open("AOJ/TwitterID.txt", "rb") as f:
+            dbx.files_upload(f.read(), "/_backup/AOJ/TwitterID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
             print("cper_bot-AOJ-register: Uploaded AOJ_TwitterID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(AOJ_TwitterID)), ")")
     
 # list 内の要素の添え字を返す（無い場合は -1）

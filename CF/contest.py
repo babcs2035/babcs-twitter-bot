@@ -45,13 +45,13 @@ def contest():
         return
 
     # 画像生成
-    listFont = ImageFont.truetype("cper_bot/CF/data/fontR.ttc", 32)
-    contestsListFirstImg = Image.open("cper_bot/CF/data/contest/contestsListImg (first).jpg")
+    listFont = ImageFont.truetype("CF/data/fontR.ttc", 32)
+    contestsListFirstImg = Image.open("CF/data/contest/contestsListImg (first).jpg")
     contestsListImg = Image.new("RGB", (1852, 68 + 64 * len(contestsList)))
     contestsListImg.paste(contestsListFirstImg, (0, 0))
     idx = 0
     for contest in contestsList:
-        contestListImg = Image.open("cper_bot/CF/data/contest/contestsListImg (cell).jpg")
+        contestListImg = Image.open("CF/data/contest/contestsListImg (cell).jpg")
         contestListDraw = ImageDraw.Draw(contestListImg)
         contestListDraw.text((10, 7), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (0, 0, 0), font = listFont)
         contestListDraw.text((360, 7), str(contest["name"]), fill = (0, 0, 0), font = listFont)
@@ -59,11 +59,11 @@ def contest():
         contestListDraw.text((1660, 7), str(contest["type"]), fill = (0, 0, 0), font = listFont)
         contestsListImg.paste(contestListImg, (0, 68 + 64 * idx))
         idx = idx + 1
-    contestsListImg.save("cper_bot/CF/data/contest/contestsListImg_fixed.jpg")
+    contestsListImg.save("CF/data/contest/contestsListImg_fixed.jpg")
 
     # リストをツイート
     listTweetText = "現在 " + str(idx) + " の Codeforces コンテストが予定されています．\nhttps://codeforces.com/contests\n"
-    api.update_with_media(filename = "cper_bot/CF/data/contest/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
+    api.update_with_media(filename = "CF/data/contest/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
 
 if __name__ == '__main__':
     print("cper_bot-CF-contest: Running as debug...")

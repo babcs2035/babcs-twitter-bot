@@ -30,8 +30,8 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # lastTweetID をダウンロード
-    dbx.files_download_to_file("cper_bot/lastTweetID.txt", "/cper_bot/lastTweetID.txt")
-    with open("cper_bot/lastTweetID.txt", "r") as f:
+    dbx.files_download_to_file("lastTweetID.txt", "/lastTweetID.txt")
+    with open("lastTweetID.txt", "r") as f:
         lastTweetID = f.readline()
     print("cper_bot-twitter: Downloaded lastTweetID : ", str(lastTweetID))
 
@@ -49,11 +49,11 @@ def uploadToDropbox():
     if idFixedFlag:
 
         # lastTweetID をアップロード
-        with open("cper_bot/lastTweetID.txt", "w") as f:
+        with open("lastTweetID.txt", "w") as f:
             f.write(str(lastTweetID))
-        with open("cper_bot/lastTweetID.txt", "rb") as f:
-            dbx.files_delete("/cper_bot/lastTweetID.txt")
-            dbx.files_upload(f.read(), "/cper_bot/lastTweetID.txt")
+        with open("lastTweetID.txt", "rb") as f:
+            dbx.files_delete("/lastTweetID.txt")
+            dbx.files_upload(f.read(), "/lastTweetID.txt")
         print("cper_bot-twitter: Uploaded lastTweetID : ", str(lastTweetID))
 
 # インスタンス化

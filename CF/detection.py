@@ -26,24 +26,24 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # CFID をダウンロード
-    dbx.files_download_to_file("cper_bot/CF/CFID.txt", "/cper_bot/CF/CFID.txt")
-    with open("cper_bot/CF/CFID.txt", "r") as f:
+    dbx.files_download_to_file("CF/CFID.txt", "/CF/CFID.txt")
+    with open("CF/CFID.txt", "r") as f:
         CFID.clear()
         for id in f:
             CFID.append(id.rstrip("\n"))
     print("cper_bot-CF-detection: Downloaded CFID (size : ", str(len(CFID)), ")")
     
     # TwitterID をダウンロード
-    dbx.files_download_to_file("cper_bot/CF/TwitterID.txt", "/cper_bot/CF/TwitterID.txt")
-    with open("cper_bot/CF/TwitterID.txt", "r") as f:
+    dbx.files_download_to_file("CF/TwitterID.txt", "/CF/TwitterID.txt")
+    with open("CF/TwitterID.txt", "r") as f:
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
     print("cper_bot-CF-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     # lastSubID をダウンロード
-    dbx.files_download_to_file("cper_bot/CF/lastSubID.txt", "/cper_bot/CF/lastSubID.txt")
-    with open("cper_bot/CF/lastSubID.txt", "rb") as f:
+    dbx.files_download_to_file("CF/lastSubID.txt", "/CF/lastSubID.txt")
+    with open("CF/lastSubID.txt", "rb") as f:
         lastSubID = pickle.load(f)
     print("cper_bot-CF-detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
 
@@ -58,11 +58,11 @@ def uploadToDropbox():
     dbx.users_get_current_account()
     
     # lastSubID をアップロード
-    with open("cper_bot/CF/lastSubID.txt", "wb") as f:
+    with open("CF/lastSubID.txt", "wb") as f:
         pickle.dump(lastSubID, f)
-    with open("cper_bot/CF/lastSubID.txt", "rb") as f:
-        dbx.files_delete("/cper_bot/CF/lastSubID.txt")
-        dbx.files_upload(f.read(), "/cper_bot/CF/lastSubID.txt")
+    with open("CF/lastSubID.txt", "rb") as f:
+        dbx.files_delete("/CF/lastSubID.txt")
+        dbx.files_upload(f.read(), "/CF/lastSubID.txt")
     print("cper_bot-CF-detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 def detection():

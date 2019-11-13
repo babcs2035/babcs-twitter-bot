@@ -27,24 +27,24 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # AOJID をダウンロード
-    dbx.files_download_to_file("cper_bot/AOJ/AOJID.txt", "/cper_bot/AOJ/AOJID.txt")
-    with open("cper_bot/AOJ/AOJID.txt", "r") as f:
+    dbx.files_download_to_file("AOJ/AOJID.txt", "/AOJ/AOJID.txt")
+    with open("AOJ/AOJID.txt", "r") as f:
         AOJID.clear()
         for id in f:
             AOJID.append(id.rstrip("\n"))
     print("cper_bot-AOJ-detection: Downloaded AOJID (size : ", str(len(AOJID)), ")")
     
     # TwitterID をダウンロード
-    dbx.files_download_to_file("cper_bot/AOJ/TwitterID.txt", "/cper_bot/AOJ/TwitterID.txt")
-    with open("cper_bot/AOJ/TwitterID.txt", "r") as f:
+    dbx.files_download_to_file("AOJ/TwitterID.txt", "/AOJ/TwitterID.txt")
+    with open("AOJ/TwitterID.txt", "r") as f:
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
     print("cper_bot-AOJ-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     # lastSubID をダウンロード
-    dbx.files_download_to_file("cper_bot/AOJ/lastSubID.txt", "/cper_bot/AOJ/lastSubID.txt")
-    with open("cper_bot/AOJ/lastSubID.txt", "r") as f:
+    dbx.files_download_to_file("AOJ/lastSubID.txt", "/AOJ/lastSubID.txt")
+    with open("AOJ/lastSubID.txt", "r") as f:
         lastSubID = f.readline()
     print("cper_bot-AOJ-detection: Downloaded lastSubID : ", str(lastSubID))
 
@@ -61,11 +61,11 @@ def uploadToDropbox():
     
     if lastSubFixedFlag:
         # lastSubID をアップロード
-        with open("cper_bot/AOJ/lastSubID.txt", "w") as f:
+        with open("AOJ/lastSubID.txt", "w") as f:
             f.write(str(lastSubID))
-        with open("cper_bot/AOJ/lastSubID.txt", "rb") as f:
-            dbx.files_delete("/cper_bot/AOJ/lastSubID.txt")
-            dbx.files_upload(f.read(), "/cper_bot/AOJ/lastSubID.txt")
+        with open("AOJ/lastSubID.txt", "rb") as f:
+            dbx.files_delete("/AOJ/lastSubID.txt")
+            dbx.files_upload(f.read(), "/AOJ/lastSubID.txt")
         print("cper_bot-AOJ-detection: Uploaded lastSubID : ", str(lastSubID))
 
 def detection():
