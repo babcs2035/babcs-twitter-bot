@@ -2,7 +2,6 @@
 import subprocess
 import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
-import followBack
 import getLiveContestID
 import FA
 import updateHighestScore
@@ -10,14 +9,6 @@ import top20
 
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 10})
-    
-# フォロバ（毎時 0, 20, 40 分）
-@sched.scheduled_job('cron', minute = '0, 20, 40', hour = '*/1')
-def scheduled_job():
-
-    print("cpcontest_bot: ----- followBack Start -----")
-    followBack.followBack()
-    print("cpcontest_bot: ----- followBack End -----")
 
 liveContestIDs = []
 
