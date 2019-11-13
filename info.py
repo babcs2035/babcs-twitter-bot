@@ -22,30 +22,30 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # AtCoderIDs をダウンロード
-    dbx.files_download_to_file("cper_bot/AtCoder/AtCoderIDs.txt", "/cper_bot/AtCoder/AtCoderIDs.txt")
-    with open("cper_bot/AtCoder/AtCoderIDs.txt", "rb") as f:
+    dbx.files_download_to_file("AtCoder/AtCoderIDs.txt", "/AtCoder/AtCoderIDs.txt")
+    with open("AtCoder/AtCoderIDs.txt", "rb") as f:
         AtCoderIDs = pickle.load(f)
     print("cper_bot-info: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
     
     # AOJID をダウンロード
-    dbx.files_download_to_file("cper_bot/AOJ/AOJID.txt", "/cper_bot/AOJ/AOJID.txt")
-    with open("cper_bot/AOJ/AOJID.txt", "r") as f:
+    dbx.files_download_to_file("AOJ/AOJID.txt", "/AOJ/AOJID.txt")
+    with open("AOJ/AOJID.txt", "r") as f:
         AOJID.clear()
         for id in f:
             AOJID.append(id.rstrip("\n"))
     print("cper_bot-info: Downloaded AOJID (size : ", str(len(AOJID)), ")")
 
     # CFID をダウンロード
-    dbx.files_download_to_file("cper_bot/CF/CFID.txt", "/cper_bot/CF/CFID.txt")
-    with open("cper_bot/CF/CFID.txt", "r") as f:
+    dbx.files_download_to_file("CF/CFID.txt", "/CF/CFID.txt")
+    with open("CF/CFID.txt", "r") as f:
         CFID.clear()
         for id in f:
             CFID.append(id.rstrip("\n"))
     print("cper_bot-info: Downloaded CFID (size : ", str(len(CFID)), ")")
 
     # YKID をダウンロード
-    dbx.files_download_to_file("cper_bot/YK/YKID.txt", "/cper_bot/YK/YKID.txt")
-    with open("cper_bot/YK/YKID.txt", "r") as f:
+    dbx.files_download_to_file("YK/YKID.txt", "/YK/YKID.txt")
+    with open("YK/YKID.txt", "r") as f:
         YKID.clear()
         for id in f:
             YKID.append(id.rstrip("\n"))
