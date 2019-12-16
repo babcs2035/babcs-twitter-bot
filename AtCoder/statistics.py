@@ -128,6 +128,9 @@ def statistics(type):
         links = sublistRows[0].find_all("a")
         subID = int(str(links[3].get("href")).split("/")[4])
         maxSubID = max(maxSubID, subID)
+        contest["title"] = contest["title"].replace("◉", "")
+        contest["title"] = contest["title"].replace("\n", "")
+        contest["title"] = contest["title"].replace("\t", "")
         print("AtCoder-statistics: Checked " + contest["title"] + " (lastSubID : " + str(subID) + ")")
 
     # グラフを描画・ツイート
