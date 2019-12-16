@@ -165,7 +165,9 @@ def detection(type):
     border = datetime.datetime.today() - datetime.timedelta(14)
     for contest in contestsJsonData:
         date = epoch_to_datetime(contest["startTimeSeconds"] + contest["durationSeconds"])
-        contest["title"] = contest["title"].replace("◉ ", "")
+        contest["title"] = contest["title"].replace("◉", "")
+        contest["title"] = contest["title"].replace("\n", "")
+        contest["title"] = contest["title"].replace("\t", "")
         if type == 0:
             if date < border:
                 checkContests.append(contest)
