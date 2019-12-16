@@ -19,8 +19,8 @@ def followBack():
     api = tweepy.API(auth)
     
     # フォロバ
-    followers = api.followers_ids("babcs_bot")
-    friends = api.friends_ids("babcs_bot")
+    followers = api.followers_ids("cper_bot")
+    friends = api.friends_ids("cper_bot")
     set_apr = set(followers) - set(friends)
     list_apr = list(set_apr)
     followedCnt = 0
