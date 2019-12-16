@@ -173,7 +173,10 @@ def result():
     for contest in contestsJsonData:
         date = epoch_to_datetime(contest["startTimeSeconds"] + contest["durationSeconds"])
         if yesterday <= date and date < datetime.datetime.today():
-            newcontests.append(str(contest["title"].replace("◉ ", "")))
+            contest["title"] = contest["title"].replace("◉", "")
+            contest["title"] = contest["title"].replace("\n", "")
+            contest["title"] = contest["title"].replace("\t", "")
+            newcontests.append(str(contest["title"]))
 
     # コンテストごとに処理
     for contest in newcontests:
