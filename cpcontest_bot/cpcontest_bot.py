@@ -5,7 +5,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 import getLiveContestID
 import FA
 import updateHighestScore
-import top20
+import ranking
 
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 10})
@@ -40,9 +40,9 @@ def scheduled_job():
         print("cpcontest_bot: ----- updateHighestScore End -----")
 
         # 20 位以内に浮上したユーザーを検知
-        print("cpcontest_bot: ----- top20 Start -----")
-        top20.top20(liveContestIDs)
-        print("cpcontest_bot: ----- top20 End -----")
+        print("cpcontest_bot: ----- ranking Start -----")
+        ranking.ranking(liveContestIDs)
+        print("cpcontest_bot: ----- ranking End -----")
 
 # おまじない
 sched.start()
