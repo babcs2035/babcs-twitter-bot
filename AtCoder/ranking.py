@@ -36,7 +36,7 @@ def downloadFromDropbox(type):
     dbx.files_download_to_file("AtCoder/AtCoderIDs.txt", "/AtCoder/AtCoderIDs.txt")
     with open("AtCoder/AtCoderIDs.txt", "rb") as f:
         AtCoderIDs = pickle.load(f)
-    print("cper_bot-AtCoder-detection: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
+    print("cper_bot-AtCoder-ranking: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
     
     dirType = ""
     if type == 0 or type == 1:
@@ -237,18 +237,27 @@ def ranking(type):
 
     # Unique AC 数ランキングをツイート
     countTweetText = "AtCoder Unique AC 数 " + tweetTextType
-    api.update_with_media(filename = "AtCoder/" + dirType + "_countRankingImg_fixed.jpg", status = countTweetText + makeRanking(dirType + "_count", "count", newACCount, "Unique AC") + "\n" + timeStamp)
-    print("cper_bot-AtCoder-ranking: Tweeted " + dirType + " countRanking")
+    if len(newACCount) > 0:
+        api.update_with_media(filename = "AtCoder/" + dirType + "_countRankingImg_fixed.jpg", status = countTweetText + makeRanking(dirType + "_count", "count", newACCount, "Unique AC") + "\n" + timeStamp)
+        print("cper_bot-AtCoder-ranking: Tweeted " + dirType + " countRanking")
+    else:
+        api.update_status(countTweetText + " ランキング TOP null\nerror: len(newACCount) == 0（AC 数の統計データが更新されていない可能性）\n@babcs2035\n\n" + timeStamp)
 
     # Point Sum ランキングをツイート
     pointTweetText = "AtCoder Point Sum " + tweetTextType
-    api.update_with_media(filename = "AtCoder/" + dirType + "_pointRankingImg_fixed.jpg", status = pointTweetText + makeRanking(dirType + "_point", "point", newACPoint, "Point") + "\n" + timeStamp)
-    print("cper_bot-AtCoder-ranking: Tweeted " + dirType + " pointRanking")
+    if len(newACPoint) > 0:
+        api.update_with_media(filename = "AtCoder/" + dirType + "_pointRankingImg_fixed.jpg", status = pointTweetText + makeRanking(dirType + "_point", "point", newACPoint, "Point") + "\n" + timeStamp)
+        print("cper_bot-AtCoder-ranking: Tweeted " + dirType + " pointRanking")
+    else:
+        api.update_status(pointTweetText + " ランキング TOP null\nerror: len(newACPoint) == 0（Rated Point Sum の統計データが更新されていない可能性）\n@babcs2035\n\n" + timeStamp)
 
     # Point Per Count ランキングをツイート
     perTweetText = "AtCoder Point / Count " + tweetTextType
-    api.update_with_media(filename = "AtCoder/" + dirType + "_perRankingImg_fixed.jpg", status = perTweetText + makeRanking(dirType + "_per", "per", newACPer, "P./C.") + "\n" + timeStamp)
-    print("cper_bot-AtCoder-ranking: Tweeted " + dirType + " perRanking")
+    if len(newACPer) > 0:
+        api.update_with_media(filename = "AtCoder/" + dirType + "_perRankingImg_fixed.jpg", status = perTweetText + makeRanking(dirType + "_per", "per", newACPer, "P./C.") + "\n" + timeStamp)
+        print("cper_bot-AtCoder-ranking: Tweeted " + dirType + " perRanking")
+    else:
+        api.update_status(perTweetText + " ランキング TOP null\nerror: len(newACPer) == 0（Rated Point Sum の統計データが更新されていない可能性）\n@babcs2035\n\n" + timeStamp)
 
     # データをアップロード
     oldACCount = acCount
