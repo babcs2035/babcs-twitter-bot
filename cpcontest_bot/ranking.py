@@ -33,7 +33,7 @@ def downloadFromDropbox():
     dbx.files_download_to_file("cpcontest_bot/AtCoderIDs.txt", "/cpcontest_bot/AtCoderIDs.txt")
     with open("cpcontest_bot/AtCoderIDs.txt", "rb") as f:
         AtCoderIDs = pickle.load(f)
-    print("cpcontest_bot-register: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
+    print("cpcontest_bot-ranking: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -91,8 +91,12 @@ def ranking(contests):
         # 順位表 json データを取得
         session = requests.Session()
         request = session.get(url = "https://atcoder.jp/contests/" + str(contest) + "/standings/json")
-        standingsJsonData = json.loads(request.text)
-        print("cpcontest_bot-ranking: Downloaded standingsJsonData")
+        try:
+            standingsJsonData = json.loads(request.text)
+            print("cpcontest_bot-ranking: Downloaded standingsJsonData")
+        except:
+            print("cpcontest_bot-ranking: standingsJsonData Error")
+            break
 
         newData = {}
         for rows in standingsJsonData["StandingsData"]:

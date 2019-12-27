@@ -81,8 +81,13 @@ def updateHighestScore(contests):
         # 順位表 json データを取得
         session = requests.Session()
         request = session.get(url = "https://atcoder.jp/contests/" + str(contest) + "/standings/json")
-        standingsJsonData = json.loads(request.text)
-        print("cpcontest_bot-updateHighestScore: Downloaded standingsJsonData")
+        try:
+            standingsJsonData = json.loads(request.text)
+            print("cpcontest_bot-updateHighestScore: Downloaded standingsJsonData")
+        except:
+            print("cpcontest_bot-updateHighestScore: standingsJsonData Error")
+            break
+
 
         for task in standingsJsonData["TaskInfo"]:
             if task["TaskScreenName"] not in scores:

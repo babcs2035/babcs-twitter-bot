@@ -28,7 +28,7 @@ def downloadFromDropbox():
     dbx.files_delete("/cpcontest_bot/FAFlags.txt")
     with open("cpcontest_bot/FAFlags.txt", "rb") as f:
         FAFlags = pickle.load(f)
-    print("cpcontest_bot-top20: Downloaded FAFlags (size : ", str(len(FAFlags)), ")")
+    print("cpcontest_bot-FA: Downloaded FAFlags (size : ", str(len(FAFlags)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -45,7 +45,7 @@ def uploadToDropbox():
         pickle.dump(FAFlags, f)
     with open("cpcontest_bot/FAFlags.txt", "rb") as f:
         dbx.files_upload(f.read(), "/cpcontest_bot/FAFlags.txt")
-    print("cpcontest_bot-top20: Uploaded FAFlags (size : ", str(len(FAFlags)), ")")
+    print("cpcontest_bot-FA: Uploaded FAFlags (size : ", str(len(FAFlags)), ")")
 
 def FA(contests):
 
@@ -84,8 +84,12 @@ def FA(contests):
         # 順位表 json データを取得
         session = requests.Session()
         request = session.get(url = "https://atcoder.jp/contests/" + str(contest) + "/standings/json")
-        standingsJsonData = json.loads(request.text)
-        print("cpcontest_bot-FA: Downloaded standingsJsonData")
+        try:
+            standingsJsonData = json.loads(request.text)
+            print("cpcontest_bot-FA: Downloaded standingsJsonData")
+        except:
+            print("cpcontest_bot-FA: standingsJsonData Error")
+            break
 
         for task in standingsJsonData["TaskInfo"]:
             if task["TaskScreenName"] not in FAFlags:
