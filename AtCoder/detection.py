@@ -228,8 +228,31 @@ def detection(type):
                                     break
                             else:
                                 noticeFlag[atcoderID] = "on"
+                            score = int(float(str(subData[4])))
+                            imagePath = "AtCoder/data/detection/"
+                            if score <= 100:
+                                imagePath = imagePath + "100"
+                            elif score <= 200:
+                                imagePath = imagePath + "200"
+                            elif score <= 300:
+                                imagePath = imagePath + "300"
+                            elif score <= 400:
+                                imagePath = imagePath + "400"
+                            elif score <= 600:
+                                imagePath = imagePath + "600"
+                            elif score <= 800:
+                                imagePath = imagePath + "800"
+                            elif score <= 1100:
+                                imagePath = imagePath + "1100"
+                            elif score <= 1500:
+                                imagePath = imagePath + "1500"
+                            elif score <= 1900:
+                                imagePath = imagePath + "1900"
+                            else:
+                                imagePath = imagePath + "2000"
+                            imagePath = imagePath + ".png"
                             try:
-                                api.update_status(atcoderID + " ( @" + twitterID + " ) さんが <AtCoder> " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\nhttps://atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
+                                api.update_with_media(filename = imagePath, status = atcoderID + " ( @" + twitterID + " ) さんが <AtCoder> " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\nhttps://atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
                                 print("cper_bot-AtCoder-detection: " + atcoderID + " ( @" + twitterID + " ) 's new AC submission (contest : " + str(contest["title"]) + ", problem : " + str(subData[1]) + ")")
                             except:
                                 print("cper_bot-AtCoder-detection: Tweet Error")
