@@ -93,7 +93,11 @@ def detection():
     # 提出を解析
     idx = 0
     for user in CFID:
-        subsJsonRes = urllib.request.urlopen("https://codeforces.com/api/user.status?handle=" + str(user))
+        try:
+            subsJsonRes = urllib.request.urlopen("https://codeforces.com/api/user.status?handle=" + str(user))
+        except:
+            print("cper_bot-CF-deteciton: subsJsonRes Error")
+            continue
         subsJsonData = json.loads(subsJsonRes.read().decode("utf-8"))
         if user in lastSubID:
             for sub in subsJsonData["result"]:
