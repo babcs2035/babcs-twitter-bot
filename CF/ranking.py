@@ -31,7 +31,7 @@ def downloadFromDropbox():
         CFID.clear()
         for id in f:
             CFID.append(id.rstrip("\n"))
-    print("CF-ranking: Downloaded CFID (size : ", str(len(CFID)), ")")
+    print("cper_bot-CF-ranking: Downloaded CFID (size : ", str(len(CFID)), ")")
     
     # TwitterID をダウンロード
     dbx.files_download_to_file("CF/TwitterID.txt", "/CF/TwitterID.txt")
@@ -39,13 +39,13 @@ def downloadFromDropbox():
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
-    print("CF-ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+    print("cper_bot-CF-ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     # acCount をダウンロード
     dbx.files_download_to_file("CF/acCount.txt", "/CF/acCount.txt")
     with open("CF/acCount.txt", "rb") as f:
         acCount = pickle.load(f)
-    print("CF-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
+    print("cper_bot-CF-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -63,7 +63,7 @@ def uploadToDropbox():
     with open("CF/acCount.txt", "rb") as f:
         dbx.files_delete("/CF/acCount.txt")
         dbx.files_upload(f.read(), "/CF/acCount.txt")
-    print("CF-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
+    print("cper_bot-CF-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
 
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
@@ -162,6 +162,6 @@ def ranking():
     uploadToDropbox()
 
 if __name__ == '__main__':
-    print("CF-ranking: Running as debug...")
+    print("cper_bot-CF-ranking: Running as debug...")
     ranking()
-    print("CF-ranking: Debug finished")
+    print("cper_bot-CF-ranking: Debug finished")

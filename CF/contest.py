@@ -66,6 +66,6 @@ def contest():
     api.update_with_media(filename = "CF/data/contest/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
 
 if __name__ == '__main__':
-    print("CF-contest: Running as debug...")
+    print("cper_bot-CF-contest: Running as debug...")
     contest()
-    print("CF-contest: Debug finished")
+    print("cper_bot-CF-contest: Debug finished")

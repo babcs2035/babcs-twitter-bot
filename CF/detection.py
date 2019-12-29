@@ -31,7 +31,7 @@ def downloadFromDropbox():
         CFID.clear()
         for id in f:
             CFID.append(id.rstrip("\n"))
-    print("CF-detection: Downloaded CFID (size : ", str(len(CFID)), ")")
+    print("cper_bot-CF-detection: Downloaded CFID (size : ", str(len(CFID)), ")")
     
     # TwitterID をダウンロード
     dbx.files_download_to_file("CF/TwitterID.txt", "/CF/TwitterID.txt")
@@ -39,13 +39,13 @@ def downloadFromDropbox():
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
-    print("CF-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+    print("cper_bot-CF-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     # lastSubID をダウンロード
     dbx.files_download_to_file("CF/lastSubID.txt", "/CF/lastSubID.txt")
     with open("CF/lastSubID.txt", "rb") as f:
         lastSubID = pickle.load(f)
-    print("CF-detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
+    print("cper_bot-CF-detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -63,7 +63,7 @@ def uploadToDropbox():
     with open("CF/lastSubID.txt", "rb") as f:
         dbx.files_delete("/CF/lastSubID.txt")
         dbx.files_upload(f.read(), "/CF/lastSubID.txt")
-    print("CF-detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
+    print("cper_bot-CF-detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 def detection():
     
@@ -93,7 +93,11 @@ def detection():
     # 提出を解析
     idx = 0
     for user in CFID:
-        subsJsonRes = urllib.request.urlopen("https://codeforces.com/api/user.status?handle=" + str(user))
+        try:
+            subsJsonRes = urllib.request.urlopen("https://codeforces.com/api/user.status?handle=" + str(user))
+        except:
+            print("cper_bot-CF-deteciton: subsJsonRes Error")
+            continue
         subsJsonData = json.loads(subsJsonRes.read().decode("utf-8"))
         if user in lastSubID:
             for sub in subsJsonData["result"]:
@@ -103,9 +107,9 @@ def detection():
                     if str(sub["verdict"]) == "OK":
                         try:
                             api.update_status(user + " ( @" + TwitterID[idx] + " ) さんが <Codeforces> " + str(sub["problem"]["name"]) + " を AC しました！\n" + "https://codeforces.com/contest/" + str(sub["contestId"]) + "/submission/" + str(sub["id"]) + "\n" + timeStamp)
-                            print("CF-detection: " + user + " ( @" + TwitterID[idx] + " ) 's new AC submission (problem : " + str(sub["problem"]["name"]) + ")")
+                            print("cper_bot-CF-detection: " + user + " ( @" + TwitterID[idx] + " ) 's new AC submission (problem : " + str(sub["problem"]["name"]) + ")")
                         except:
-                            print("CF-detection: Tweet Error")
+                            print("cper_bot-CF-detection: Tweet Error")
         lastSubID[user] = int(subsJsonData["result"][0]["id"])
         idx = idx + 1
 
@@ -113,6 +117,6 @@ def detection():
     uploadToDropbox()
 
 if __name__ == '__main__':
-    print("CF-detection: Running as debug...")
+    print("cper_bot-CF-detection: Running as debug...")
     detection()
-    print("CF-detection: Debug finished")
+    print("cper_bot-CF-detection: Debug finished")

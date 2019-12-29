@@ -32,7 +32,7 @@ def downloadFromDropbox():
         CFID.clear()
         for id in f:
             CFID.append(id.rstrip("\n"))
-    print("CF-result: Downloaded CFID (size : ", str(len(CFID)), ")")
+    print("cper_bot-CF-result: Downloaded CFID (size : ", str(len(CFID)), ")")
     
     # TwitterID をダウンロード
     dbx.files_download_to_file("CF/TwitterID.txt", "/CF/TwitterID.txt")
@@ -40,7 +40,7 @@ def downloadFromDropbox():
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
-    print("CF-result: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+    print("cper_bot-CF-result: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
 
 def epoch_to_datetime(epoch):
     return datetime.datetime(*time.localtime(epoch)[:6])
@@ -118,7 +118,7 @@ def result():
     # 取得すべきコンテストを取得
     contestsJsonRes = urllib.request.urlopen("https://codeforces.com/api/contest.list")
     contestsJsonData = json.loads(contestsJsonRes.read().decode("utf-8"))
-    print("CF-result: Downloaded contestsJsonData")
+    print("cper_bot-CF-result: Downloaded contestsJsonData")
     newcontests = []
     yesterday = datetime.datetime.today() - datetime.timedelta(1)
     for contest in contestsJsonData["result"]:
@@ -135,27 +135,27 @@ def result():
         for user in CFID:
             reslistJsonRes = urllib.request.urlopen("https://codeforces.com/api/user.rating?handle=" + str(user))
             reslistJsonData = json.loads(reslistJsonRes.read().decode("utf-8"))
-            print("CF-result: Downloaded " + str(user) + "'s reslistData")
+            print("cper_bot-CF-result: Downloaded " + str(user) + "'s reslistData")
             for row in reslistJsonData["result"]:
                 if str(contest) == str(row["contestName"]):
                     rankList.append({ "user" : str(user), "rank" : int(row["rank"]) })
                     diffList.append({ "user" : str(user), "diff" : (int(row["newRating"]) - int(row["oldRating"])) })
                     break
-        print("CF-result: Checked " + str(contest) + " result")
+        print("cper_bot-CF-result: Checked " + str(contest) + " result")
 
         # ランキングを作成
         if len(rankList) > 0:
             rankList.sort(key = lambda x: x["rank"])
             tweetText = str(contest) + " 順位表" + makeRanking("rank", rankList, "位")
             api.update_with_media(filename = "CF/data/result/rankRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
-            print("CF-result: Tweeted " + str(contest) + " rankRanking")
+            print("cper_bot-CF-result: Tweeted " + str(contest) + " rankRanking")
         if len(diffList) > 0:
             diffList.sort(key = lambda x: x["diff"], reverse = True)
             tweetText = str(contest) + " レート変動値" + makeRanking("diff", diffList, "")
             api.update_with_media(filename = "CF/data/result/diffRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
-            print("CF-result: Tweeted " + str(contest) + " diffRanking")
+            print("cper_bot-CF-result: Tweeted " + str(contest) + " diffRanking")
 
 if __name__ == '__main__':
-    print("CF-result: Running as debug...")
+    print("cper_bot-CF-result: Running as debug...")
     result()
-    print("CF-result: Debug finished")
+    print("cper_bot-CF-result: Debug finished")
