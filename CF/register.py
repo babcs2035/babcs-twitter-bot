@@ -3,11 +3,11 @@ import os
 import datetime
 import urllib.request
 import dropbox
+import pickle
 
 # グローバル変数
-CFID = []
-CF_TwitterID = []
-CF_listFixedFlag = False
+CFIDs = set()
+CFIDsFixedFlag = False
 
 # CF ID が存在するか確認
 def checkCFID(cfID):
@@ -24,72 +24,41 @@ def checkCFID(cfID):
 def downloadFromDropbox():
     
     # グローバル変数
-    global CFID
-    global CF_TwitterID
+    global CFIDs
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
 
-    # CFID をダウンロード
-    dbx.files_download_to_file("CF/CFID.txt", "/CF/CFID.txt")
-    with open("CF/CFID.txt", "r") as f:
-        CFID.clear()
-        for id in f:
-            CFID.append(id.rstrip("\n"))
-    print("cper_bot-CF-register: Downloaded CFID (size : ", str(len(CFID)), ")")
-    
-    # CF_TwitterID をダウンロード
-    dbx.files_download_to_file("CF/TwitterID.txt", "/CF/TwitterID.txt")
-    with open("CF/TwitterID.txt", "r") as f:
-        CF_TwitterID.clear()
-        for id in f:
-            CF_TwitterID.append(id.rstrip("\n"))
-    print("cper_bot-CF-register: Downloaded CF_TwitterID (size : ", str(len(CF_TwitterID)), ")")
+    # CFIDs をダウンロード
+    dbx.files_download_to_file("CF/CFIDs.txt", "/CF/CFIDs.txt")
+    with open("CF/CFIDs.txt", "rb") as f:
+        CFIDs = pickle.load(f)
+    print("cper_bot-CF-register: Downloaded CFIDs (size : ", str(len(CFIDs)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
     
     # グローバル変数
-    global CFID
-    global CF_TwitterID
-    global CF_listFixedFlag
+    global CFIDs
+    global CFIDsFixedFlag
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
         
-    if CF_listFixedFlag:
-        # CFID をアップロード
-        with open("CF/CFID.txt", "w") as f:
-            for id in CFID:
-                f.write(str(id) + "\n")
-        with open("CF/CFID.txt", "rb") as f:
-            dbx.files_delete("/CF/CFID.txt")
-            dbx.files_upload(f.read(), "/CF/CFID.txt")
-            print("cper_bot-CF-register: Uploaded CFID (size : ", str(len(CFID)), ")")
-        with open("CF/CFID.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/_backup/CF/CFID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
-            print("cper_bot-CF-register: Uploaded CFID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(CFID)), ")")
+    if CFIDsFixedFlag:
 
-        # CF_TwitterID をアップロード
-        with open("CF/TwitterID.txt", "w") as f:
-            for id in CF_TwitterID:
-                f.write(str(id) + "\n")
-        with open("CF/TwitterID.txt", "rb") as f:
-            dbx.files_delete("/CF/TwitterID.txt")
-            dbx.files_upload(f.read(), "/CF/TwitterID.txt")
-            print("cper_bot-CF-register: Uploaded CF_TwitterID (size : ", str(len(CF_TwitterID)), ")")
-        with open("CF/TwitterID.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/_backup/CF/TwitterID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
-            print("cper_bot-CF-register: Uploaded CF_TwitterID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(CF_TwitterID)), ")")
-    
-# list 内の要素の添え字を返す（無い場合は -1）
-def myIndex(x, l):
-    if x in l:
-        return l.index(x)
-    else:
-        return -1
+        # CFIDs をアップロード
+        with open("CF/CFIDs.txt", "wb") as f:
+            pickle.dump(CFIDs, f)
+        with open("CF/CFIDs.txt", "rb") as f:
+            dbx.files_delete("/CF/CFIDs.txt")
+            dbx.files_upload(f.read(), "/CF/CFIDs.txt")
+            print("cper_bot-CF-register: Uploaded CFIDs (size : ", str(len(CFIDs)), ")")
+        with open("CF/CFIDs.txt", "rb") as f:
+            dbx.files_upload(f.read(), "/_backup/CF/CFIDs/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
+            print("cper_bot-CF-register: Uploaded CFIDs (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(CFIDs)), ")")
 
 # CF ID 登録・解除
 def register(cfID, twitterID, flag):
@@ -97,9 +66,8 @@ def register(cfID, twitterID, flag):
     print("cper_bot-CF-register: ----- CF-register Start -----")
 
     # グローバル変数
-    global CFID
-    global CF_TwitterID
-    global CF_listFixedFlag
+    global CFIDs
+    global CFIDsFixedFlag
         
     # 時刻表示を作成
     timeStamp = datetime.datetime.today()
@@ -109,26 +77,28 @@ def register(cfID, twitterID, flag):
     downloadFromDropbox()
 
     # 登録・解除処理
-    CF_listFixedFlag = False
+    CFIDsFixedFlag = False
     tweetText = ""
     if flag == 0:
         if checkCFID(cfID):
-            CFID.append(cfID)
-            CF_TwitterID.append(twitterID)
-            tweetText = "@" + str(twitterID) + " Codeforces ID を登録しました！\n";
-            print("cper_bot-CF-register: Registered new CF ID : " + cfID)
-            CF_listFixedFlag = True
+            if (cfID, twitterID) not in CFIDs:
+                CFIDs.add((cfID, twitterID))
+                tweetText = "@" + str(twitterID) + " Codeforces ID を登録しました！\n";
+                print("cper_bot-CF-register: Registered new CF ID : " + cfID)
+                CFIDsFixedFlag = True
+            else:
+                tweetText = "@" + str(twitterID) + " この Codeforces ID は既に登録されています！\n"
+                print("cper_bot-AtCoder-register: Rejected to register CF ID : " + cfID)
         else:
             tweetText = "@" + str(twitterID) + " 正しい Codeforces ID ではありません！\n"
             print("cper_bot-CF-register: Rejected to CF-register new CF ID : " + cfID)
     if flag == 1:
         if checkCFID(cfID):
-            if myIndex(cfID, CFID) != -1 and myIndex(str(twitterID), CF_TwitterID) != -1 and myIndex(cfID, CFID) == myIndex(str(twitterID), CF_TwitterID):
-                CFID.pop(myIndex(str(twitterID), CF_TwitterID))
-                CF_TwitterID.pop(myIndex(str(twitterID), CF_TwitterID))
+            if (cfID, twitterID) in CFIDs:
+                CFIDs.remove((cfID, twitterID))
                 tweetText = "@" + str(twitterID) + " Codeforces ID を登録解除しました！\n"
                 print("cper_bot-CF-register: Unregistered CF ID : " + cfID)
-                CF_listFixedFlag = True
+                CFIDsFixedFlag = True
             else:
                 tweetText = "@" + str(twitterID) + " この Codeforces ID は登録されていません！\n"
                 print("cper_bot-CF-register: Rejected to unregister CF ID : " + cfID)
