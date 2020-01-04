@@ -61,7 +61,7 @@ def downloadImage(url, dst_path):
         with urllib.request.urlopen(url) as web_file, open(dst_path, 'wb') as local_file:
             local_file.write(web_file.read())
     except:
-        print("cpcontest_bot-results: downloadImage Error (url = " + url + ", dst_path = " + dst_path + ")")
+        print("cpcontest_bot-ranking: downloadImage Error (url = " + url + ", dst_path = " + dst_path + ")")
 
 def ranking(contests):
 
@@ -130,31 +130,31 @@ def ranking(contests):
                         except:
                             print("cpcontest_bot-ranking: userpageData Error (UserScreenName = " + rows["UserScreenName"] + ")")
                             continue
-                        downloadImage(userpageData.find("img", class_ = "avatar").attrs["src"], "cpcontest_bot/imgs/" + rows["UserScreenName"] + ".png")
+                        downloadImage(userpageData.find("img", class_ = "avatar").attrs["src"], "cpcontest_bot/data/" + rows["UserScreenName"] + ".png")
 
                         # 投稿する画像を作成
                         succeedFlag = True
                         try:
-                            font = ImageFont.truetype("AtCoder/data/fontR.ttc", 96)
-                            fontB = ImageFont.truetype("AtCoder/data/fontB.ttc", 96)
+                            font = ImageFont.truetype("cpcontest_bot/data/fontR.ttc", 96)
+                            fontB = ImageFont.truetype("cpcontest_bot/data/fontB.ttc", 96)
                             resImg = Image.new("RGB", (1405, 562), (255, 255, 255))
                             resDraw = ImageDraw.Draw(resImg)
-                            resImg.paste(Image.open("cpcontest_bot/imgs/" + rows["UserScreenName"] + ".png").resize((512, 512)), (25, 25))
+                            resImg.paste(Image.open("cpcontest_bot/data/" + rows["UserScreenName"] + ".png").resize((512, 512)), (25, 25))
                             resDraw.text((567, 165), str(rankings[contest][rows["UserScreenName"]]) + " 位 ⇒", fill = (64, 64, 64), font = font)
                             resDraw.text((617, 281), str(rows["Rank"]) + " 位 (" + str(int(rankings[contest][rows["UserScreenName"]]) - int(rows["Rank"])) + " 位 UP)", fill = (255, 64, 64), font = fontB)
-                            resImg.save("cpcontest_bot/imgs/resImg.jpg")
+                            resImg.save("cpcontest_bot/data/resImg.jpg")
                         except:
                             succeedFlag = False
 
                         # ツイート
                         if flag:
                             if succeedFlag:
-                                api.update_with_media(filename = "cpcontest_bot/imgs/resImg.jpg", status = "〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " ( @" + userTwitterID + " ) さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rows["Rank"]) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                                api.update_with_media(filename = "cpcontest_bot/data/resImg.jpg", status = "〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " ( @" + userTwitterID + " ) さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rows["Rank"]) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
                             else:
                                 api.update_status("〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " ( @" + userTwitterID + " ) さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rows["Rank"]) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
                         elif rows["Rank"] <= 10:
                             if succeedFlag:
-                                api.update_with_media(filename = "cpcontest_bot/imgs/resImg.jpg", status = "〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rows["Rank"]) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                                api.update_with_media(filename = "cpcontest_bot/data/resImg.jpg", status = "〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rows["Rank"]) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
                             else:
                                 api.update_status("〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rows["Rank"]) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
                         print("cpcontest_bot-ranking: detected ranking updated (" + rows["UserScreenName"] + ")")
