@@ -9,43 +9,31 @@ import requests
 import pickle
 
 # グローバル変数
-CFID = []
-TwitterID = []
+CFIDs = set()
 lastSubID = {}
 
 # Dropbox からダウンロード
 def downloadFromDropbox():
     
     # グローバル変数
-    global CFID
-    global TwitterID
+    global CFIDs
     global lastSubID
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
 
-    # CFID をダウンロード
-    dbx.files_download_to_file("CF/CFID.txt", "/CF/CFID.txt")
-    with open("CF/CFID.txt", "r") as f:
-        CFID.clear()
-        for id in f:
-            CFID.append(id.rstrip("\n"))
-    print("CF-detection: Downloaded CFID (size : ", str(len(CFID)), ")")
-    
-    # TwitterID をダウンロード
-    dbx.files_download_to_file("CF/TwitterID.txt", "/CF/TwitterID.txt")
-    with open("CF/TwitterID.txt", "r") as f:
-        TwitterID.clear()
-        for id in f:
-            TwitterID.append(id.rstrip("\n"))
-    print("CF-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+    # CFIDs をダウンロード
+    dbx.files_download_to_file("CF/CFIDs.txt", "/CF/CFIDs.txt")
+    with open("CF/CFIDs.txt", "rb") as f:
+        CFIDs = pickle.load(f)
+    print("cper_bot-CF-detection: Downloaded CFIDs (size : ", str(len(CFIDs)), ")")
     
     # lastSubID をダウンロード
     dbx.files_download_to_file("CF/lastSubID.txt", "/CF/lastSubID.txt")
     with open("CF/lastSubID.txt", "rb") as f:
         lastSubID = pickle.load(f)
-    print("CF-detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
+    print("cper_bot-CF-detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -63,13 +51,12 @@ def uploadToDropbox():
     with open("CF/lastSubID.txt", "rb") as f:
         dbx.files_delete("/CF/lastSubID.txt")
         dbx.files_upload(f.read(), "/CF/lastSubID.txt")
-    print("CF-detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
+    print("cper_bot-CF-detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 def detection():
     
     # グローバル変数
-    global CFID
-    global TwitterID
+    global CFIDs
     global lastSubID
     
     # 各種キー設定
@@ -92,26 +79,31 @@ def detection():
 
     # 提出を解析
     idx = 0
-    for user in CFID:
-        subsJsonRes = urllib.request.urlopen("https://codeforces.com/api/user.status?handle=" + str(user))
+    for (cfID, twitterID) in CFIDs:
+        try:
+            subsJsonRes = urllib.request.urlopen("https://codeforces.com/api/user.status?handle=" + str(cfID))
+        except:
+            print("cper_bot-CF-deteciton: subsJsonRes Error")
+            continue
         subsJsonData = json.loads(subsJsonRes.read().decode("utf-8"))
-        if user in lastSubID:
+        if cfID in lastSubID:
             for sub in subsJsonData["result"]:
-                if int(sub["id"]) <= lastSubID[user]:
+                if int(sub["id"]) <= lastSubID[cfID]:
                     break
-                if str(sub["verdict"]) == "OK":
-                    try:
-                        api.update_status(user + " ( @" + TwitterID[idx] + " ) さんが " + str(sub["problem"]["name"]) + " を AC しました！\n提出ソースコード：" + "https://codeforces.com/contest/" + str(sub["contestId"]) + "/submission/" + str(sub["id"]) + "\n" + timeStamp)
-                        print("CF-detection: " + user + " ( @" + TwitterID[idx] + " ) 's new AC submission (problem : " + str(sub["problem"]["name"]) + ")")
-                    except:
-                        print("CF-detection: Tweet Error")
-        lastSubID[user] = int(subsJsonData["result"][0]["id"])
+                if "verdict" in sub:
+                    if str(sub["verdict"]) == "OK":
+                        try:
+                            api.update_status(cfID + " ( @" + twitterID + " ) さんが <Codeforces> " + str(sub["problem"]["name"]) + " を AC しました！\n" + "https://codeforces.com/contest/" + str(sub["contestId"]) + "/submission/" + str(sub["id"]) + "\n" + timeStamp)
+                            print("cper_bot-CF-detection: " + cfID + " ( @" + twitterID + " ) 's new AC submission (problem : " + str(sub["problem"]["name"]) + ")")
+                        except:
+                            print("cper_bot-CF-detection: Tweet Error")
+        lastSubID[cfID] = int(subsJsonData["result"][0]["id"])
         idx = idx + 1
 
     # データをアップロード
     uploadToDropbox()
 
 if __name__ == '__main__':
-    print("CF-detection: Running as debug...")
+    print("cper_bot-CF-detection: Running as debug...")
     detection()
-    print("CF-detection: Debug finished")
+    print("cper_bot-CF-detection: Debug finished")

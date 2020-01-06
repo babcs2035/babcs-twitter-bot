@@ -3,7 +3,6 @@ import os
 import tweepy
 import datetime
 import time
-import dropbox
 import urllib
 import requests
 import json
@@ -15,18 +14,6 @@ def epoch_to_datetime(epoch):
 
 def sec_to_time(sec):
     return "{0.hours:02}:{0.minutes:02}".format(relativedelta(seconds=sec))
-
-# Dropbox にアップロード
-def uploadToDropbox():
-
-    # Dropbox オブジェクトの生成
-    dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
-    dbx.users_get_current_account()
-    
-    # contestsListImg_fixed をアップロード
-    with open("CF/data/contest/contestsListImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/CF/contestsListImg_fixed/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-        print("CF-contest: Uploaded contestsListImg_fixed")
 
 def contest():
     
@@ -52,10 +39,13 @@ def contest():
     for contest in contestsJsonData["result"]:
         if str(contest["phase"]) == "BEFORE":
             contestsList.append(contest)
-    contestsList.sort(key = lambda x: x["id"])
+    contestsList.sort(key = lambda x: x["startTimeSeconds"])
+    if len(contestsList) == 0:
+        api.update_status("現在予定されている Codeforces コンテストはありません．\nhttps://codeforces.com/contests\n\n" + timeStamp)
+        return
 
     # 画像生成
-    listFont = ImageFont.truetype("CF/data/YuGothM.ttc", 32)
+    listFont = ImageFont.truetype("CF/data/fontR.ttc", 32)
     contestsListFirstImg = Image.open("CF/data/contest/contestsListImg (first).jpg")
     contestsListImg = Image.new("RGB", (1852, 68 + 64 * len(contestsList)))
     contestsListImg.paste(contestsListFirstImg, (0, 0))
@@ -63,22 +53,19 @@ def contest():
     for contest in contestsList:
         contestListImg = Image.open("CF/data/contest/contestsListImg (cell).jpg")
         contestListDraw = ImageDraw.Draw(contestListImg)
-        contestListDraw.text((10, 15), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (0, 0, 0), font = listFont)
-        contestListDraw.text((360, 15), str(contest["name"]), fill = (0, 0, 0), font = listFont)
-        contestListDraw.text((1460, 15), str(sec_to_time(contest["durationSeconds"])), fill = (0, 0, 0), font = listFont)
-        contestListDraw.text((1660, 15), str(contest["type"]), fill = (0, 0, 0), font = listFont)
+        contestListDraw.text((10, 7), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (0, 0, 0), font = listFont)
+        contestListDraw.text((360, 7), str(contest["name"]), fill = (0, 0, 0), font = listFont)
+        contestListDraw.text((1460, 7), str(sec_to_time(contest["durationSeconds"])), fill = (0, 0, 0), font = listFont)
+        contestListDraw.text((1660, 7), str(contest["type"]), fill = (0, 0, 0), font = listFont)
         contestsListImg.paste(contestListImg, (0, 68 + 64 * idx))
         idx = idx + 1
     contestsListImg.save("CF/data/contest/contestsListImg_fixed.jpg")
 
     # リストをツイート
-    listTweetText = "現在，" + str(idx) + " の Codeforces コンテストが予定されています．\nhttps://codeforces.com/contests\n"
+    listTweetText = "現在 " + str(idx) + " の Codeforces コンテストが予定されています．\nhttps://codeforces.com/contests\n"
     api.update_with_media(filename = "CF/data/contest/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
 
-    # 画像をアップロード
-    uploadToDropbox()
-
 if __name__ == '__main__':
-    print("CF-contest: Running as debug...")
+    print("cper_bot-CF-contest: Running as debug...")
     contest()
-    print("CF-contest: Debug finished")
+    print("cper_bot-CF-contest: Debug finished")

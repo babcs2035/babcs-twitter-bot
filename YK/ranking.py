@@ -32,7 +32,7 @@ def downloadFromDropbox():
         YKID.clear()
         for id in f:
             YKID.append(id.rstrip("\n"))
-    print("YK-ranking: Downloaded YKID (size : ", str(len(YKID)), ")")
+    print("cper_bot-YK-ranking: Downloaded YKID (size : ", str(len(YKID)), ")")
     
     # TwitterID をダウンロード
     dbx.files_download_to_file("TwitterID.txt", "/YK/TwitterID.txt")
@@ -40,13 +40,13 @@ def downloadFromDropbox():
         TwitterID.clear()
         for id in f:
             TwitterID.append(id.rstrip("\n"))
-    print("YK-ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+    print("cper_bot-YK-ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
     
     # acCount をダウンロード
     dbx.files_download_to_file("acCount.txt", "/YK/acCount.txt")
     with open("acCount.txt", "rb") as f:
         acCount = pickle.load(f)
-    print("YK-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
+    print("cper_bot-YK-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -64,7 +64,7 @@ def uploadToDropbox():
     with open("acCount.txt", "rb") as f:
         dbx.files_delete("/YK/acCount.txt")
         dbx.files_upload(f.read(), "/YK/acCount.txt")
-    print("YK-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
+    print("cper_bot-YK-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
 
 # list 内の要素の添え字を返す（無い場合は -1）
 def myIndex(x, l):
@@ -161,6 +161,6 @@ def ranking():
     uploadToDropbox()
 
 if __name__ == '__main__':
-    print("YK-ranking: Running as debug...")
+    print("cper_bot-YK-ranking: Running as debug...")
     ranking()
-    print("YK-ranking: Debug finished")
+    print("cper_bot-YK-ranking: Debug finished")

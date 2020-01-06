@@ -2,46 +2,41 @@
 import os
 import tweepy
 import datetime
-import json
+import time
 import dropbox
-import urllib
-from PIL import Image, ImageDraw, ImageFont
+import requests
 import pickle
+import json
+from PIL import Image, ImageDraw, ImageFont
 
 # グローバル変数
-AtCoderID = []
-TwitterID = []
+AtCoderIDs = []
 acCount = {}
 acPoint = {}
+ratings = {}
+
+# 定数
+acCountReachNum = 50
+acPointReachNum = 5000
 
 # Dropbox からダウンロード
 def downloadFromDropbox(type):
     
     # グローバル変数
-    global AtCoderID
-    global TwitterID
+    global AtCoderIDs
     global acCount
     global acPoint
+    global ratings
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
 
-    # AtCoderID をダウンロード
-    dbx.files_download_to_file("AtCoder/AtCoderID.txt", "/AtCoder/AtCoderID.txt")
-    with open("AtCoder/AtCoderID.txt", "r") as f:
-        AtCoderID.clear()
-        for id in f:
-            AtCoderID.append(id.rstrip("\n"))
-    print("ranking: Downloaded AtCoderID (size : ", str(len(AtCoderID)), ")")
-    
-    # TwitterID をダウンロード
-    dbx.files_download_to_file("AtCoder/TwitterID.txt", "/AtCoder/TwitterID.txt")
-    with open("AtCoder/TwitterID.txt", "r") as f:
-        TwitterID.clear()
-        for id in f:
-            TwitterID.append(id.rstrip("\n"))
-    print("ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+    # AtCoderIDs をダウンロード
+    dbx.files_download_to_file("AtCoder/AtCoderIDs.txt", "/AtCoder/AtCoderIDs.txt")
+    with open("AtCoder/AtCoderIDs.txt", "rb") as f:
+        AtCoderIDs = pickle.load(f)
+    print("cper_bot-AtCoder-ranking: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
     
     dirType = ""
     if type == 0 or type == 1:
@@ -55,13 +50,19 @@ def downloadFromDropbox(type):
     dbx.files_download_to_file("AtCoder/" + dirType + "_acCount.txt", "/AtCoder/" + dirType + "_acCount.txt")
     with open("AtCoder/" + dirType + "_acCount.txt", "rb") as f:
         acCount = pickle.load(f)
-    print("ranking: Downloaded " + dirType + " acCount (size : ", str(len(acCount)), ")")
-
+    print("cper_bot-AtCoder-ranking: Downloaded " + dirType + " acCount (size : ", str(len(acCount)), ")")
+    
     # acPoint をダウンロード
     dbx.files_download_to_file("AtCoder/" + dirType + "_acPoint.txt", "/AtCoder/" + dirType + "_acPoint.txt")
     with open("AtCoder/" + dirType + "_acPoint.txt", "rb") as f:
         acPoint = pickle.load(f)
-    print("ranking: Downloaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
+    print("cper_bot-AtCoder-ranking: Downloaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
+
+    # ratings をダウンロード
+    dbx.files_download_to_file("AtCoder/ratings.txt", "/AtCoder/ratings.txt")
+    with open("AtCoder/ratings.txt", "rb") as f:
+        ratings = pickle.load(f)
+    print("cper_bot-AtCoder-ranking: Downloaded ratings (size : ", str(len(ratings)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox(type):
@@ -91,7 +92,7 @@ def uploadToDropbox(type):
         with open("AtCoder/" + dirType + "_acCount.txt", "rb") as f:
             dbx.files_delete("/AtCoder/" + dirType + "_acCount.txt")
             dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_acCount.txt")
-        print("ranking: Uploaded " + dirType + " acCount (size : ", str(len(acCount)), ")")
+        print("cper_bot-AtCoder-ranking: Uploaded " + dirType + " acCount (size : ", str(len(acCount)), ")")
 
         # acPoint をアップロード
         with open("AtCoder/" + dirType + "_acPoint.txt", "wb") as f:
@@ -99,29 +100,62 @@ def uploadToDropbox(type):
         with open("AtCoder/" + dirType + "_acPoint.txt", "rb") as f:
             dbx.files_delete("/AtCoder/" + dirType + "_acPoint.txt")
             dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_acPoint.txt")
-        print("ranking: Uploaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
+        print("cper_bot-AtCoder-ranking: Uploaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
 
-    # countRankingImg_fixed をアップロード
-    with open("AtCoder/" + dirType + "_countRankingImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/AtCoder/countRankingImg_fixed/" + dirType + "_" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-        print("ranking: Uploaded " + dirType + " countRankingImg_fixed")
+def makeRanking(type1, type2, listData, unit):
+    
+    global AtCoderIDa
+    global ratings
+    
+    colors = [[0, 0, 0], [128, 128, 128], [128, 64, 0], [0, 128, 0], [0, 192, 192], [0, 0, 255], [192, 192, 0], [255, 128, 0], [255, 0, 0]]
+    rows = 30
 
-    # pointRankingImg_fixed をアップロード
-    with open("AtCoder/" + dirType + "_pointRankingImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/AtCoder/pointRankingImg_fixed/" + dirType + "_" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-        print("ranking: Uploaded " + dirType + " pointRankingImg_fixed")
+    flag = int(listData[0][str(type2)]) > int(listData[len(listData) - 1][str(type2)])
+    rankNum = 1
+    countNum = 1
+    countIndex = 0
+    rankingFont = ImageFont.truetype("AtCoder/data/fontR.ttc", 32)
+    rankingFontS = ImageFont.truetype("AtCoder/data/fontB.ttc", 32)
+    rankingFirstImg = Image.open("AtCoder/data/" + str(type2) + "RankingImg (first).jpg")
+    resImg = Image.new("RGB", (850 * int((len(listData) + rows - 1) / rows), 65 + 63 * min(len(listData), rows)))
+    awardsList = []
+    for idx in range(len(listData)):
+        if idx % rows == 0:
+            resImg.paste(rankingFirstImg, (850 * int(idx / rows), 0))
+        rankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
+        rankingDraw = ImageDraw.Draw(rankingImg)
+        if idx > 0:
+            if flag and int(listData[idx - 1][str(type2)]) > int(listData[idx][str(type2)]):
+                rankNum = rankNum + countNum
+                countNum = 1
+                countIndex += 1
+            elif (not flag) and int(listData[idx - 1][str(type2)]) < int(listData[idx][str(type2)]):
+                rankNum = rankNum + countNum
+                countNum = 1
+                countIndex += 1
+            else:
+                countNum = countNum + 1
 
-    # perRankingImg_fixed をアップロード
-    with open("AtCoder/" + dirType + "_perRankingImg_fixed.jpg", "rb") as f:
-        dbx.files_upload(f.read(), "/_backup/AtCoder/perRankingImg_fixed/" + dirType + "_" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".jpg")
-        print("ranking: Uploaded " + dirType + " perRankingImg_fixed")
+        colorIndex = 0
+        for border in range(7, 0, -1):
+            if str(listData[idx]["atcoderID"]) in ratings:
+                if ratings[str(listData[idx]["atcoderID"])] >= border * 400:
+                    colorIndex = border + 1
+                    break
+        if rankNum <= 8:
+            rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFontS)
+            rankingDraw.text((120, 7), listData[idx]["atcoderID"] + " (@" + listData[idx]["twitterID"] + ")", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFontS)
+            rankingDraw.text((672, 7), str(listData[idx][str(type2)]), fill = (0, 0, 0), font = rankingFontS)
+            awardsList.append("@" + listData[idx]["twitterID"])
+        else:
+            rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFont)
+            rankingDraw.text((120, 7), listData[idx]["atcoderID"] + " (@" + listData[idx]["twitterID"] + ")", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFont)
+            rankingDraw.text((672, 7), str(listData[idx][str(type2)]), fill = (0, 0, 0), font = rankingFont)
+        resImg.paste(rankingImg, (850 * int(idx / rows), 65 + 63 * (idx % rows)))
 
-# list 内の要素の添え字を返す（無い場合は -1）
-def myIndex(x, l):
-    if x in l:
-        return l.index(x)
-    else:
-        return -1
+    resImg.save("AtCoder/" + str(type1) + "RankingImg_fixed.jpg")
+    tweetText = " ランキング TOP " + str(rankNum) + "\n入賞の " + " , ".join(awardsList) + " さん おめでとうございます！\n"
+    return tweetText
 
 # ランキング生成 (type 0:Daily, 1:Mid Daily, 2:Weekly, 3:Monthly)
 def ranking(type):
@@ -140,38 +174,15 @@ def ranking(type):
     auth = tweepy.OAuthHandler(CK, CS)
     auth.set_access_token(AT, AS)
     api = tweepy.API(auth)
-    
+
+    # 時刻表示を作成
+    timeStamp = datetime.datetime.today()
+    timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
+
     # データをダウンロード
     downloadFromDropbox(type)
-
-    # AC 数を取得
-    acCountJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/atcoder-api/info/ac")
-    acPointJson = urllib.request.urlopen("https://kenkoooo.com/atcoder/atcoder-api/info/sums")
-    acCountData = json.loads(acCountJson.read().decode("utf-8"))
-    acPointData = json.loads(acPointJson.read().decode("utf-8"))
-    nowACCount = {}
-    nowACPoint = {}
-    for user in acCountData:
-        if user["user_id"] in AtCoderID:
-            nowACCount[str(user["user_id"])] = int(user["problem_count"])
-    for user in acPointData:
-        if user["user_id"] in AtCoderID:
-            nowACPoint[str(user["user_id"])] = int(user["point_sum"])
-    newACCount = []
-    newACPoint = []
-    newACPer = []
-    for user in AtCoderID:
-        if user in acCount:
-            if nowACCount[user] - acCount[user] > 0:
-                newACCount.append(({"user_id" : user, "count" : nowACCount[user] - acCount[user]}))
-        if user in acPoint:
-            if nowACPoint[user] - acPoint[user] > 0:
-                newACPoint.append(({"user_id" : user, "point" : nowACPoint[user] - acPoint[user]}))
-                newACPer.append(({"user_id" : user, "per": float(nowACPoint[user] - acPoint[user]) / float(nowACCount[user] - acCount[user])}))
-    newACCount.sort(key = lambda x: x["count"], reverse = True)
-    newACPoint.sort(key = lambda x: x["point"], reverse = True)
-    newACPer.sort(key = lambda x: x["per"], reverse = True)
-
+    
+    # ランキング種別を設定
     dirType = ""
     if type == 0:
         dirType = "daily"
@@ -182,73 +193,36 @@ def ranking(type):
     if type == 3:
         dirType = "monthly"
 
-    # Unique AC 数ランキングを作成
-    countRankNum = 1
-    countNum = 1
-    rankingFont = ImageFont.truetype("AtCoder/data/YuGothM.ttc", 32)
-    countRankingFirstImg = Image.open("AtCoder/data/countRankingImg (first).jpg")
-    countResImg = Image.new("RGB", (738, 65 + 63 * len(newACCount)))
-    countResImg.paste(countRankingFirstImg, (0, 0))
-    for idx in range(len(newACCount)):
-        countRankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
-        countRankingDraw = ImageDraw.Draw(countRankingImg)
-        if idx > 0:
-            if int(newACCount[idx - 1]["count"]) > int(newACCount[idx]["count"]):
-                countRankNum = countRankNum + countNum
-                countNum = 1
-            else:
-                countNum = countNum + 1
-        countRankingDraw.text((10, 19), str(countRankNum), fill = (0, 0, 0), font = rankingFont)
-        countRankingDraw.text((120, 19), newACCount[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
-        countRankingDraw.text((560, 19), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
-        countResImg.paste(countRankingImg, (0, 65 + 63 * idx))
-    countResImg.save("AtCoder/" + dirType + "_countRankingImg_fixed.jpg")
-
-    # Point Sum ランキングを作成
-    pointRankNum = 1
-    pointNum = 1
-    pointRankingFirstImg = Image.open("AtCoder/data/pointRankingImg (first).jpg")
-    pointResImg = Image.new("RGB", (738, 65 + 63 * len(newACPoint)))
-    pointResImg.paste(pointRankingFirstImg, (0, 0))
-    for idx in range(len(newACPoint)):
-        pointRankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
-        pointRankingDraw = ImageDraw.Draw(pointRankingImg)
-        if idx > 0:
-            if int(newACPoint[idx - 1]["point"]) > int(newACPoint[idx]["point"]):
-                pointRankNum = pointRankNum + pointNum
-                pointNum = 1
-            else:
-                pointNum = pointNum + 1
-        pointRankingDraw.text((10, 19), str(pointRankNum), fill = (0, 0, 0), font = rankingFont)
-        pointRankingDraw.text((120, 19), newACPoint[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
-        pointRankingDraw.text((560, 19), str(newACPoint[idx]["point"]), fill = (0, 0, 0), font = rankingFont)
-        pointResImg.paste(pointRankingImg, (0, 65 + 63 * idx))
-    pointResImg.save("AtCoder/" + dirType + "_pointRankingImg_fixed.jpg")
-
-    # Point Per Count ランキングを作成
-    perRankNum = 1
-    perNum = 1
-    perRankingFirstImg = Image.open("AtCoder/data/perRankingImg (first).jpg")
-    perResImg = Image.new("RGB", (738, 65 + 63 * len(newACPer)))
-    perResImg.paste(perRankingFirstImg, (0, 0))
-    for idx in range(len(newACPer)):
-        perRankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
-        perRankingDraw = ImageDraw.Draw(perRankingImg)
-        if idx > 0:
-            if int(newACPer[idx - 1]["per"]) > int(newACPer[idx]["per"]):
-                perRankNum = perRankNum + perNum
-                perNum = 1
-            else:
-                perNum = perNum + 1
-        perRankingDraw.text((10, 19), str(perRankNum), fill = (0, 0, 0), font = rankingFont)
-        perRankingDraw.text((120, 19), newACPer[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
-        perRankingDraw.text((560, 19), str(newACPer[idx]["per"]), fill = (0, 0, 0), font = rankingFont)
-        perResImg.paste(perRankingImg, (0, 65 + 63 * idx))
-    perResImg.save("AtCoder/" + dirType + "_perRankingImg_fixed.jpg")
-
-    # 時刻表示を作成
-    timeStamp = datetime.datetime.today()
-    timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
+    # AC 数を取得
+    session = requests.Session()
+    request = session.get(url = "https://kenkoooo.com/atcoder/resources/ac.json")
+    acCountData = json.loads(request.text)
+    request = session.get(url = "https://kenkoooo.com/atcoder/resources/sums.json")
+    acPointData = json.loads(request.text)
+    nowACCount = {}
+    nowACPoint = {}
+    for user in acCountData:
+        for atcoderID, twitterID in AtCoderIDs:
+            if user["user_id"] == atcoderID:
+                nowACCount[str(user["user_id"])] = int(user["problem_count"])
+    for user in acPointData:
+        for atcoderID, twitterID in AtCoderIDs:
+            if user["user_id"] == atcoderID:
+                nowACPoint[str(user["user_id"])] = int(user["point_sum"])
+    newACCount = []
+    newACPoint = []
+    newACPer = []
+    for atcoderID, twitterID in AtCoderIDs:
+        if atcoderID in acCount and atcoderID in nowACCount:
+            if nowACCount[atcoderID] - acCount[atcoderID] > 0:
+                newACCount.append(({"atcoderID" : atcoderID, "twitterID" : twitterID, "count" : nowACCount[atcoderID] - acCount[atcoderID]}))
+        if atcoderID in acPoint and atcoderID in nowACPoint:
+            if nowACPoint[atcoderID] - acPoint[atcoderID] > 0 and nowACCount[atcoderID] - acCount[atcoderID] > 0:
+                newACPoint.append(({"atcoderID" : atcoderID, "twitterID" : twitterID, "point" : nowACPoint[atcoderID] - acPoint[atcoderID]}))
+                newACPer.append(({"atcoderID" : atcoderID, "twitterID" : twitterID, "per": float(nowACPoint[atcoderID] - acPoint[atcoderID]) / float(nowACCount[atcoderID] - acCount[atcoderID])}))
+    newACCount.sort(key = lambda x: x["count"], reverse = True)
+    newACPoint.sort(key = lambda x: x["point"], reverse = True)
+    newACPer.sort(key = lambda x: x["per"], reverse = True)
 
     # ランキングをツイート
     tweetTextType = ""
@@ -261,60 +235,61 @@ def ranking(type):
     if type == 3:
         tweetTextType = "Monthly"
 
-    countTweetText = "AtCoder Unique AC 数 " + tweetTextType + " ランキング TOP " + str(countRankNum) + "\n"
-    countRankNum = 1
-    countNum = 1
-    for idx in range(len(newACCount)):
-        if idx > 0:
-            if int(newACCount[idx - 1]["count"]) > int(newACCount[idx]["count"]):
-                countRankNum = countRankNum + countNum
-                countNum = 1
-            else:
-                countNum = countNum + 1
-        if countRankNum + countNum - 1 <= 3:
-            countTweetText += str(countRankNum) + " 位 " + newACCount[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACCount[idx]["user_id"],AtCoderID)]) + " ) " + str(newACCount[idx]["count"]) + " Unique AC\n"
-        else:
-            break
-    api.update_with_media(filename = "AtCoder/" + dirType + "_countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
-    
-    pointTweetText = "AtCoder Point Sum " + tweetTextType + " ランキング TOP " + str(pointRankNum) + "\n"
-    pointRankNum = 1
-    pointNum = 1
-    for idx in range(len(newACPoint)):
-        if idx > 0:
-            if int(newACPoint[idx - 1]["point"]) > int(newACPoint[idx]["point"]):
-                pointRankNum = pointRankNum + pointNum
-                pointNum = 1
-            else:
-                pointNum = pointNum + 1
-        if pointRankNum + pointNum - 1 <= 3:
-            pointTweetText += str(pointRankNum) + " 位 " + newACPoint[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACPoint[idx]["user_id"],AtCoderID)]) + " ) " + str(newACPoint[idx]["point"]) + " Point\n"
-        else:
-            break
-    api.update_with_media(filename = "AtCoder/" + dirType + "_pointRankingImg_fixed.jpg", status = pointTweetText + "\n" + timeStamp)
+    # Unique AC 数ランキングをツイート
+    countTweetText = "AtCoder Unique AC 数 " + tweetTextType
+    if len(newACCount) > 0:
+        api.update_with_media(filename = "AtCoder/" + dirType + "_countRankingImg_fixed.jpg", status = countTweetText + makeRanking(dirType + "_count", "count", newACCount, "Unique AC") + "\n" + timeStamp)
+        print("cper_bot-AtCoder-ranking: Tweeted " + dirType + " countRanking")
+    else:
+        api.update_status(countTweetText + " ランキング TOP null\nerror: len(newACCount) == 0（AC 数の統計データが更新されていない可能性）\n@babcs2035\n\n" + timeStamp)
 
-    perTweetText = "AtCoder Point / Count " + tweetTextType + " ランキング TOP " + str(perRankNum) + "\n"
-    perRankNum = 1
-    perNum = 1
-    for idx in range(len(newACPer)):
-        if idx > 0:
-            if int(newACPer[idx - 1]["per"]) > int(newACPer[idx]["per"]):
-                perRankNum = perRankNum + perNum
-                perNum = 1
-            else:
-                perNum = perNum + 1
-        if perRankNum + perNum - 1 <= 3:
-            perTweetText += str(perRankNum) + " 位 " + newACPer[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACPer[idx]["user_id"],AtCoderID)]) + " ) " + str(newACPer[idx]["per"]) + " Point\n"
-        else:
-            break
-    api.update_with_media(filename = "AtCoder/" + dirType + "_perRankingImg_fixed.jpg", status = perTweetText + "\n" + timeStamp)
-    
+    # Point Sum ランキングをツイート
+    pointTweetText = "AtCoder Point Sum " + tweetTextType
+    if len(newACPoint) > 0:
+        api.update_with_media(filename = "AtCoder/" + dirType + "_pointRankingImg_fixed.jpg", status = pointTweetText + makeRanking(dirType + "_point", "point", newACPoint, "Point") + "\n" + timeStamp)
+        print("cper_bot-AtCoder-ranking: Tweeted " + dirType + " pointRanking")
+    else:
+        api.update_status(pointTweetText + " ランキング TOP null\nerror: len(newACPoint) == 0（Rated Point Sum の統計データが更新されていない可能性）\n@babcs2035\n\n" + timeStamp)
+
+    # Point Per Count ランキングをツイート
+    perTweetText = "AtCoder Point / Count " + tweetTextType
+    if len(newACPer) > 0:
+        api.update_with_media(filename = "AtCoder/" + dirType + "_perRankingImg_fixed.jpg", status = perTweetText + makeRanking(dirType + "_per", "per", newACPer, "P./C.") + "\n" + timeStamp)
+        print("cper_bot-AtCoder-ranking: Tweeted " + dirType + " perRanking")
+    else:
+        api.update_status(perTweetText + " ランキング TOP null\nerror: len(newACPer) == 0（Rated Point Sum の統計データが更新されていない可能性）\n@babcs2035\n\n" + timeStamp)
+
     # データをアップロード
+    oldACCount = acCount
+    oldACPoint = acPoint
     acCount = nowACCount
     acPoint = nowACPoint
     uploadToDropbox(type)
 
+    # AC 数・Rated Point Sum の通知
+    if type == 0:
+        for atcoderID, twitterID in AtCoderIDs:
+            userURL = "https://kenkoooo.com/atcoder/#/user/" + atcoderID
+            if atcoderID in oldACCount and atcoderID in nowACCount:
+                if nowACCount[atcoderID] - oldACCount[atcoderID] > 0:
+                    if type == 0 and int(nowACCount[atcoderID] / acCountReachNum) > int(oldACCount[atcoderID] / acCountReachNum):
+                        try:
+                            api.update_status(atcoderID + " ( @" + twitterID + " ) さんの AtCoder での AC 数が " + str(oldACCount[atcoderID]) + " -> " + str(nowACCount[atcoderID]) + " となり，" + str(int(nowACCount[atcoderID] / acCountReachNum) * acCountReachNum) + " を突破しました！\n" + userURL + "\n" + timeStamp)
+                            print("cper_bot-AtCoder-ranking: Tweeted " + atcoderID + " ( @" + twitterID + " )'s AC Count Reach (" + str(oldACCount[atcoderID]) + " -> " + str(nowACCount[atcoderID]) + ")")
+                        except:
+                            print("cper_bot-AtCoder-ranking: Tweet Error")
+                        time.sleep(5)
+            if atcoderID in oldACPoint and atcoderID in nowACPoint:
+                if nowACPoint[atcoderID] - oldACPoint[atcoderID] > 0 and nowACCount[atcoderID] - oldACCount[atcoderID] > 0:
+                    if type == 0 and int(nowACPoint[atcoderID] / acPointReachNum) > int(oldACPoint[atcoderID] / acPointReachNum):
+                        try:
+                            api.update_status(atcoderID + " ( @" + twitterID + " ) さんの AtCoder での Rated Point Sum 数が " + str(oldACPoint[atcoderID]) + " -> " + str(nowACPoint[atcoderID]) + " となり，" + str(int(nowACPoint[atcoderID] / acPointReachNum) * acPointReachNum) + " を突破しました！\n" + userURL + "\n" + timeStamp)
+                            print("cper_bot-AtCoder-ranking: Tweeted " + atcoderID + " ( @" + twitterID + " )'s Rated Point Sum Reach (" + str(oldACPoint[atcoderID]) + " -> " + str(nowACPoint[atcoderID]) + ")")
+                        except:
+                            print("cper_bot-AtCoder-ranking: Tweet Error")
+                        time.sleep(5)
+
 if __name__ == '__main__':
-    print("AtCoder-ranking: Running as debug...")
+    print("cper_bot-AtCoder-ranking: Running as debug...")
     ranking(1)
-    print("AtCoder-ranking: Debug finished")
+    print("cper_bot-AtCoder-ranking: Debug finished")
