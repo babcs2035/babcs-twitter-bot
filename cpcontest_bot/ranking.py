@@ -6,6 +6,7 @@ import pickle
 import datetime
 import requests
 import urllib
+import shutil
 from bs4 import BeautifulSoup
 import json
 from PIL import Image, ImageDraw, ImageFont
@@ -56,7 +57,8 @@ def uploadToDropbox():
 
 def downloadImage(url, dst_path):
     if url[0] != 'h':
-        url = "https:" + url
+        shutil.copy("AtCoder/data/default.png", dst_path)
+        return
     try:
         with urllib.request.urlopen(url) as web_file, open(dst_path, 'wb') as local_file:
             local_file.write(web_file.read())
