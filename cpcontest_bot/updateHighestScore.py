@@ -9,12 +9,14 @@ from bs4 import BeautifulSoup
 import json
 
 scores = {}
+AtCoderIDs = []
 
 # Dropbox からダウンロード
 def downloadFromDropbox():
     
     # グローバル変数
     global scores
+    global AtCoderIDs
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
@@ -26,6 +28,12 @@ def downloadFromDropbox():
     with open("cpcontest_bot/scores.txt", "rb") as f:
         scores = pickle.load(f)
     print("cpcontest_bot-updateHighestScore: Downloaded scores (size : ", str(len(scores)), ")")
+
+    # AtCoderIDs をダウンロード
+    dbx.files_download_to_file("cpcontest_bot/AtCoderIDs.txt", "/cpcontest_bot/AtCoderIDs.txt")
+    with open("cpcontest_bot/AtCoderIDs.txt", "rb") as f:
+        AtCoderIDs = pickle.load(f)
+    print("cpcontest_bot-updateHighestScore: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
@@ -44,9 +52,13 @@ def uploadToDropbox():
         dbx.files_upload(f.read(), "/cpcontest_bot/scores.txt")
     print("cpcontest_bot-updateHighestScore: Uploaded scores (size : ", str(len(scores)), ")")
 
+def sec_to_time(sec):
+    return str(int(sec / 60)) + ":" + str(int(sec % 60)).zfill(2)
+
 def updateHighestScore(contests):
 
     global scores
+    global AtCoderIDs
 
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY2"]
@@ -81,25 +93,44 @@ def updateHighestScore(contests):
         # 順位表 json データを取得
         session = requests.Session()
         request = session.get(url = "https://atcoder.jp/contests/" + str(contest) + "/standings/json")
-        standingsJsonData = json.loads(request.text)
-        print("cpcontest_bot-updateHighestScore: Downloaded standingsJsonData")
+        try:
+            standingsJsonData = json.loads(request.text)
+            print("cpcontest_bot-updateHighestScore: Downloaded standingsJsonData")
+        except:
+            print("cpcontest_bot-updateHighestScore: standingsJsonData Error")
+            break
+
 
         for task in standingsJsonData["TaskInfo"]:
             if task["TaskScreenName"] not in scores:
                 scores[task["TaskScreenName"]] = 0
         for task in standingsJsonData["TaskInfo"]:
             maxScore = -1
+            minTime = -1
             maxUser = ""
             for rows in standingsJsonData["StandingsData"]:
                 if task["TaskScreenName"] not in rows["TaskResults"]:
                     continue
                 userScore = int(rows["TaskResults"][task["TaskScreenName"]]["Score"])
-                if (maxScore == -1 or userScore > maxScore) and userScore > 0:
+                userTime = int(rows["TaskResults"][task["TaskScreenName"]]["Elapsed"])
+                if (maxScore == -1 or userScore >= maxScore) and userScore > 0 and (minTime == -1 or userTime < minTime):
                     maxScore = int(rows["TaskResults"][task["TaskScreenName"]]["Score"])
+                    minTime = int(rows["TaskResults"][task["TaskScreenName"]]["Elapsed"])
                     maxUser = str(rows["UserScreenName"])
             if maxScore > scores[task["TaskScreenName"]]:
+                flag = False
+                userTwitterID = ""
+                for atcoderID, twitterID in AtCoderIDs:
+                    if atcoderID == maxUser:
+                        flag = True
+                        userTwitterID = twitterID
+                        break
                 scores[task["TaskScreenName"]] = maxScore
-                api.update_status("〔" + contestName + " 実況〕\n" + maxUser + " さんが " +  task["Assignment"] + " 問題で " + str(maxScore / 100) + " 点を獲得し，最高得点を更新しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                minTime /= 1000000000
+                if flag:
+                    api.update_status("〔" + contestName + " 実況〕\n" + maxUser + " ( @" + userTwitterID + " ) さんが " +  task["Assignment"] + " 問題で " + str(maxScore / 100) + " 点を " + str(sec_to_time(minTime)) + " に獲得し，最高得点を更新しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                else:
+                    api.update_status("〔" + contestName + " 実況〕\n" + maxUser + " さんが " +  task["Assignment"] + " 問題で " + str(maxScore / 100) + " 点を " + str(sec_to_time(minTime)) + " に獲得し，最高得点を更新しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
                 print("cpcontest_bot-updateHighestScore: detected " + str(task["TaskScreenName"]) + " updated the highest score (" + maxUser + ")")
 
     uploadToDropbox()

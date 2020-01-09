@@ -12,58 +12,39 @@ from bs4 import BeautifulSoup
 from PIL import Image, ImageDraw, ImageFont
 
 # グローバル変数
-CFID = []
-TwitterID = []
+CFIDs = set()
 
 # Dropbox からダウンロード
 def downloadFromDropbox():
     
     # グローバル変数
-    global CFID
-    global TwitterID
+    global CFIDs
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
 
-    # CFID をダウンロード
-    dbx.files_download_to_file("CF/CFID.txt", "/CF/CFID.txt")
-    with open("CF/CFID.txt", "r") as f:
-        CFID.clear()
-        for id in f:
-            CFID.append(id.rstrip("\n"))
-    print("cper_bot-CF-result: Downloaded CFID (size : ", str(len(CFID)), ")")
+    # CFIDs をダウンロード
+    dbx.files_download_to_file("CF/CFIDs.txt", "/CF/CFIDs.txt")
+    with open("CF/CFIDs.txt", "rb") as f:
+        CFIDs = pickle.load(f)
+    print("cper_bot-CF-result: Downloaded CFIDs (size : ", str(len(CFIDs)), ")")
     
-    # TwitterID をダウンロード
-    dbx.files_download_to_file("CF/TwitterID.txt", "/CF/TwitterID.txt")
-    with open("CF/TwitterID.txt", "r") as f:
-        TwitterID.clear()
-        for id in f:
-            TwitterID.append(id.rstrip("\n"))
-    print("cper_bot-CF-result: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
-
 def epoch_to_datetime(epoch):
     return datetime.datetime(*time.localtime(epoch)[:6])
 
-# list 内の要素の添え字を返す（無い場合は -1）
-def myIndex(x, l):
-    if x in l:
-        return l.index(x)
-    else:
-        return -1
+def makeRanking(type, listData):
 
-def makeRanking(type, listData, unit):
-
-    global CFID
-    global TwitterID
+    global CFIDs
 
     flag = int(listData[0][str(type)]) > int(listData[len(listData) - 1][str(type)])
     rankNum = 1
     countNum = 1
     rankingFont = ImageFont.truetype("CF/data/fontR.ttc", 32)
+    rankingFontS = ImageFont.truetype("CF/data/fontB.ttc", 32)
     rankingFirstImg = Image.open("CF/data/result/" + str(type) + "RankingImg (first).jpg")
     resImg = Image.new("RGB", (738 * int((len(listData) + 19) / 20), 65 + 63 * min(len(listData), 20)))
-    tweetText = ""
+    awardsList = []
     for idx in range(len(listData)):
         if idx % 20 == 0:
             resImg.paste(rankingFirstImg, (738 * int(idx / 20), 0))
@@ -79,22 +60,24 @@ def makeRanking(type, listData, unit):
             else:
                 countNum = countNum + 1
         
-        if rankNum + countNum - 1 <= 3:
-            tweetText += str(rankNum) + " 位 " + listData[idx]["user"] + " ( @" + str(TwitterID[myIndex(listData[idx]["user"], CFID)]) + " ) " + str(listData[idx][str(type)]) + " " + str(unit) + "\n"
-        
-        rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFont)
-        rankingDraw.text((120, 7), listData[idx]["user"], fill = (0, 0, 0), font = rankingFont)
-        rankingDraw.text((560, 7), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFont)
+        if rankNum <= 5:
+            awardsList.append("@" + listData[idx]["twitterID"])
+            rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFontS)
+            rankingDraw.text((120, 7), listData[idx]["cfID"], fill = (0, 0, 0), font = rankingFontS)
+            rankingDraw.text((560, 7), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFontS)
+        else:
+            rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFont)
+            rankingDraw.text((120, 7), listData[idx]["cfID"], fill = (0, 0, 0), font = rankingFont)
+            rankingDraw.text((560, 7), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFont)
         resImg.paste(rankingImg, (738 * int(idx / 20), 65 + 63 * (idx % 20)))
     resImg.save("CF/data/result/" + str(type) + "RankingImg_fixed.jpg")
-    tweetText = " ランキング TOP " + str(rankNum) + "\n" + tweetText
+    tweetText = " ランキング TOP " + str(rankNum) + "\n入賞の " + " , ".join(awardsList) + " さん おめでとうございます！\n"
     return tweetText
 
 def result():
     
     # グローバル変数
-    global CFID
-    global TwitterID
+    global CFIDs
 
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
@@ -132,26 +115,30 @@ def result():
         diffList = []
 
         # ユーザーの成績を取得
-        for user in CFID:
-            reslistJsonRes = urllib.request.urlopen("https://codeforces.com/api/user.rating?handle=" + str(user))
+        for (cfID, twitterID) in CFIDs:
+            try:
+                reslistJsonRes = urllib.request.urlopen("https://codeforces.com/api/user.rating?handle=" + str(cfID))
+            except:
+                print("cper_bot-CF-result: reslistJsonRes Error")
+                continue
             reslistJsonData = json.loads(reslistJsonRes.read().decode("utf-8"))
-            print("cper_bot-CF-result: Downloaded " + str(user) + "'s reslistData")
+            print("cper_bot-CF-result: Downloaded " + str(cfID) + "'s reslistData")
             for row in reslistJsonData["result"]:
                 if str(contest) == str(row["contestName"]):
-                    rankList.append({ "user" : str(user), "rank" : int(row["rank"]) })
-                    diffList.append({ "user" : str(user), "diff" : (int(row["newRating"]) - int(row["oldRating"])) })
+                    rankList.append({ "cfID" : str(cfID), "twitterID" : str(twitterID), "rank" : int(row["rank"]) })
+                    diffList.append({ "cfID" : str(cfID), "twitterID" : str(twitterID), "diff" : (int(row["newRating"]) - int(row["oldRating"])) })
                     break
         print("cper_bot-CF-result: Checked " + str(contest) + " result")
 
         # ランキングを作成
         if len(rankList) > 0:
             rankList.sort(key = lambda x: x["rank"])
-            tweetText = str(contest) + " 順位表" + makeRanking("rank", rankList, "位")
+            tweetText = str(contest) + " 順位表" + makeRanking("rank", rankList)
             api.update_with_media(filename = "CF/data/result/rankRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
             print("cper_bot-CF-result: Tweeted " + str(contest) + " rankRanking")
         if len(diffList) > 0:
             diffList.sort(key = lambda x: x["diff"], reverse = True)
-            tweetText = str(contest) + " レート変動値" + makeRanking("diff", diffList, "")
+            tweetText = str(contest) + " レート変動値" + makeRanking("diff", diffList)
             api.update_with_media(filename = "CF/data/result/diffRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
             print("cper_bot-CF-result: Tweeted " + str(contest) + " diffRanking")
 

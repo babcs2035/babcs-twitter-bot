@@ -5,14 +5,17 @@ import datetime
 import time
 import dropbox
 import requests
+import urllib
 import pickle
 import json
+import shutil
 from bs4 import BeautifulSoup
 from PIL import Image, ImageDraw, ImageFont
 
 # グローバル変数
 AtCoderIDs = []
 ratings = {}
+canPassDL = False
 
 # Dropbox からダウンロード
 def downloadFromDropbox():
@@ -58,6 +61,21 @@ def uploadToDropbox():
 def epoch_to_datetime(epoch):
     return datetime.datetime(*time.localtime(epoch)[:6])
 
+def downloadImage(url, dst_path):
+
+    global canPassDL
+
+    if canPassDL and os.path.exists(dst_path):
+        return
+    if url[0] != 'h':
+        shutil.copy("AtCoder/data/default.png", dst_path)
+        return
+    try:
+        with urllib.request.urlopen(url) as web_file, open(dst_path, 'wb') as local_file:
+            local_file.write(web_file.read())
+    except:
+        print("cper_bot-AtCoder-result: downloadImage Error (url = " + url + ", dst_path = " + dst_path + ")")
+
 def makeRanking(type, listData, unit):
 
     global AtCoderIDs
@@ -97,13 +115,23 @@ def makeRanking(type, listData, unit):
                     break   
         if rankNum <= 8:
             rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFontS)
-            rankingDraw.text((120, 7), listData[idx]["atcoderID"] + " ( @" + listData[idx]["twitterID"] + " )", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFontS)
+            rankingDraw.text((182, 7), listData[idx]["atcoderID"], fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFontS)
             rankingDraw.text((560, 7), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFontS)
             awardsList.append("@" + listData[idx]["twitterID"])
         else:
             rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFont)
-            rankingDraw.text((120, 7), listData[idx]["atcoderID"] + " ( @" + listData[idx]["twitterID"] + " )", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFont)
+            rankingDraw.text((182, 7), listData[idx]["atcoderID"], fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFont)
             rankingDraw.text((560, 7), str(listData[idx][str(type)]), fill = (0, 0, 0), font = rankingFont)
+        
+        # ユーザーのアバター画像をダウンロード
+        userpage = requests.get(url = "https://atcoder.jp/users/" + listData[idx]["atcoderID"])
+        try:
+            userpage.raise_for_status()
+            userpageData = BeautifulSoup(userpage.text, "html.parser")
+            downloadImage(userpageData.find("img", class_ = "avatar").attrs["src"], "AtCoder/data/" + listData[idx]["atcoderID"] + ".png")
+            rankingImg.paste(Image.open("AtCoder/data/" + listData[idx]["atcoderID"] + ".png").resize((59, 59)), (105, 2))
+        except:
+            print("cper_bot-AtCoder-result: userpageData Error (atcoderID = " + listData[idx]["atcoderID"] + ")")
         resImg.paste(rankingImg, (738 * int(idx / rows), 65 + 63 * (idx % rows)))
     resImg.save("AtCoder/data/result/" + str(type) + "RankingImg_fixed.jpg")
     return " ランキング TOP " + str(rankNum) + "\n入賞の " + " , ".join(awardsList) + " さん おめでとうございます！\n"
@@ -114,6 +142,7 @@ def result():
     global AtCoderIDs
     global contestFlag
     global ratings
+    global canPassDL
 
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
@@ -215,21 +244,25 @@ def result():
         print("cper_bot-AtCoder-result: Checked " + str(contest) + " result")
 
         # ランキングを作成
+        canPassDL = False
         if len(rankList) > 0:
             rankList.sort(key = lambda x: x["rank"])
             tweetText = str(contest) + " 順位表" + makeRanking("rank", rankList, "位")
             api.update_with_media(filename = "AtCoder/data/result/rankRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
             print("cper_bot-AtCoder-result: Tweeted " + str(contest) + " rankRanking")
+            canPassDL = True
         if len(perfList) > 0:
             perfList.sort(key = lambda x: x["perf"], reverse = True)
             tweetText = str(contest) + " パフォーマンス値" + makeRanking("perf", perfList, "perf.")
             api.update_with_media(filename = "AtCoder/data/result/perfRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
             print("cper_bot-AtCoder-result: Tweeted " + str(contest) + " perfRanking")
+            canPassDL = True
         if len(diffList) > 0:
             diffList.sort(key = lambda x: x["diff"], reverse = True)
             tweetText = str(contest) + " レート変動値" + makeRanking("diff", diffList, "")
             api.update_with_media(filename = "AtCoder/data/result/diffRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
             print("cper_bot-AtCoder-result: Tweeted " + str(contest) + " diffRanking")
+            canPassDL = True
 
     # データをアップロード
     uploadToDropbox()

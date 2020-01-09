@@ -2,15 +2,15 @@
 import os
 import tweepy
 import datetime
-import json
 import dropbox
 import urllib
-from bs4 import BeautifulSoup
 import requests
+import pickle
+import json
+from bs4 import BeautifulSoup
 
 # グローバル変数
-AOJID = []
-TwitterID = []
+AOJIDs = set()
 lastSubID = 0
 lastSubFixedFlag = True
 
@@ -18,8 +18,7 @@ lastSubFixedFlag = True
 def downloadFromDropbox():
     
     # グローバル変数
-    global AOJID
-    global TwitterID
+    global AOJIDs
     global lastSubID
 
     # Dropbox オブジェクトの生成
@@ -27,20 +26,10 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # AOJID をダウンロード
-    dbx.files_download_to_file("AOJ/AOJID.txt", "/AOJ/AOJID.txt")
-    with open("AOJ/AOJID.txt", "r") as f:
-        AOJID.clear()
-        for id in f:
-            AOJID.append(id.rstrip("\n"))
-    print("cper_bot-AOJ-detection: Downloaded AOJID (size : ", str(len(AOJID)), ")")
-    
-    # TwitterID をダウンロード
-    dbx.files_download_to_file("AOJ/TwitterID.txt", "/AOJ/TwitterID.txt")
-    with open("AOJ/TwitterID.txt", "r") as f:
-        TwitterID.clear()
-        for id in f:
-            TwitterID.append(id.rstrip("\n"))
-    print("cper_bot-AOJ-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+    dbx.files_download_to_file("AOJ/AOJIDs.txt", "/AOJ/AOJIDs.txt")
+    with open("AOJ/AOJIDs.txt", "rb") as f:
+        AOJIDs = pickle.load(f)
+    print("cper_bot-AOJ-detection: Downloaded AOJIDs (size : ", str(len(AOJIDs)), ")")
     
     # lastSubID をダウンロード
     dbx.files_download_to_file("AOJ/lastSubID.txt", "/AOJ/lastSubID.txt")
@@ -71,8 +60,7 @@ def uploadToDropbox():
 def detection():
     
     # グローバル変数
-    global AOJID
-    global TwitterID
+    global AOJIDs
     global lastSubID
     global lastSubFixedFlag
     
@@ -106,21 +94,21 @@ def detection():
             continue
 
         # AOJ ID に当てはまるか調べる
-        pos = -1
-        idx = 0
-        for id in AOJID:
-            if id == str(sub["userId"]):
-                pos = idx
+        AOJID = "-1"
+        twitterID = "-1"
+        for (id1, id2) in AOJIDs:
+            if id1 == str(sub["userId"]):
+                AOJID = id1
+                twitterID = id2
                 break
-            idx = idx + 1
-        if pos == -1:
+        if AOJID == "-1":
             continue
 
-        subURL = "https://onlinejudge.u-aizu.ac.jp/recent_judges/" + str(sub["problemId"]) + "/judge/" + str(sub["judgeId"]) + "/" + str(id) + "/" + str(sub["language"])
+        subURL = "https://onlinejudge.u-aizu.ac.jp/recent_judges/" + str(sub["problemId"]) + "/judge/" + str(sub["judgeId"]) + "/" + AOJID + "/" + str(sub["language"])
         problemName = str(sub["problemTitle"])
         try:
-            api.update_status(str(AOJID[pos]) + " ( @" + str(TwitterID[pos]) + " ) さんが <AOJ> " + problemName + " を AC しました！\n" + subURL + "\n" + timeStamp)
-            print("cper_bot-AOJ-detection: " + str(AOJID[pos]) + " ( @" + str(TwitterID[pos]) + " ) 's new AC submission (problem : " + problemName + ")")
+            api.update_status(AOJID + " ( @" + twitterID + " ) さんが <AOJ> " + problemName + " を AC しました！\n" + subURL + "\n" + timeStamp)
+            print("cper_bot-AOJ-detection: " + AOJID + " ( @" + twitterID + " ) 's new AC submission (problem : " + problemName + ")")
         except:
             print("cper_bot-AOJ-detection: Tweet Error")
 

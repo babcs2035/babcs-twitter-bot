@@ -22,6 +22,7 @@ subprocess.Popen(["python", "AOJ/AOJ-bot.py"])
 subprocess.Popen(["python", "CF/CF-bot.py"])
 subprocess.Popen(["python", "YK/YK-bot.py"])
 subprocess.Popen(["python", "cpcontest_bot/cpcontest_bot.py"])
+subprocess.Popen(["python", "cpcontest_bot/twitter.py"])
 
 # おまじない
 sched.start()
