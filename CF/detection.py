@@ -97,7 +97,8 @@ def detection():
                             print("cper_bot-CF-detection: " + cfID + " ( @" + twitterID + " ) 's new AC submission (problem : " + str(sub["problem"]["name"]) + ")")
                         except:
                             print("cper_bot-CF-detection: Tweet Error")
-        lastSubID[cfID] = int(subsJsonData["result"][0]["id"])
+        if len(subsJsonData["result"]) > 0:
+            lastSubID[cfID] = int(subsJsonData["result"][0]["id"])
         idx = idx + 1
 
     # データをアップロード
