@@ -43,6 +43,16 @@ def downloadFromDropbox(type):
 
     print("cper_bot-AtCoder-detection: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
 
+    # noticeFlag をダウンロード
+    dbx.files_download_to_file("AtCoder/noticeFlag.txt", "/AtCoder/noticeFlag.txt")
+    with open("AtCoder/noticeFlag.txt", "rb") as f:
+        noticeFlag = pickle.load(f)
+        
+        # メモリ解放
+        del f
+        gc.collect()
+    print("cper_bot-AtCoder-detection: Downloaded noticeFlag (size : ", str(len(noticeFlag)), ")")
+
     if type == 0:
         
         # lastSubID をダウンロード
@@ -70,17 +80,6 @@ def downloadFromDropbox(type):
             gc.collect()
 
         print("cper_bot-AtCoder-detection: Downloaded lastSubID_recent (size : ", str(len(lastSubID_Recent)), ")")
-    
-    # noticeFlag をダウンロード
-    dbx.files_download_to_file("AtCoder/noticeFlag.txt", "/AtCoder/noticeFlag.txt")
-    with open("AtCoder/noticeFlag.txt", "rb") as f:
-        noticeFlag = pickle.load(f)
-        
-        # メモリ解放
-        del f
-        gc.collect()
-
-    print("cper_bot-AtCoder-detection: Downloaded noticeFlag (size : ", str(len(noticeFlag)), ")")
 
 # Dropbox にアップロード
 # type = 0 : all
