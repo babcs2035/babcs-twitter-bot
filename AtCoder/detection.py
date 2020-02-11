@@ -347,8 +347,10 @@ def detection(type):
 
     # メモリ解放
     del AtCoderIDs
-    del lastSubID_All
-    del lastSubID_Recent
+    if type == 0:
+        del lastSubID_All
+    if type == 1:
+        del lastSubID_Recent
     del lastSubID
     del session
     del request
