@@ -204,6 +204,8 @@ def detection(type):
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
     
     # データをダウンロード
+    AtCoderIDs = []
+    noticeFlag = {}
     downloadFromDropbox(type)
     lastSubID = {}
     if type == 0:
@@ -347,6 +349,7 @@ def detection(type):
 
     # メモリ解放
     del AtCoderIDs
+    del noticeFlag
     if type == 0:
         del lastSubID_All
     if type == 1:
