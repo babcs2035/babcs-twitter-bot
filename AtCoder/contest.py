@@ -7,6 +7,7 @@ import json
 import urllib
 from PIL import Image, ImageDraw, ImageFont
 from dateutil.relativedelta import relativedelta
+import gc
 
 def epoch_to_datetime(epoch):
     return datetime.datetime(*time.localtime(epoch)[:6])
@@ -75,12 +76,28 @@ def contest():
         contestListDraw.text((1460, 7), str(sec_to_time(contest["durationSeconds"])), fill = (0, 0, 0), font = listFontR)
         contestsListImg.paste(contestListImg, (0, 68 + 64 * idx))
         idx = idx + 1
+
+        # メモリ解放
+        del contestListImg
+        del contestListDraw
+        gc.collect()
+
     contestsListImg.save("AtCoder/contestsListImg_fixed.jpg")
 
     # リストをツイート
     listTweetText = "現在 " + str(len(contestsList)) + " の AtCoder コンテストが予定されています．\nhttps://atcoder.jp/contests/\n"
     api.update_with_media(filename = "AtCoder/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
     print("cper_bot-AtCoder-contest: Tweeted contestsListImg_fixed")
+
+    # メモリ解放
+    del contestsJsonRes
+    del contestsJsonData
+    del contestsList
+    del listFontR
+    del listFontB
+    del contestsListFirstImg
+    del contestsListImg
+    gc.collect()
 
 if __name__ == '__main__':
     print("cper_bot-AtCoder-contest: Running as debug...")
