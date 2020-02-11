@@ -348,8 +348,6 @@ def detection(type):
     uploadToDropbox(type)
 
     # メモリ解放
-    del AtCoderIDs
-    del noticeFlag
     if type == 0:
         del lastSubID_All
     if type == 1:
