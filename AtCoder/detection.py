@@ -337,7 +337,7 @@ def detection(type):
             del sublistRows
             gc.collect()
 
-        print("cper_bot-AtCoder-detection: Checked " + contest["title"] + " submissions (subCount : " + str(subCount) + ", newlastSubID : " + str(newLastSubID[str(contest["id"])]) + ")")
+        # print("cper_bot-AtCoder-detection: Checked " + contest["title"] + " submissions (subCount : " + str(subCount) + ", newlastSubID : " + str(newLastSubID[str(contest["id"])]) + ")")
 
     # データをアップロード
     if type == 0:
