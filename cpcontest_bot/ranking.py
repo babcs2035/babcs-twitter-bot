@@ -89,21 +89,26 @@ def ranking(contests):
 
     # 順位表から順位の浮上を見つける
     newRankings = {}
+    login_info = {
+        "name": os.environ["ATCODER_ID"],
+        "password" : os.environ["ATCODER_PASSWORD"]
+    }
     for contest in contests:
 
         # コンテスト名を取得
-        topHTML = requests.get("https://atcoder.jp/contests/" + str(contest))
+        session = requests.session()
+        topHTML = session.post("https://" + str(contest) + ".contest.atcoder.jp/login", data = login_info)
         try:
             topHTML.raise_for_status()
             topData = BeautifulSoup(topHTML.text, "html.parser")
         except:
             print("cpcontest_bot-ranking: topHTML Error (contest = " + contest + ")")
             break
-        contestName = str(topData.contents[3].contents[1].contents[1].contents[0])[0:-10]
+        contestName = str(topData.find("h1", class_ = "site-title").contents[0])[11:-7]
 
         # 順位表 json データを取得
         session = requests.Session()
-        request = session.get(url = "https://atcoder.jp/contests/" + str(contest) + "/standings/json")
+        request = session.post("https://" + str(contest) + ".contest.atcoder.jp/standings/json", data = login_info)
         try:
             standingsJsonData = json.loads(request.text)
             print("cpcontest_bot-ranking: Downloaded standingsJsonData")
@@ -112,27 +117,41 @@ def ranking(contests):
             break
 
         newData = {}
-        for rows in standingsJsonData["StandingsData"]:
+        rankNum = 1
+        index = 0
+        rankTemp = 0
+        for rows in standingsJsonData["response"]:
+            if "user_screen_name" not in rows:
+                index += 1
+                continue
+            if rankNum > 1:
+                if standingsJsonData["response"][index - 1]["penalty"] == standingsJsonData["response"][index]["penalty"] and standingsJsonData["response"][index - 1]["score"] == standingsJsonData["response"][index]["score"]:
+                    rankNum -= 1
+                    rankTemp += 1
+                else:
+                    rankNum += rankTemp
+                    rankTemp = 0
+
             if contest in rankings:
-                if rows["UserScreenName"] in rankings[contest]:
+                if rows["user_screen_name"] in rankings[contest]:
                     flag = False
                     userTwitterID = ""
                     for atcoderID, twitterID in AtCoderIDs:
-                        if atcoderID == rows["UserScreenName"]:
+                        if atcoderID == rows["user_screen_name"]:
                             flag = True
                             userTwitterID = twitterID
                             break
-                    if rankings[contest][rows["UserScreenName"]] > rows["Rank"]:
+                    if rankings[contest][rows["user_screen_name"]] > rankNum and (rankNum <= 10 or flag):
 
                         # ユーザーのアバター画像をダウンロード
-                        userpage = requests.get(url = "https://atcoder.jp/users/" + rows["UserScreenName"])
+                        userpage = requests.get(url = "https://atcoder.jp/users/" + rows["user_screen_name"])
                         try:
                             userpage.raise_for_status()
                             userpageData = BeautifulSoup(userpage.text, "html.parser")
                         except:
-                            print("cpcontest_bot-ranking: userpageData Error (UserScreenName = " + rows["UserScreenName"] + ")")
+                            print("cpcontest_bot-ranking: userpageData Error (user_screen_name = " + rows["user_screen_name"] + ")")
                             continue
-                        downloadImage(userpageData.find("img", class_ = "avatar").attrs["src"], "cpcontest_bot/data/" + rows["UserScreenName"] + ".png")
+                        downloadImage(userpageData.find("img", class_ = "avatar").attrs["src"], "cpcontest_bot/data/" + rows["user_screen_name"] + ".png")
 
                         # 投稿する画像を作成
                         succeedFlag = True
@@ -141,9 +160,9 @@ def ranking(contests):
                             fontB = ImageFont.truetype("cpcontest_bot/data/fontB.ttc", 96)
                             resImg = Image.new("RGB", (1405, 562), (255, 255, 255))
                             resDraw = ImageDraw.Draw(resImg)
-                            resImg.paste(Image.open("cpcontest_bot/data/" + rows["UserScreenName"] + ".png").resize((512, 512)), (25, 25))
-                            resDraw.text((567, 165), str(rankings[contest][rows["UserScreenName"]]) + " 位 ⇒", fill = (64, 64, 64), font = font)
-                            resDraw.text((617, 281), str(rows["Rank"]) + " 位 (" + str(int(rankings[contest][rows["UserScreenName"]]) - int(rows["Rank"])) + " 位 UP)", fill = (255, 64, 64), font = fontB)
+                            resImg.paste(Image.open("cpcontest_bot/data/" + rows["user_screen_name"] + ".png").resize((512, 512)), (25, 25))
+                            resDraw.text((567, 165), str(rankings[contest][rows["user_screen_name"]]) + " 位 ⇒", fill = (64, 64, 64), font = font)
+                            resDraw.text((617, 281), str(rankNum) + " 位 (" + str(int(rankings[contest][rows["user_screen_name"]]) - int(rankNum)) + " 位 UP)", fill = (255, 64, 64), font = fontB)
                             resImg.save("cpcontest_bot/data/resImg.jpg")
                         except:
                             succeedFlag = False
@@ -151,16 +170,18 @@ def ranking(contests):
                         # ツイート
                         if flag:
                             if succeedFlag:
-                                api.update_with_media(filename = "cpcontest_bot/data/resImg.jpg", status = "〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " ( @" + userTwitterID + " ) さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rows["Rank"]) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                                api.update_with_media(filename = "cpcontest_bot/data/resImg.jpg", status = "〔" + contestName + " 実況〕\n" + rows["user_screen_name"] + " ( @" + userTwitterID + " ) さんが " + str(rankings[contest][rows["user_screen_name"]]) + " 位から " + str(rankNum) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
                             else:
-                                api.update_status("〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " ( @" + userTwitterID + " ) さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rows["Rank"]) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
-                        elif rows["Rank"] <= 10:
+                                api.update_status("〔" + contestName + " 実況〕\n" + rows["user_screen_name"] + " ( @" + userTwitterID + " ) さんが " + str(rankings[contest][rows["user_screen_name"]]) + " 位から " + str(rankNum) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                        else:
                             if succeedFlag:
-                                api.update_with_media(filename = "cpcontest_bot/data/resImg.jpg", status = "〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rows["Rank"]) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                                api.update_with_media(filename = "cpcontest_bot/data/resImg.jpg", status = "〔" + contestName + " 実況〕\n" + rows["user_screen_name"] + " さんが " + str(rankings[contest][rows["user_screen_name"]]) + " 位から " + str(rankNum) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
                             else:
-                                api.update_status("〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rows["Rank"]) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
-                        print("cpcontest_bot-ranking: detected ranking updated (" + rows["UserScreenName"] + ")")
-            newData[rows["UserScreenName"]] = rows["Rank"]
+                                api.update_status("〔" + contestName + " 実況〕\n" + rows["user_screen_name"] + " さんが " + str(rankings[contest][rows["user_screen_name"]]) + " 位から " + str(rankNum) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                        print("cpcontest_bot-ranking: detected ranking updated (" + rows["user_screen_name"] + ")")
+            newData[rows["user_screen_name"]] = rankNum
+            rankNum += 1
+            index += 1
         newRankings[contest] = newData
     
     rankings = newRankings

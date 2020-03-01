@@ -78,21 +78,26 @@ def updateHighestScore(contests):
     downloadFromDropbox()
 
     # 順位表から最高得点を見つける
+    login_info = {
+        "name": os.environ["ATCODER_ID"],
+        "password" : os.environ["ATCODER_PASSWORD"]
+    }
     for contest in contests:
 
         # コンテスト名を取得
-        topHTML = requests.get("https://atcoder.jp/contests/" + str(contest))
+        session = requests.session()
+        topHTML = session.post("https://" + str(contest) + ".contest.atcoder.jp/login", data = login_info)
         try:
             topHTML.raise_for_status()
             topData = BeautifulSoup(topHTML.text, "html.parser")
         except:
-            print("cpcontest_bot-updateHighestScore: topHTML Error")
+            print("cpcontest_bot-updateHighestScore: topHTML Error (contest = " + contest + ")")
             break
-        contestName = str(topData.contents[3].contents[1].contents[1].contents[0])[0:-10]
+        contestName = str(topData.find("h1", class_ = "site-title").contents[0])[11:-7]
 
         # 順位表 json データを取得
         session = requests.Session()
-        request = session.get(url = "https://atcoder.jp/contests/" + str(contest) + "/standings/json")
+        request = session.post("https://" + str(contest) + ".contest.atcoder.jp/standings/json", data = login_info)
         try:
             standingsJsonData = json.loads(request.text)
             print("cpcontest_bot-updateHighestScore: Downloaded standingsJsonData")
@@ -101,23 +106,28 @@ def updateHighestScore(contests):
             break
 
 
-        for task in standingsJsonData["TaskInfo"]:
-            if task["TaskScreenName"] not in scores:
-                scores[task["TaskScreenName"]] = 0
-        for task in standingsJsonData["TaskInfo"]:
+        for task in standingsJsonData["response"][0]["tasks"]:
+            if task["task_screen_name"] not in scores:
+                scores[task["task_screen_name"]] = 0
+        taskIndex = 0
+        for task in standingsJsonData["response"][0]["tasks"]:
             maxScore = -1
-            minTime = -1
+            minTime = "-1"
             maxUser = ""
-            for rows in standingsJsonData["StandingsData"]:
-                if task["TaskScreenName"] not in rows["TaskResults"]:
+            firstFlag = True
+            for rows in standingsJsonData["response"]:
+                if firstFlag:
+                    firstFlag = False
                     continue
-                userScore = int(rows["TaskResults"][task["TaskScreenName"]]["Score"])
-                userTime = int(rows["TaskResults"][task["TaskScreenName"]]["Elapsed"])
-                if (maxScore == -1 or userScore >= maxScore) and userScore > 0 and (minTime == -1 or userTime < minTime):
-                    maxScore = int(rows["TaskResults"][task["TaskScreenName"]]["Score"])
-                    minTime = int(rows["TaskResults"][task["TaskScreenName"]]["Elapsed"])
-                    maxUser = str(rows["UserScreenName"])
-            if maxScore > scores[task["TaskScreenName"]]:
+                if rows["tasks"][taskIndex]["score"] == 0:
+                    continue
+                userScore = int(rows["tasks"][taskIndex]["score"])
+                userTime = str(rows["tasks"][taskIndex]["elapsed_time"])
+                if (maxScore == -1 or userScore >= maxScore) and userScore > 0 and (minTime == "-1" or userTime < minTime):
+                    maxScore = userScore
+                    minTime = userTime
+                    maxUser = str(rows["user_screen_name"])
+            if maxScore > scores[task["task_screen_name"]]:
                 flag = False
                 userTwitterID = ""
                 for atcoderID, twitterID in AtCoderIDs:
@@ -125,14 +135,14 @@ def updateHighestScore(contests):
                         flag = True
                         userTwitterID = twitterID
                         break
-                scores[task["TaskScreenName"]] = maxScore
-                minTime /= 1000000000
+                scores[task["task_screen_name"]] = maxScore
+                assign = chr(ord('A') + taskIndex)
                 if flag:
-                    api.update_status("〔" + contestName + " 実況〕\n" + maxUser + " ( @" + userTwitterID + " ) さんが " +  task["Assignment"] + " 問題で " + str(maxScore / 100) + " 点を " + str(sec_to_time(minTime)) + " に獲得し，最高得点を更新しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                    api.update_status("〔" + contestName + " 実況〕\n" + maxUser + " ( @" + userTwitterID + " ) さんが " + assign + " 問題で " + str(maxScore) + " 点を " + minTime + " に獲得し，最高得点を更新しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
                 else:
-                    api.update_status("〔" + contestName + " 実況〕\n" + maxUser + " さんが " +  task["Assignment"] + " 問題で " + str(maxScore / 100) + " 点を " + str(sec_to_time(minTime)) + " に獲得し，最高得点を更新しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
-                print("cpcontest_bot-updateHighestScore: detected " + str(task["TaskScreenName"]) + " updated the highest score (" + maxUser + ")")
-
+                    api.update_status("〔" + contestName + " 実況〕\n" + maxUser + " さんが " + assign + " 問題で " + str(maxScore) + " 点を " + minTime + " に獲得し，最高得点を更新しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                print("cpcontest_bot-updateHighestScore: detected " + str(task["task_screen_name"]) + " updated the highest score (" + maxUser + ")")
+            taskIndex += 1
     uploadToDropbox()
 
 if __name__ == '__main__':
