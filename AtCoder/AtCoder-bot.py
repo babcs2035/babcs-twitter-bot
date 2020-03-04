@@ -13,7 +13,7 @@ import statistics
 # インスタンス化
 sched = BlockingScheduler(
     executors = {
-        'threadpool' : ThreadPoolExecutor(max_workers = 3),
+        'threadpool' : ThreadPoolExecutor(max_workers = 5),
         'processpool' : ProcessPoolExecutor(max_workers = 1)
     }
 )
