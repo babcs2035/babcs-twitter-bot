@@ -20,8 +20,8 @@ ratings = {}
 canPassDL = False
 
 # 定数
-acCountReachNum = 50
-acPointReachNum = 5000
+acCountReachNum = 100
+acPointReachNum = 10000
 
 # Dropbox からダウンロード
 def downloadFromDropbox(type):
