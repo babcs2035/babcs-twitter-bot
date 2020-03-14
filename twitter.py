@@ -65,7 +65,7 @@ sched = BlockingScheduler(
     }
 )
 
-@sched.scheduled_job('interval', seconds = 20, executor = 'threadpool')
+@sched.scheduled_job('interval', seconds = 60, executor = 'threadpool')
 def scheduled_job():
 
     # グローバル変数
