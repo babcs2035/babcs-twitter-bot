@@ -4,6 +4,7 @@ import tweepy
 import datetime
 import time
 import dropbox
+from dropbox.files import WriteMode
 import requests
 import pickle
 import json
@@ -57,7 +58,6 @@ def downloadFromDropbox(type):
         
         # lastSubID をダウンロード
         dbx.files_download_to_file("AtCoder/lastSubID.txt", "/AtCoder/lastSubID.txt")
-        dbx.files_delete("/AtCoder/lastSubID.txt")
         with open("AtCoder/lastSubID.txt", "rb") as f:
             lastSubID_All = pickle.load(f)
 
@@ -71,7 +71,6 @@ def downloadFromDropbox(type):
         
         # lastSubID_recent をダウンロード
         dbx.files_download_to_file("AtCoder/lastSubID_recent.txt", "/AtCoder/lastSubID_recent.txt")
-        dbx.files_delete("/AtCoder/lastSubID_recent.txt")
         with open("AtCoder/lastSubID_recent.txt", "rb") as f:
             lastSubID_Recent = pickle.load(f)
 
@@ -107,7 +106,7 @@ def uploadToDropbox(type):
             gc.collect()
 
         with open("AtCoder/lastSubID.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/AtCoder/lastSubID.txt")
+            dbx.files_upload(f.read(), "/AtCoder/lastSubID.txt", mode = dropbox.files.WriteMode.overwrite)
 
             # メモリ解放
             del f
@@ -126,7 +125,7 @@ def uploadToDropbox(type):
             gc.collect()
 
         with open("AtCoder/lastSubID_recent.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/AtCoder/lastSubID_recent.txt")
+            dbx.files_upload(f.read(), "/AtCoder/lastSubID_recent.txt", mode = dropbox.files.WriteMode.overwrite)
 
             # メモリ解放
             del f
@@ -145,8 +144,7 @@ def uploadToDropbox(type):
             gc.collect()
 
         with open("AtCoder/noticeFlag.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/noticeFlag.txt")
-            dbx.files_upload(f.read(), "/AtCoder/noticeFlag.txt")
+            dbx.files_upload(f.read(), "/AtCoder/noticeFlag.txt", mode = dropbox.files.WriteMode.overwrite)
 
             # メモリ解放
             del f
