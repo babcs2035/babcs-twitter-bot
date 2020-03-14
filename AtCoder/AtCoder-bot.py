@@ -18,8 +18,8 @@ sched = BlockingScheduler(
     }
 )
 
-# AtCoder AC 全検出（毎時 0, 15, 30, 45 分）
-@sched.scheduled_job('cron', minute = '0, 15, 30, 45', hour = '*/1', executor = 'threadpool')
+# AtCoder AC 全検出（毎時 0, 20, 40 分）
+@sched.scheduled_job('cron', minute = '0, 20, 40', hour = '*/1', executor = 'threadpool')
 def scheduled_job():
 
     print("cper_bot-AtCoder-bot: ----- AtCoder-detection (All) Start -----")
@@ -34,32 +34,32 @@ def scheduled_job():
     detection.detection(1)
     print("cper_bot-AtCoder-bot: ----- AtCoder-detection (Recent) End -----")
   
-# AtCoder Daily ランキング（毎日 0:00）
-@sched.scheduled_job('cron', minute = '0', hour = '0', executor = 'threadpool')
+# AtCoder Daily ランキング（毎日 0:05）
+@sched.scheduled_job('cron', minute = '5', hour = '0', executor = 'threadpool')
 def scheduled_job():
 
     print("cper_bot-AtCoder-bot: ----- AtCoder-ranking (Daily) Start -----")
     ranking.ranking(0)
     print("cper_bot-AtCoder-bot: ----- AtCoder-ranking (Daily) End -----")
 
-# AtCoder Mid Daily ランキング（毎日 12:00）
-@sched.scheduled_job('cron', minute = '0', hour = '12', executor = 'threadpool')
+# AtCoder Mid Daily ランキング（毎日 12:05）
+@sched.scheduled_job('cron', minute = '5', hour = '12', executor = 'threadpool')
 def scheduled_job():
 
     print("cper_bot-AtCoder-bot: ----- AtCoder-ranking (Mid Daily) Start -----")
     ranking.ranking(1)
     print("cper_bot-AtCoder-bot: ----- AtCoder-ranking (Mid Daily) End -----")
 
-# AtCoder Weekly ランキング（毎週月曜 0:05）
-@sched.scheduled_job('cron', minute = '5', hour = '0', day_of_week = 'mon', executor = 'threadpool')
+# AtCoder Weekly ランキング（毎週月曜 0:15）
+@sched.scheduled_job('cron', minute = '15', hour = '0', day_of_week = 'mon', executor = 'threadpool')
 def scheduled_job():
 
     print("cper_bot-AtCoder-bot: ----- AtCoder-ranking (Weekly) Start -----")
     ranking.ranking(2)
     print("cper_bot-AtCoder-bot: ----- AtCoder-ranking (Weekly) End -----")
 
-# AtCoder Monthly ランキング（毎月１日 0:15）
-@sched.scheduled_job('cron', minute = '15', hour = '0', day = '1', executor = 'threadpool')
+# AtCoder Monthly ランキング（毎月１日 0:30）
+@sched.scheduled_job('cron', minute = '30', hour = '0', day = '1', executor = 'threadpool')
 def scheduled_job():
 
     print("cper_bot-AtCoder-bot: ----- AtCoder-ranking (Monthly) Start -----")
@@ -98,8 +98,8 @@ def scheduled_job():
     statistics.statistics(0)
     print("cper_bot-AtCoder-bot: ----- AtCoder-detection (hour) End -----")
 
-# AtCoder 1 日ごとの統計情報（毎日 0:20）
-@sched.scheduled_job('cron', minute = '20', hour = '0', executor = 'threadpool')
+# AtCoder 1 日ごとの統計情報（毎日 0:35）
+@sched.scheduled_job('cron', minute = '35', hour = '0', executor = 'threadpool')
 def scheduled_job():
 
     print("cper_bot-AtCoder-bot: ----- AtCoder-statistics (day) Start -----")
