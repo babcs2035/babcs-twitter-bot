@@ -131,7 +131,7 @@ def statistics(type):
         contest["title"] = contest["title"].replace("◉", "")
         contest["title"] = contest["title"].replace("\n", "")
         contest["title"] = contest["title"].replace("\t", "")
-        print("AtCoder-statistics: Checked " + contest["title"] + " (lastSubID : " + str(subID) + ")")
+        # print("AtCoder-statistics: Checked " + contest["title"] + " (lastSubID : " + str(subID) + ")")
 
     # グラフを描画・ツイート
     xs = []
