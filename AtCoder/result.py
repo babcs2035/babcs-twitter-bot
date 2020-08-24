@@ -193,14 +193,15 @@ def result():
 
     ## コンテスト結果のランキング処理
     # 取得すべきコンテストを取得
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'}
     session = requests.Session()
-    request = session.get(url = "https://atcoder-api.appspot.com/contests")
+    request = session.get(url = "https://kenkoooo.com/atcoder/resources/contests.json", headers = headers)
     contestsJsonData = json.loads(request.text)
     print("cper_bot-AtCoder-result: Downloaded contestsJsonData")
     newcontests = []
     yesterday = datetime.datetime.today() - datetime.timedelta(1)
     for contest in contestsJsonData:
-        date = epoch_to_datetime(contest["startTimeSeconds"] + contest["durationSeconds"])
+        date = epoch_to_datetime(contest["start_epoch_second"] + contest["duration_second"])
         if yesterday <= date and date < datetime.datetime.today():
             contest["title"] = contest["title"].replace("◉", "")
             contest["title"] = contest["title"].replace("\n", "")

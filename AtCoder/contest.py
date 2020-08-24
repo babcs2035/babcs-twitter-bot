@@ -5,6 +5,7 @@ import datetime
 import time
 import json
 import urllib
+import requests
 from PIL import Image, ImageDraw, ImageFont
 from dateutil.relativedelta import relativedelta
 import gc
@@ -33,12 +34,14 @@ def contest():
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
 
     # 開催予定のコンテストを取得
-    contestsJsonRes = urllib.request.urlopen("https://atcoder-api.appspot.com/contests")
-    contestsJsonData = json.loads(contestsJsonRes.read().decode("utf-8"))
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'}
+    session = requests.Session()
+    request = session.get(url = "https://kenkoooo.com/atcoder/resources/contests.json", headers = headers)
+    contestsJsonData = json.loads(request.text)
     print("cper_bot-AtCoder-contest: Downloaded contestsJsonData")
     contestsList = []
     for contest in contestsJsonData:
-        date = epoch_to_datetime(contest["startTimeSeconds"])
+        date = epoch_to_datetime(contest["start_epoch_second"])
         if datetime.datetime.today() < date:
             contestsList.append(contest)
 
@@ -59,21 +62,21 @@ def contest():
         contest["title"] = contest["title"].replace("\t", "")
         contestListImg = Image.open("AtCoder/data/contestsListImg (cell).jpg")
         contestListDraw = ImageDraw.Draw(contestListImg)
-        startTime = epoch_to_datetime(contest["startTimeSeconds"])
-        contestListDraw.text((10, 7), str(epoch_to_datetime(contest["startTimeSeconds"])), fill = (0, 0, 0), font = listFontR)
-        if str(contest["ratedRange"]) == " ~ 1999":
+        startTime = epoch_to_datetime(contest["start_epoch_second"])
+        contestListDraw.text((10, 7), str(epoch_to_datetime(contest["start_epoch_second"])), fill = (0, 0, 0), font = listFontR)
+        if str(contest["rate_change"]) == " ~ 1999":
             contestListDraw.text((360, 7), str(contest["title"]), fill = (0, 0, 255), font = listFontB)
-            contestListDraw.text((1660, 7), str(contest["ratedRange"]), fill = (0, 0, 255), font = listFontB)
-        elif str(contest["ratedRange"]) == " ~ 2799":
+            contestListDraw.text((1660, 7), str(contest["rate_change"]), fill = (0, 0, 255), font = listFontB)
+        elif str(contest["rate_change"]) == " ~ 2799":
             contestListDraw.text((360, 7), str(contest["title"]), fill = (255, 150, 50), font = listFontB)
-            contestListDraw.text((1660, 7), str(contest["ratedRange"]), fill = (255, 150, 50), font = listFontB)
-        elif str(contest["ratedRange"]) == "All":
+            contestListDraw.text((1660, 7), str(contest["rate_change"]), fill = (255, 150, 50), font = listFontB)
+        elif str(contest["rate_change"]) == "All":
             contestListDraw.text((360, 7), str(contest["title"]), fill = (255, 0, 0), font = listFontB)
-            contestListDraw.text((1660, 7), str(contest["ratedRange"]), fill = (255, 0, 0), font = listFontB)
+            contestListDraw.text((1660, 7), str(contest["rate_change"]), fill = (255, 0, 0), font = listFontB)
         else:
             contestListDraw.text((360, 7), str(contest["title"]), fill = (0, 0, 0), font = listFontR)
-            contestListDraw.text((1660, 7), str(contest["ratedRange"]), fill = (0, 0, 0), font = listFontR)
-        contestListDraw.text((1460, 7), str(sec_to_time(contest["durationSeconds"])), fill = (0, 0, 0), font = listFontR)
+            contestListDraw.text((1660, 7), str(contest["rate_change"]), fill = (0, 0, 0), font = listFontR)
+        contestListDraw.text((1460, 7), str(sec_to_time(contest["duration_second"])), fill = (0, 0, 0), font = listFontR)
         contestsListImg.paste(contestListImg, (0, 68 + 64 * idx))
         idx = idx + 1
 
@@ -90,7 +93,6 @@ def contest():
     print("cper_bot-AtCoder-contest: Tweeted contestsListImg_fixed")
 
     # メモリ解放
-    del contestsJsonRes
     del contestsJsonData
     del contestsList
     del listFontR
