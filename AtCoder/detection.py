@@ -263,7 +263,7 @@ def detection(type):
                     continue
 
                 links = row.find_all("a")
-                subID = int(str(links[3].get("href")).split("/")[4])
+                subID = int(str(links[4].get("href")).split("/")[4])
                 userID = str(links[1].get("href")).split("/")[2]
                 if newLastSubID[str(contest["id"])] == -1:
                     newLastSubID[str(contest["id"])] = subID
