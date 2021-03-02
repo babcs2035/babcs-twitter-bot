@@ -102,8 +102,9 @@ def statistics(type):
     downloadFromDropbox(type)
 
     # コンテストごとに提出を解析
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'}
     session = requests.Session()
-    request = session.get(url = "https://atcoder-api.appspot.com/contests")
+    request = session.get(url = "https://kenkoooo.com/atcoder/resources/contests.json", headers = headers)
     contestsJsonData = json.loads(request.text)
     print("cper_bot-AtCoder-statistics: Downloaded contestsJsonData")
     maxSubID = -1
@@ -131,7 +132,7 @@ def statistics(type):
         contest["title"] = contest["title"].replace("◉", "")
         contest["title"] = contest["title"].replace("\n", "")
         contest["title"] = contest["title"].replace("\t", "")
-        print("cper_bot-AtCoder-statistics: Checked " + contest["title"] + " (lastSubID : " + str(subID) + ")")
+        # print("cper_bot-AtCoder-statistics: Checked " + contest["title"] + " (lastSubID : " + str(subID) + ")")
 
     # グラフを描画・ツイート
     xs = []
