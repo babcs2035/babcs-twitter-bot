@@ -30,11 +30,10 @@ liveContestIDs = []
 def scheduled_job():
     
     global liveContestIDs
-    if len(liveContestIDs) == 0:
 
-        print("cpcontest_bot: ----- getLiveContestID Start -----")
-        liveContestIDs = getLiveContestID.get()
-        print("cpcontest_bot: ----- getLiveContestID End -----")
+    print("cpcontest_bot: ----- getLiveContestID Start -----")
+    liveContestIDs = getLiveContestID.get()
+    print("cpcontest_bot: ----- getLiveContestID End -----")
 
 @sched.scheduled_job('interval', seconds = 60, executor = 'threadpool')
 def scheduled_job():
