@@ -275,7 +275,7 @@ def cpcontest(contests):
                             else:
                                 api.update_status("〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rankNum) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
                         print("cpcontest_bot-ranking: detected ranking updated (" + rows["UserScreenName"] + ")")
-            newData[rows["UserScreenName"]] = rankNum
+                    newData[rows["UserScreenName"]] = rankNum
         newRankings[contest] = newData
 
     rankings = newRankings
