@@ -228,6 +228,9 @@ def cpcontest(contests):
         newData = {}
         for rows in standingsJsonData["StandingsData"]:
             if contest in rankings:
+                if "Rank" in rows:
+                    rankNum = int(rows["Rank"])
+                    newData[rows["UserScreenName"]] = rankNum
                 if rows["UserScreenName"] in rankings[contest]:
                     flag = False
                     userTwitterID = ""
@@ -236,7 +239,6 @@ def cpcontest(contests):
                             flag = True
                             userTwitterID = twitterID
                             break
-                    rankNum = int(rows["Rank"])
                     if rankings[contest][rows["UserScreenName"]] > rankNum and (rankNum <= 10 or flag):
 
                         # ユーザーのアバター画像をダウンロード
@@ -275,7 +277,6 @@ def cpcontest(contests):
                             else:
                                 api.update_status("〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rankNum) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
                         print("cpcontest_bot-ranking: detected ranking updated (" + rows["UserScreenName"] + ")")
-                    newData[rows["UserScreenName"]] = rankNum
         newRankings[contest] = newData
 
     rankings = newRankings
