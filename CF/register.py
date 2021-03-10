@@ -53,8 +53,7 @@ def uploadToDropbox():
         with open("CF/CFIDs.txt", "wb") as f:
             pickle.dump(CFIDs, f)
         with open("CF/CFIDs.txt", "rb") as f:
-            dbx.files_delete("/CF/CFIDs.txt")
-            dbx.files_upload(f.read(), "/CF/CFIDs.txt")
+            dbx.files_upload(f.read(), "/CF/CFIDs.txt", mode = dropbox.files.WriteMode.overwrite)
             print("cper_bot-CF-register: Uploaded CFIDs (size : ", str(len(CFIDs)), ")")
         with open("CF/CFIDs.txt", "rb") as f:
             dbx.files_upload(f.read(), "/_backup/CF/CFIDs/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")

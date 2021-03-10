@@ -49,8 +49,7 @@ def uploadToDropbox():
     with open("CF/lastSubID.txt", "wb") as f:
         pickle.dump(lastSubID, f)
     with open("CF/lastSubID.txt", "rb") as f:
-        dbx.files_delete("/CF/lastSubID.txt")
-        dbx.files_upload(f.read(), "/CF/lastSubID.txt")
+        dbx.files_upload(f.read(), "/CF/lastSubID.txt", mode = dropbox.files.WriteMode.overwrite)
     print("cper_bot-CF-detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 def detection():
