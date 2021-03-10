@@ -53,8 +53,7 @@ def uploadToDropbox():
         with open("AOJ/AOJIDs.txt", "wb") as f:
             pickle.dump(AOJIDs, f)
         with open("AOJ/AOJIDs.txt", "rb") as f:
-            dbx.files_delete("/AOJ/AOJIDs.txt")
-            dbx.files_upload(f.read(), "/AOJ/AOJIDs.txt")
+            dbx.files_upload(f.read(), "/AOJ/AOJIDs.txt", mode = dropbox.files.WriteMode.overwrite)
             print("cper_bot-AOJ-register: Uploaded AOJIDs (size : ", str(len(AOJIDs)), ")")
         with open("AOJ/AOJIDs.txt", "rb") as f:
             dbx.files_upload(f.read(), "/_backup/AOJ/AOJIDs/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
