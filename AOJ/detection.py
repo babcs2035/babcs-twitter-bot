@@ -53,8 +53,7 @@ def uploadToDropbox():
         with open("AOJ/lastSubID.txt", "w") as f:
             f.write(str(lastSubID))
         with open("AOJ/lastSubID.txt", "rb") as f:
-            dbx.files_delete("/AOJ/lastSubID.txt")
-            dbx.files_upload(f.read(), "/AOJ/lastSubID.txt")
+            dbx.files_upload(f.read(), "/AOJ/lastSubID.txt", mode = dropbox.files.WriteMode.overwrite)
         print("cper_bot-AOJ-detection: Uploaded lastSubID : ", str(lastSubID))
 
 def detection():
