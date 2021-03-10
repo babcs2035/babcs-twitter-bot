@@ -34,21 +34,18 @@ def downloadFromDropbox():
     
     # FAFlags をダウンロード
     dbx.files_download_to_file("cpcontest_bot/FAFlags.txt", "/cpcontest_bot/FAFlags.txt")
-    dbx.files_delete("/cpcontest_bot/FAFlags.txt")
     with open("cpcontest_bot/FAFlags.txt", "rb") as f:
         FAFlags = pickle.load(f)
     print("cpcontest_bot-FA: Downloaded FAFlags (size : ", str(len(FAFlags)), ")")
 
     # rankings をダウンロード
     dbx.files_download_to_file("cpcontest_bot/rankings.txt", "/cpcontest_bot/rankings.txt")
-    dbx.files_delete("/cpcontest_bot/rankings.txt")
     with open("cpcontest_bot/rankings.txt", "rb") as f:
         rankings = pickle.load(f)
     print("cpcontest_bot-ranking: Downloaded rankings (size : ", str(len(rankings)), ")")
 
     # scores をダウンロード
     dbx.files_download_to_file("cpcontest_bot/scores.txt", "/cpcontest_bot/scores.txt")
-    dbx.files_delete("/cpcontest_bot/scores.txt")
     with open("cpcontest_bot/scores.txt", "rb") as f:
         scores = pickle.load(f)
     print("cpcontest_bot-updateHighestScore: Downloaded scores (size : ", str(len(scores)), ")")
@@ -75,21 +72,21 @@ def uploadToDropbox():
     with open("cpcontest_bot/FAFlags.txt", "wb") as f:
         pickle.dump(FAFlags, f)
     with open("cpcontest_bot/FAFlags.txt", "rb") as f:
-        dbx.files_upload(f.read(), "/cpcontest_bot/FAFlags.txt")
+        dbx.files_upload(f.read(), "/cpcontest_bot/FAFlags.txt", mode = dropbox.files.WriteMode.overwrite)
     print("cpcontest_bot-FA: Uploaded FAFlags (size : ", str(len(FAFlags)), ")")
 
     # rankings をアップロード
     with open("cpcontest_bot/rankings.txt", "wb") as f:
         pickle.dump(rankings, f)
     with open("cpcontest_bot/rankings.txt", "rb") as f:
-        dbx.files_upload(f.read(), "/cpcontest_bot/rankings.txt")
+        dbx.files_upload(f.read(), "/cpcontest_bot/rankings.txt", mode = dropbox.files.WriteMode.overwrite)
     print("cpcontest_bot-ranking: Uploaded rankings (size : ", str(len(rankings)), ")")
 
     # scores をアップロード
     with open("cpcontest_bot/scores.txt", "wb") as f:
         pickle.dump(scores, f)
     with open("cpcontest_bot/scores.txt", "rb") as f:
-        dbx.files_upload(f.read(), "/cpcontest_bot/scores.txt")
+        dbx.files_upload(f.read(), "/cpcontest_bot/scores.txt", mode = dropbox.files.WriteMode.overwrite)
     print("cpcontest_bot-updateHighestScore: Uploaded scores (size : ", str(len(scores)), ")")
 
 def downloadImage(url, dst_path):
