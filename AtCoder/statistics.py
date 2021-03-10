@@ -62,8 +62,7 @@ def uploadToDropbox(type):
         with open("AtCoder/subCount_hour.txt", "wb") as f:
             pickle.dump(subCount, f)
         with open("AtCoder/subCount_hour.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/subCount_hour.txt")
-            dbx.files_upload(f.read(), "/AtCoder/subCount_hour.txt")
+            dbx.files_upload(f.read(), "/AtCoder/subCount_hour.txt", mode = dropbox.files.WriteMode.overwrite)
         print("cper_bot-AtCoder-statistics: Uploaded subCount_hour (size : ", str(len(subCount)), ")")
 
     if type == 1:
@@ -72,8 +71,7 @@ def uploadToDropbox(type):
         with open("AtCoder/subCount_day.txt", "wb") as f:
             pickle.dump(subCount, f)
         with open("AtCoder/subCount_day.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/subCount_day.txt")
-            dbx.files_upload(f.read(), "/AtCoder/subCount_day.txt")
+            dbx.files_upload(f.read(), "/AtCoder/subCount_day.txt", mode = dropbox.files.WriteMode.overwrite)
         print("cper_bot-AtCoder-statistics: Uploaded subCount_day (size : ", str(len(subCount)), ")")
 
 # type = 0 : 1 hour

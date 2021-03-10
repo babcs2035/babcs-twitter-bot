@@ -54,8 +54,7 @@ def uploadToDropbox():
     with open("AtCoder/ratings.txt", "wb") as f:
         pickle.dump(ratings, f)
     with open("AtCoder/ratings.txt", "rb") as f:
-        dbx.files_delete("/AtCoder/ratings.txt")
-        dbx.files_upload(f.read(), "/AtCoder/ratings.txt")
+        dbx.files_upload(f.read(), "/AtCoder/ratings.txt", mode = dropbox.files.WriteMode.overwrite)
     print("cper_bot-AtCoder-result: Uploaded ratings (size : ", str(len(ratings)), ")")
 
 def epoch_to_datetime(epoch):

@@ -94,16 +94,14 @@ def uploadToDropbox(type):
         with open("AtCoder/" + dirType + "_acCount.txt", "wb") as f:
             pickle.dump(acCount, f)
         with open("AtCoder/" + dirType + "_acCount.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/" + dirType + "_acCount.txt")
-            dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_acCount.txt")
+            dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_acCount.txt", mode = dropbox.files.WriteMode.overwrite)
         print("cper_bot-AtCoder-ranking: Uploaded " + dirType + " acCount (size : ", str(len(acCount)), ")")
 
         # acPoint をアップロード
         with open("AtCoder/" + dirType + "_acPoint.txt", "wb") as f:
             pickle.dump(acPoint, f)
         with open("AtCoder/" + dirType + "_acPoint.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/" + dirType + "_acPoint.txt")
-            dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_acPoint.txt")
+            dbx.files_upload(f.read(), "/AtCoder/" + dirType + "_acPoint.txt", mode = dropbox.files.WriteMode.overwrite)
         print("cper_bot-AtCoder-ranking: Uploaded " + dirType + " acPoint (size : ", str(len(acPoint)), ")")
 
 def downloadImage(url, dst_path):
