@@ -53,8 +53,7 @@ def uploadToDropbox():
         with open("YK/YKIDs.txt", "wb") as f:
             pickle.dump(YKIDs, f)
         with open("YK/YKIDs.txt", "rb") as f:
-            dbx.files_delete("/YK/YKIDs.txt")
-            dbx.files_upload(f.read(), "/YK/YKIDs.txt")
+            dbx.files_upload(f.read(), "/YK/YKIDs.txt", mode = dropbox.files.WriteMode.overwrite)
             print("cper_bot-YK-register: Uploaded YKIDs (size : ", str(len(YKIDs)), ")")
         with open("YK/YKIDs.txt", "rb") as f:
             dbx.files_upload(f.read(), "/_backup/YK/YKIDs/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")

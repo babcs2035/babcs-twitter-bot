@@ -50,8 +50,7 @@ def uploadToDropbox():
     with open("YK/lastSubID.txt", "w") as f:
         f.write(str(lastSubID))
     with open("YK/lastSubID.txt", "rb") as f:
-        dbx.files_delete("/YK/lastSubID.txt")
-        dbx.files_upload(f.read(), "/YK/lastSubID.txt")
+        dbx.files_upload(f.read(), "/YK/lastSubID.txt", mode = dropbox.files.WriteMode.overwrite)
     print("cper_bot-YK-detection: Uploaded lastSubID : ", str(lastSubID))
 
 def detection():
