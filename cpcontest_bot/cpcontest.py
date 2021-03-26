@@ -138,6 +138,12 @@ def cpcontest(contests):
     newRankings = {}
     for contest in contests:
 
+        # チーム戦かどうか判定
+        teamFlag = False
+        if contest[-5:] == "_team":
+            teamFlag = True
+            contest = contest.replace("_team", "")
+
         # コンテスト名を取得
         topHTML = session.get("https://atcoder.jp/contests/" + str(contest))
         try:
@@ -150,7 +156,7 @@ def cpcontest(contests):
 
 
         # 順位表 json データを取得
-        request = session.get(url = "https://atcoder.jp/contests/" + str(contest) + "/standings/json")
+        request = session.get(url = "https://atcoder.jp/contests/" + str(contest) + "/standings" + ("/team" if teamFlag else "") + "/json")
         try:
             standingsJsonData = json.loads(request.text)
             print("cpcontest_bot-FA: Downloaded standingsJsonData")
@@ -160,13 +166,14 @@ def cpcontest(contests):
 
         # 順位表から最高得点を見つける
         for task in standingsJsonData["TaskInfo"]:
-            if task["TaskScreenName"] not in scores:
-                scores[task["TaskScreenName"]] = 0
+            if task["TaskScreenName"] + ("_team" if teamFlag else "") not in scores:
+                scores[task["TaskScreenName"] + ("_team" if teamFlag else "")] = 0
         taskIndex = 0
         for task in standingsJsonData["TaskInfo"]:
             maxScore = -1
             minTime = "-1"
             maxUser = ""
+            isUserTeam = False
             taskID = contest + "_" + chr(ord('a') + taskIndex)
             for rows in standingsJsonData["StandingsData"]:
                 if taskID not in rows["TaskResults"]:
@@ -175,11 +182,12 @@ def cpcontest(contests):
                     continue
                 userScore = int(rows["TaskResults"][taskID]["Score"])
                 userTime = str(rows["TaskResults"][taskID]["Elapsed"])
-                if (maxScore == -1 or userScore >= maxScore) and userScore > 0 and (minTime == "-1" or userTime < minTime):
+                if userScore > maxScore or ((maxScore == -1 or userScore >= maxScore) and userScore > 0 and (minTime == "-1" or int(userTime) < int(minTime))):
                     maxScore = userScore
                     minTime = userTime
                     maxUser = str(rows["UserScreenName"])
-            if maxScore > scores[task["TaskScreenName"]]:
+                    isUserTeam = rows["IsTeam"]
+            if maxScore > scores[task["TaskScreenName"] + ("_team" if teamFlag else "")]:
                 flag = False
                 userTwitterID = ""
                 for atcoderID, twitterID in AtCoderIDs:
@@ -187,48 +195,62 @@ def cpcontest(contests):
                         flag = True
                         userTwitterID = twitterID
                         break
-                scores[task["TaskScreenName"]] = maxScore
+                scores[task["TaskScreenName"] + ("_team" if teamFlag else "")] = maxScore
                 assign = chr(ord('A') + taskIndex)
                 maxScore /= 100
                 minTime = int(minTime) / 1000000000
                 minTime = sec_to_time(int(minTime))
-                if flag:
-                    api.update_status("〔" + contestName + " 実況〕\n" + maxUser + " ( @" + userTwitterID + " ) さんが " + assign + " 問題で " + str(maxScore) + " 点を " + minTime + " に獲得し，最高得点を更新しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                if isUserTeam:
+                    maxUser = "チーム「" + maxUser + "」"
                 else:
-                    api.update_status("〔" + contestName + " 実況〕\n" + maxUser + " さんが " + assign + " 問題で " + str(maxScore) + " 点を " + minTime + " に獲得し，最高得点を更新しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
-                print("cpcontest_bot-updateHighestScore: detected " + str(task["TaskScreenName"]) + " updated the highest score (" + maxUser + ")")
+                    maxUser = maxUser + (" ( @" + userTwitterID + " ) " if flag else " ")
+                api.update_status("〔" + contestName + ("（チーム戦）" if teamFlag else "") + " 実況〕\n" + maxUser + "さんが " + assign + " 問題で " + str(maxScore) + " 点を " + minTime + " に獲得し，最高得点を更新しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                print("cpcontest_bot-updateHighestScore: detected " + str(task["TaskScreenName"] + ("_team" if teamFlag else "")) + " updated the highest score (" + maxUser + ")")
             taskIndex += 1
 
         # 順位表から FA を見つける
         for task in standingsJsonData["TaskInfo"]:
-            if task["TaskScreenName"] not in FAFlags:
-                FAFlags[task["TaskScreenName"]] = False
+            if task["TaskScreenName"] + ("_team" if teamFlag else "") not in FAFlags:
+                FAFlags[task["TaskScreenName"] + ("_team" if teamFlag else "")] = False
         for task in standingsJsonData["TaskInfo"]:
-            if FAFlags[task["TaskScreenName"]]:
+            if FAFlags[task["TaskScreenName"] + ("_team" if teamFlag else "")]:
                 continue
             minTime = -1
             minUser = ""
+            isUserTeam = False
             for rows in standingsJsonData["StandingsData"]:
                 if task["TaskScreenName"] not in rows["TaskResults"]:
                     continue
                 userTime = int(rows["TaskResults"][task["TaskScreenName"]]["Elapsed"])
-                if (minTime == -1 or userTime < minTime) and userTime > 0:
+                if (minTime == -1 or userTime < minTime) and userTime > 0 and rows["TaskResults"][task["TaskScreenName"]]["Status"] == 1:
                     minTime = int(rows["TaskResults"][task["TaskScreenName"]]["Elapsed"])
                     minUser = str(rows["UserScreenName"])
+                    isUserTeam = rows["IsTeam"]
             if minTime != -1:
-                FAFlags[task["TaskScreenName"]] = True
+                FAFlags[task["TaskScreenName"] + ("_team" if teamFlag else "")] = True
+                flag = False
+                userTwitterID = ""
+                for atcoderID, twitterID in AtCoderIDs:
+                    if atcoderID == maxUser:
+                        flag = True
+                        userTwitterID = twitterID
+                        break
                 minTime /= 1000000000
-                api.update_status("〔" + contestName + " 実況〕\n" + task["Assignment"] + " 問題の FA を " + str(sec_to_time(minTime)) + " で " + minUser + " さんが獲得しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
-                print("cpcontest_bot-FA: detected " + str(task["TaskScreenName"]) + " FA (" + minUser + ")")
+                if isUserTeam:
+                    minUser = "チーム「" + minUser + "」"
+                else:
+                    minUser = " " + minUser + (" ( @" + userTwitterID + " ) " if flag else " ")
+                api.update_status("〔" + contestName + ("（チーム戦）" if teamFlag else "") + " 実況〕\n" + task["Assignment"] + " 問題の FA を " + str(sec_to_time(minTime)) + " で" + minUser + "さんが獲得しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                print("cpcontest_bot-FA: detected " + str(task["TaskScreenName"] + ("_team" if teamFlag else "")) + " FA (" + minUser + ")")
 
         # 順位表から順位の浮上を見つける
         newData = {}
         for rows in standingsJsonData["StandingsData"]:
-            if contest in rankings:
+            if contest + ("_team" if teamFlag else "") in rankings:
                 if "Rank" in rows:
                     rankNum = int(rows["Rank"])
                     newData[rows["UserScreenName"]] = rankNum
-                if rows["UserScreenName"] in rankings[contest]:
+                if rows["UserScreenName"] in rankings[contest + ("_team" if teamFlag else "")]:
                     flag = False
                     userTwitterID = ""
                     for atcoderID, twitterID in AtCoderIDs:
@@ -236,7 +258,7 @@ def cpcontest(contests):
                             flag = True
                             userTwitterID = twitterID
                             break
-                    if rankings[contest][rows["UserScreenName"]] > rankNum and (rankNum <= 10 or flag):
+                    if rankings[contest + ("_team" if teamFlag else "")][rows["UserScreenName"]] > rankNum and (rankNum <= 10 or flag):
 
                         # ユーザーのアバター画像をダウンロード
                         userpage = requests.get(url = "https://atcoder.jp/users/" + rows["UserScreenName"])
@@ -245,36 +267,34 @@ def cpcontest(contests):
                             userpageData = BeautifulSoup(userpage.text, "html.parser")
                         except:
                             print("cpcontest_bot-ranking: userpageData Error (user_screen_name = " + rows["UserScreenName"] + ")")
-                            continue
-                        downloadImage(userpageData.find("img", class_ = "avatar").attrs["src"], "cpcontest_bot/data/" + rows["UserScreenName"] + ".png")
-
+                        
                         # 投稿する画像を作成
                         succeedFlag = True
                         try:
+                            downloadImage(("aaa" if rows["IsTeam"] else userpageData.find("img", class_ = "avatar").attrs["src"]), "cpcontest_bot/data/" + rows["UserScreenName"] + ".png")
                             font = ImageFont.truetype("cpcontest_bot/data/fontR.ttc", 96)
                             fontB = ImageFont.truetype("cpcontest_bot/data/fontB.ttc", 96)
                             resImg = Image.new("RGB", (1405, 562), (255, 255, 255))
                             resDraw = ImageDraw.Draw(resImg)
                             resImg.paste(Image.open("cpcontest_bot/data/" + rows["UserScreenName"] + ".png").resize((512, 512)), (25, 25))
-                            resDraw.text((567, 165), str(rankings[contest][rows["UserScreenName"]]) + " 位 ⇒", fill = (64, 64, 64), font = font)
-                            resDraw.text((617, 281), str(rankNum) + " 位 (" + str(int(rankings[contest][rows["UserScreenName"]]) - int(rankNum)) + " 位 UP)", fill = (255, 64, 64), font = fontB)
+                            resDraw.text((567, 165), str(rankings[contest + ("_team" if teamFlag else "")][rows["UserScreenName"]]) + " 位 ⇒", fill = (64, 64, 64), font = font)
+                            resDraw.text((617, 281), str(rankNum) + " 位 (" + str(int(rankings[contest + ("_team" if teamFlag else "")][rows["UserScreenName"]]) - int(rankNum)) + " 位 UP)", fill = (255, 64, 64), font = fontB)
                             resImg.save("cpcontest_bot/data/resImg.jpg")
                         except:
                             succeedFlag = False
 
                         # ツイート
-                        if flag:
-                            if succeedFlag:
-                                api.update_with_media(filename = "cpcontest_bot/data/resImg.jpg", status = "〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " ( @" + userTwitterID + " ) さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rankNum) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
-                            else:
-                                api.update_status("〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " ( @" + userTwitterID + " ) さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rankNum) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                        userName = rows["UserScreenName"]
+                        if rows["IsTeam"]:
+                            userName = "チーム「" + userName + "」"
                         else:
-                            if succeedFlag:
-                                api.update_with_media(filename = "cpcontest_bot/data/resImg.jpg", status = "〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rankNum) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
-                            else:
-                                api.update_status("〔" + contestName + " 実況〕\n" + rows["UserScreenName"] + " さんが " + str(rankings[contest][rows["UserScreenName"]]) + " 位から " + str(rankNum) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
-                        print("cpcontest_bot-ranking: detected ranking updated (" + rows["UserScreenName"] + ")")
-        newRankings[contest] = newData
+                            userName = userName + (" ( @" + userTwitterID + " ) " if flag else " ")
+                        if succeedFlag:
+                            api.update_with_media(filename = "cpcontest_bot/data/resImg.jpg", status = "〔" + contestName + ("（チーム戦）" if teamFlag else "") + " 実況〕\n" + userName + "さんが " + str(rankings[contest + ("_team" if teamFlag else "")][rows["UserScreenName"]]) + " 位から " + str(rankNum) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                        else:
+                            api.update_status("〔" + contestName + ("（チーム戦）" if teamFlag else "") + " 実況〕\n" + userName + "さんが " + str(rankings[contest + ("_team" if teamFlag else "")][rows["UserScreenName"]]) + " 位から " + str(rankNum) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                        print("cpcontest_bot-ranking: detected ranking updated (" + rows["UserScreenName"] + ("_team" if teamFlag else "") + ")")
+        newRankings[contest + ("_team" if teamFlag else "")] = newData
 
     rankings = newRankings
     uploadToDropbox()
