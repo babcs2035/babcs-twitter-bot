@@ -51,6 +51,6 @@ tweepy==3.10.0
 typing==3.7.4.3
 typing-extensions==3.7.4.3
 tzlocal==2.1
-urllib3==1.26.3
+urllib3==1.26.4
 Werkzeug==1.0.1
 zlib-wrapper==0.1.3
