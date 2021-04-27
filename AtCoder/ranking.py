@@ -134,9 +134,16 @@ def makeRanking(type1, type2, listData, unit):
     rankingFont = ImageFont.truetype("AtCoder/data/fontR.ttc", 32)
     rankingFontS = ImageFont.truetype("AtCoder/data/fontB.ttc", 32)
     rankingFirstImg = Image.open("AtCoder/data/" + str(type2) + "RankingImg (first).jpg")
-    resImg = Image.new("RGB", (850 * int((len(listData) + rows - 1) / rows), 65 + 63 * min(len(listData), rows)))
+
+    cols = int((len(listData) + rows - 1) / rows)
+    if cols > 5:
+        cols = 5
+
+    resImg = Image.new("RGB", (850 * cols, 65 + 63 * min(len(listData), rows)))
     awardsList = []
     for idx in range(len(listData)):
+        if idx == rows * 5:
+            break
         if idx % rows == 0:
             resImg.paste(rankingFirstImg, (850 * int(idx / rows), 0))
         rankingImg = Image.open("AtCoder/data/rankingImg (cell).jpg")
@@ -159,7 +166,7 @@ def makeRanking(type1, type2, listData, unit):
                 if ratings[str(listData[idx]["atcoderID"])] >= border * 400:
                     colorIndex = border + 1
                     break
-        if rankNum <= 8:
+        if rankNum <= 8 and len(str(" , ".join(awardsList))) <= 100:
             rankingDraw.text((10, 7), str(rankNum), fill = (0, 0, 0), font = rankingFontS)
             rankingDraw.text((182, 7), listData[idx]["atcoderID"] + " (@" + listData[idx]["twitterID"] + ")", fill = (colors[colorIndex][0], colors[colorIndex][1], colors[colorIndex][2]), font = rankingFontS)
             rankingDraw.text((672, 7), str(listData[idx][str(type2)]), fill = (0, 0, 0), font = rankingFontS)
@@ -233,10 +240,12 @@ def ranking(type):
         for atcoderID, twitterID in AtCoderIDs:
             if user["user_id"] == atcoderID:
                 nowACCount[str(user["user_id"])] = int(user["problem_count"])
+                break
     for user in acPointData:
         for atcoderID, twitterID in AtCoderIDs:
             if user["user_id"] == atcoderID:
                 nowACPoint[str(user["user_id"])] = int(user["point_sum"])
+                break
     newACCount = []
     newACPoint = []
     newACPer = []
@@ -269,8 +278,8 @@ def ranking(type):
     if len(newACCount) > 0:
         api.update_with_media(filename = "AtCoder/" + dirType + "_countRankingImg_fixed.jpg", status = countTweetText + makeRanking(dirType + "_count", "count", newACCount, "Unique AC") + "\n" + timeStamp)
         print("cper_bot-AtCoder-ranking: Tweeted " + dirType + " countRanking")
-    else:
-        api.update_status(countTweetText + " ランキング TOP null\nerror: len(newACCount) == 0（AC 数の統計データが更新されていない可能性）\n@babcs2035\n\n" + timeStamp)
+    # else:
+        # api.update_status(countTweetText + " ランキング TOP null\nerror: len(newACCount) == 0（AC 数の統計データが更新されていない可能性）\n@babcs2035\n\n" + timeStamp)
     canPassDL = True
 
     # Point Sum ランキングをツイート
@@ -278,16 +287,16 @@ def ranking(type):
     if len(newACPoint) > 0:
         api.update_with_media(filename = "AtCoder/" + dirType + "_pointRankingImg_fixed.jpg", status = pointTweetText + makeRanking(dirType + "_point", "point", newACPoint, "Point") + "\n" + timeStamp)
         print("cper_bot-AtCoder-ranking: Tweeted " + dirType + " pointRanking")
-    else:
-        api.update_status(pointTweetText + " ランキング TOP null\nerror: len(newACPoint) == 0（Rated Point Sum の統計データが更新されていない可能性）\n@babcs2035\n\n" + timeStamp)
+    # else:
+        # api.update_status(pointTweetText + " ランキング TOP null\nerror: len(newACPoint) == 0（Rated Point Sum の統計データが更新されていない可能性）\n@babcs2035\n\n" + timeStamp)
 
     # Point Per Count ランキングをツイート
     perTweetText = "AtCoder Point / Count " + tweetTextType
     if len(newACPer) > 0:
         api.update_with_media(filename = "AtCoder/" + dirType + "_perRankingImg_fixed.jpg", status = perTweetText + makeRanking(dirType + "_per", "per", newACPer, "P./C.") + "\n" + timeStamp)
         print("cper_bot-AtCoder-ranking: Tweeted " + dirType + " perRanking")
-    else:
-        api.update_status(perTweetText + " ランキング TOP null\nerror: len(newACPer) == 0（Rated Point Sum の統計データが更新されていない可能性）\n@babcs2035\n\n" + timeStamp)
+    # else:
+        # api.update_status(perTweetText + " ランキング TOP null\nerror: len(newACPer) == 0（Rated Point Sum の統計データが更新されていない可能性）\n@babcs2035\n\n" + timeStamp)
 
     # データをアップロード
     oldACCount = acCount
