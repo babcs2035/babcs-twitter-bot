@@ -1,20 +1,9 @@
 ﻿# import
-import os
 import subprocess
 import datetime
-import requests
-import scout_apm.api
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 import followBack
-
-config = {
-    "name": "babcs-twitter-bot",
-    "key": os.environ["SCOUT_KEY"],
-    "monitor": True,
-}
-
-scout_apm.api.install(config = config)
 
 # インスタンス化
 sched = BlockingScheduler(
@@ -36,7 +25,6 @@ def scheduled_job():
 sched.start()
     
 # 各 Bot を呼び出し
-scout_apm.api.BackgroundTransaction.start("Background Job")
 subprocess.Popen(["python", "twitter.py"])
 subprocess.Popen(["python", "AtCoder/AtCoder-bot.py"])
 subprocess.Popen(["python", "AOJ/AOJ-bot.py"])
