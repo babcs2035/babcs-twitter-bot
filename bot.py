@@ -1,9 +1,20 @@
 ﻿# import
+import os
 import subprocess
 import datetime
+import requests
+import scout_apm.api
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 import followBack
+
+config = {
+    "name": "babcs-twitter-bot",
+    "key": os.environ["SCOUT_KEY"],
+    "monitor": True,
+}
+
+scout_apm.api.install(config = config)
 
 # インスタンス化
 sched = BlockingScheduler(
@@ -12,7 +23,7 @@ sched = BlockingScheduler(
         'processpool' : ProcessPoolExecutor(max_workers = 1)
     }
 )
-    
+   
 # フォロバ（毎時 0, 20, 40 分）
 @sched.scheduled_job('cron', minute = '0, 20, 40', hour = '*/1', executor = 'threadpool')
 def scheduled_job():
@@ -20,15 +31,16 @@ def scheduled_job():
     print("bot: ----- followBack Start -----")
     followBack.followBack()
     print("bot: ----- followBack End -----")
-    
-# 各 Bot を呼び出し
-subprocess.Popen(["python", "twitter.py"])
-subprocess.Popen(["python", "AtCoder/AtCoder-bot.py"])
-subprocess.Popen(["python", "AOJ/AOJ-bot.py"])
-subprocess.Popen(["python", "CF/CF-bot.py"])
-subprocess.Popen(["python", "YK/YK-bot.py"])
-subprocess.Popen(["python", "cpcontest_bot/cpcontest_bot.py"])
-subprocess.Popen(["python", "cpcontest_bot/twitter.py"])
 
 # おまじない
 sched.start()
+    
+# 各 Bot を呼び出し
+with scout_apm.api.BackgroundTransaction("Background Job"):
+    subprocess.Popen(["python", "twitter.py"])
+    subprocess.Popen(["python", "AtCoder/AtCoder-bot.py"])
+    subprocess.Popen(["python", "AOJ/AOJ-bot.py"])
+    subprocess.Popen(["python", "CF/CF-bot.py"])
+    subprocess.Popen(["python", "YK/YK-bot.py"])
+    subprocess.Popen(["python", "cpcontest_bot/cpcontest_bot.py"])
+    subprocess.Popen(["python", "cpcontest_bot/twitter.py"])
