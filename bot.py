@@ -36,11 +36,11 @@ def scheduled_job():
 sched.start()
     
 # 各 Bot を呼び出し
-with scout_apm.api.BackgroundTransaction("Background Job"):
-    subprocess.Popen(["python", "twitter.py"])
-    subprocess.Popen(["python", "AtCoder/AtCoder-bot.py"])
-    subprocess.Popen(["python", "AOJ/AOJ-bot.py"])
-    subprocess.Popen(["python", "CF/CF-bot.py"])
-    subprocess.Popen(["python", "YK/YK-bot.py"])
-    subprocess.Popen(["python", "cpcontest_bot/cpcontest_bot.py"])
-    subprocess.Popen(["python", "cpcontest_bot/twitter.py"])
+scout_apm.api.BackgroundTransaction.start("Background Job")
+subprocess.Popen(["python", "twitter.py"])
+subprocess.Popen(["python", "AtCoder/AtCoder-bot.py"])
+subprocess.Popen(["python", "AOJ/AOJ-bot.py"])
+subprocess.Popen(["python", "CF/CF-bot.py"])
+subprocess.Popen(["python", "YK/YK-bot.py"])
+subprocess.Popen(["python", "cpcontest_bot/cpcontest_bot.py"])
+subprocess.Popen(["python", "cpcontest_bot/twitter.py"])
