@@ -35,7 +35,7 @@ oauthlib==3.1.0
 paramiko==2.7.2
 parse==1.19.0
 pickle5==0.0.11
-Pillow==8.2.0
+Pillow==8.3.2
 pip==21.1
 ply==3.11
 protobuf==3.15.8
