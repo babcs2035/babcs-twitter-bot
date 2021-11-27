@@ -20,7 +20,7 @@ fake-useragent==0.1.11
 filelock==3.0.12
 Flask==1.1.2
 future==0.18.2
-idna==3.1
+idna==2.5
 importlib-metadata==2.1.1
 itsdangerous==1.1.0
 Jinja2==2.11.3
