@@ -132,7 +132,7 @@ def statistics(type):
     xs = []
     ys = []
     subCount.append((timeStamp, maxSubID))
-    if (type == 0 and len(subCount) == 49) or (type == 1 and len(subCount) == 15):
+    while (type == 0 and len(subCount) > 72) or (type == 1 and len(subCount) > 90):
         del subCount[0]
     for i in range(1, len(subCount)):
         if type == 0:
