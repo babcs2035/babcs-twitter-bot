@@ -61,7 +61,7 @@ six==1.16.0
 soupsieve==2.3.1
 stone==3.2.1
 tqdm==4.62.3
-tweepy==4.4.0
+tweepy==3.10.0
 typing==3.7.4.3
 typing-extensions==4.0.1
 tzlocal==4.1
