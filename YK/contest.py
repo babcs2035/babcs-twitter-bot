@@ -61,7 +61,7 @@ def contest():
 
     # リストをツイート
     listTweetText = "現在 " + str(len(contestsList)) + " の yukicoder コンテストが予定されています．\nhttps://yukicoder.me/contests\n"
-    api.update_with_media(filename = "YK/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
+    api.update_status_with_media(filename = "YK/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
 
 if __name__ == '__main__':
     print("cper_bot-YK-contest: Running as debug...")

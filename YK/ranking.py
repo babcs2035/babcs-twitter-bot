@@ -133,7 +133,7 @@ def ranking():
 
     # ランキングをツイート
     countTweetText = "yukicoder Unique AC 数ランキング TOP " + str(countRankNum) + "\n入賞の " + " , ".join(awardsList) + " さん おめでとうございます！\n"
-    api.update_with_media(filename = "YK/data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
+    api.update_status_with_media(filename = "YK/data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
     
     # データをアップロード
     acCount = nowACCount
