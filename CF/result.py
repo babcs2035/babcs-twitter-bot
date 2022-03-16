@@ -134,12 +134,12 @@ def result():
         if len(rankList) > 0:
             rankList.sort(key = lambda x: x["rank"])
             tweetText = str(contest) + " 順位表" + makeRanking("rank", rankList)
-            api.update_with_media(filename = "CF/data/result/rankRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
+            api.update_status_with_media(filename = "CF/data/result/rankRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
             print("cper_bot-CF-result: Tweeted " + str(contest) + " rankRanking")
         if len(diffList) > 0:
             diffList.sort(key = lambda x: x["diff"], reverse = True)
             tweetText = str(contest) + " レート変動値" + makeRanking("diff", diffList)
-            api.update_with_media(filename = "CF/data/result/diffRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
+            api.update_status_with_media(filename = "CF/data/result/diffRankingImg_fixed.jpg", status = tweetText + "\n" + timeStamp)
             print("cper_bot-CF-result: Tweeted " + str(contest) + " diffRanking")
 
 if __name__ == '__main__':
