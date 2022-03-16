@@ -53,7 +53,7 @@ def uploadToDropbox():
 # インスタンス化
 sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
 
-@sched.scheduled_job('interval', seconds = 20)
+@sched.scheduled_job('interval', seconds = 60)
 def scheduled_job():
 
     # グローバル変数

@@ -6,6 +6,7 @@ import json
 import urllib.request
 import dropbox
 from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from requests_oauthlib import OAuth1Session
 import AtCoder.status
 import AtCoder.register
@@ -57,9 +58,14 @@ def uploadToDropbox():
         print("cper_bot-twitter: Uploaded lastTweetID : ", str(lastTweetID))
 
 # インスタンス化
-sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
+sched = BlockingScheduler(
+    executors = {
+        'threadpool' : ThreadPoolExecutor(max_workers = 1),
+        'processpool' : ProcessPoolExecutor(max_workers = 1)
+    }
+)
 
-@sched.scheduled_job('interval', seconds = 20)
+@sched.scheduled_job('interval', seconds = 60, executor = 'threadpool')
 def scheduled_job():
 
     # グローバル変数
