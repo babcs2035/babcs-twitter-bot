@@ -50,8 +50,7 @@ def uploadToDropbox():
     with open("acCount.txt", "wb") as f:
         pickle.dump(acCount, f)
     with open("acCount.txt", "rb") as f:
-        dbx.files_delete("/YK/acCount.txt")
-        dbx.files_upload(f.read(), "/YK/acCount.txt")
+        dbx.files_upload(f.read(), "/YK/acCount.txt", mode = dropbox.files.WriteMode.overwrite)
     print("cper_bot-YK-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
 
 def ranking():
@@ -78,13 +77,16 @@ def ranking():
     nowACCount = {}
     for (ykID, twitterID) in YKIDs:
         url = "https://yukicoder.me/api/v1/user/name/" + urllib.parse.quote_plus(ykID, encoding = "utf-8")
-        acCountJson = urllib.request.urlopen(url)
-        acCountData = json.loads(acCountJson.read().decode("utf-8"))
-        nowACCount[str(ykID)] = int(acCountData["Solved"])
+        try:
+            acCountJson = urllib.request.urlopen(url)
+            acCountData = json.loads(acCountJson.read().decode("utf-8"))
+            nowACCount[str(ykID)] = int(acCountData["Solved"])
+        except:
+            print("cper_bot-YK-ranking: acCountJson Error (ykID = " + ykID + ")")
 
     newACCount = []
     for (ykID, twitterID) in YKIDs:
-        if ykID in acCount:
+        if ykID in acCount and ykID in nowACCount:
             if nowACCount[ykID] - acCount[ykID] > 0:
                 newACCount.append(({"ykID" : ykID, "twitterID" : twitterID, "count" : nowACCount[ykID] - acCount[ykID]}))
     newACCount.sort(key = lambda x: x["count"], reverse = True)
