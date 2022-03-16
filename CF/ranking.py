@@ -135,7 +135,7 @@ def ranking():
 
     # ランキングをツイート
     countTweetText = "Codeforces AC 提出数ランキング TOP " + str(countRankNum) + "\n入賞の " + " , ".join(awardsList) + " さん おめでとうございます！\n"
-    api.update_with_media(filename = "CF/data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
+    api.update_status_with_media(filename = "CF/data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
     
     # データをアップロード
     acCount = nowACCount

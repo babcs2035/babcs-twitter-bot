@@ -63,7 +63,7 @@ def contest():
 
     # リストをツイート
     listTweetText = "現在 " + str(idx) + " の Codeforces コンテストが予定されています．\nhttps://codeforces.com/contests\n"
-    api.update_with_media(filename = "CF/data/contest/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
+    api.update_status_with_media(filename = "CF/data/contest/contestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
 
 if __name__ == '__main__':
     print("cper_bot-CF-contest: Running as debug...")
