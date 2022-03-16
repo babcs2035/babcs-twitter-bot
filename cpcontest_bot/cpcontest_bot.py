@@ -2,47 +2,36 @@
 import subprocess
 import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 import getLiveContestID
-import FA
-import updateHighestScore
-import ranking
+import cpcontest
 
 # インスタンス化
-sched = BlockingScheduler(job_defaults = {'max_instances' : 10})
+sched = BlockingScheduler(
+    executors = {
+        'threadpool' : ThreadPoolExecutor(max_workers = 2),
+        'processpool' : ProcessPoolExecutor(max_workers = 1)
+    }
+)
 
 liveContestIDs = []
 
 # 開催中のコンテストを取得
-@sched.scheduled_job('interval', seconds = 30)
+@sched.scheduled_job('interval', seconds = 30, executor = 'threadpool')
 def scheduled_job():
     
-    print("cpcontest_bot: ----- getLiveContestID Start -----")
-
     global liveContestIDs
-    liveContestIDs = getLiveContestID.get()
 
+    print("cpcontest_bot: ----- getLiveContestID Start -----")
+    liveContestIDs = getLiveContestID.get()
     print("cpcontest_bot: ----- getLiveContestID End -----")
 
-@sched.scheduled_job('interval', seconds = 60)
+@sched.scheduled_job('interval', seconds = 60, executor = 'threadpool')
 def scheduled_job():
     
     global liveContestIDs
     if len(liveContestIDs) > 0:
-        
-        # FA を見つける
-        print("cpcontest_bot: ----- FA Start -----")
-        FA.FA(liveContestIDs)
-        print("cpcontest_bot: ----- FA End -----")
-
-        # 問題ごとの最高得点更新を検知
-        print("cpcontest_bot: ----- updateHighestScore Start -----")
-        updateHighestScore.updateHighestScore(liveContestIDs)
-        print("cpcontest_bot: ----- updateHighestScore End -----")
-
-        # 20 位以内に浮上したユーザーを検知
-        print("cpcontest_bot: ----- ranking Start -----")
-        ranking.ranking(liveContestIDs)
-        print("cpcontest_bot: ----- ranking End -----")
+        cpcontest.cpcontest(liveContestIDs)
 
 # おまじない
 sched.start()
