@@ -53,8 +53,7 @@ def uploadToDropbox():
         with open("AtCoder/AtCoderIDs.txt", "wb") as f:
             pickle.dump(AtCoderIDs, f)
         with open("AtCoder/AtCoderIDs.txt", "rb") as f:
-            dbx.files_delete("/AtCoder/AtCoderIDs.txt")
-            dbx.files_upload(f.read(), "/AtCoder/AtCoderIDs.txt")
+            dbx.files_upload(f.read(), "/AtCoder/AtCoderIDs.txt", mode = dropbox.files.WriteMode.overwrite)
         print("cper_bot-AtCoder-register: Uploaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
     
 # AtCoder ID 登録・解除

@@ -10,38 +10,26 @@ import requests
 import pickle
 
 # グローバル変数
-YKID = []
-TwitterID = []
+YKIDs = set()
 lastSubID = 0
 
 # Dropbox からダウンロード
 def downloadFromDropbox():
     
     # グローバル変数
-    global YKID
-    global TwitterID
+    global YKIDs
     global lastSubID
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
 
-    # YKID をダウンロード
-    dbx.files_download_to_file("YK/YKID.txt", "/YK/YKID.txt")
-    with open("YK/YKID.txt", "r") as f:
-        YKID.clear()
-        for id in f:
-            YKID.append(id.rstrip("\n"))
-    print("cper_bot-YK-detection: Downloaded YKID (size : ", str(len(YKID)), ")")
-    
-    # TwitterID をダウンロード
-    dbx.files_download_to_file("YK/TwitterID.txt", "/YK/TwitterID.txt")
-    with open("YK/TwitterID.txt", "r") as f:
-        TwitterID.clear()
-        for id in f:
-            TwitterID.append(id.rstrip("\n"))
-    print("cper_bot-YK-detection: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
-    
+    # YKIDs をダウンロード
+    dbx.files_download_to_file("YK/YKIDs.txt", "/YK/YKIDs.txt")
+    with open("YK/YKIDs.txt", "rb") as f:
+        YKIDs = pickle.load(f)
+    print("cper_bot-YK-detection: Downloaded YKIDs (size : ", str(len(YKIDs)), ")")
+
     # lastSubID をダウンロード
     dbx.files_download_to_file("YK/lastSubID.txt", "/YK/lastSubID.txt")
     with open("YK/lastSubID.txt", "r") as f:
@@ -62,15 +50,13 @@ def uploadToDropbox():
     with open("YK/lastSubID.txt", "w") as f:
         f.write(str(lastSubID))
     with open("YK/lastSubID.txt", "rb") as f:
-        dbx.files_delete("/YK/lastSubID.txt")
-        dbx.files_upload(f.read(), "/YK/lastSubID.txt")
+        dbx.files_upload(f.read(), "/YK/lastSubID.txt", mode = dropbox.files.WriteMode.overwrite)
     print("cper_bot-YK-detection: Uploaded lastSubID : ", str(lastSubID))
 
 def detection():
     
     # グローバル変数
-    global YKID
-    global TwitterID
+    global YKIDs
     global lastSubID
     
     # 各種キー設定
@@ -125,15 +111,13 @@ def detection():
 
             # ユーザーの AC 提出かどうか判定
             if status == "AC":
-                idx = 0
-                for ids in YKID:
-                    if userID == ids:
+                for (ykID, twitterID) in YKIDs:
+                    if userID == ykID:
                         try:
-                            api.update_status(userID + " ( @" + TwitterID[idx] + " ) さんが <yukicoder> " + str(problemName) + " を AC しました！\n" + "https://yukicoder.me/submissions/" + str(subID) + "\n" + timeStamp)
-                            print("cper_bot-YK-detection: " + userID + " ( @" + TwitterID[idx] + " ) 's new AC submission (problem : " + str(problemName) + ")")
+                            api.update_status(userID + " ( @" + twitterID + " ) さんが <yukicoder> " + str(problemName) + " を AC しました！\n" + "https://yukicoder.me/submissions/" + str(subID) + "\n" + timeStamp)
+                            print("cper_bot-YK-detection: " + userID + " ( @" + twitterID + " ) 's new AC submission (problem : " + str(problemName) + ")")
                         except:
                             print("cper_bot-YK-detection: Tweet Error")
-                    idx = idx + 1
         if skipFlag:
             break
         sublistPageNum = sublistPageNum + 1
@@ -143,6 +127,6 @@ def detection():
     uploadToDropbox()
 
 if __name__ == '__main__':
-    print("CF-detection: Running as debug...")
+    print("cper_bot-YK-detection: Running as debug...")
     detection()
-    print("CF-detection: Debug finished")
+    print("cper_bot-YK-detection: Debug finished")

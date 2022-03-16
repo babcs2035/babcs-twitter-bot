@@ -3,11 +3,11 @@ import os
 import datetime
 import urllib.request
 import dropbox
+import pickle
 
 # グローバル変数
-YKID = []
-YK_TwitterID = []
-YK_listFixedFlag = False
+YKIDs = set()
+YKIDsFixedFlag = False
 
 # YK ID が存在するか確認
 def checkYKID(ykID):
@@ -24,72 +24,40 @@ def checkYKID(ykID):
 def downloadFromDropbox():
     
     # グローバル変数
-    global YKID
-    global YK_TwitterID
+    global YKIDs
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
 
     # YKID をダウンロード
-    dbx.files_download_to_file("YK/YKID.txt", "/YK/YKID.txt")
-    with open("YK/YKID.txt", "r") as f:
-        YKID.clear()
-        for id in f:
-            YKID.append(id.rstrip("\n"))
-    print("cper_bot-YK-register: Downloaded YKID (size : ", str(len(YKID)), ")")
-    
-    # YK_TwitterID をダウンロード
-    dbx.files_download_to_file("YK/TwitterID.txt", "/YK/TwitterID.txt")
-    with open("YK/TwitterID.txt", "r") as f:
-        YK_TwitterID.clear()
-        for id in f:
-            YK_TwitterID.append(id.rstrip("\n"))
-    print("cper_bot-YK-register: Downloaded YK_TwitterID (size : ", str(len(YK_TwitterID)), ")")
+    dbx.files_download_to_file("YK/YKIDs.txt", "/YK/YKIDs.txt")
+    with open("YK/YKIDs.txt", "rb") as f:
+        YKIDs = pickle.load(f)
+    print("cper_bot-YK-register: Downloaded YKIDs (size : ", str(len(YKIDs)), ")")
 
 # Dropbox にアップロード
 def uploadToDropbox():
     
     # グローバル変数
-    global YKID
-    global YK_TwitterID
-    global YK_listFixedFlag
+    global YKIDs
+    global YKIDsFixedFlag
 
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
         
-    if YK_listFixedFlag:
-        # YKID をアップロード
-        with open("YK/YKID.txt", "w") as f:
-            for id in YKID:
-                f.write(str(id) + "\n")
-        with open("YK/YKID.txt", "rb") as f:
-            dbx.files_delete("/YK/YKID.txt")
-            dbx.files_upload(f.read(), "/YK/YKID.txt")
-            print("cper_bot-YK-register: Uploaded YKID (size : ", str(len(YKID)), ")")
-        with open("YK/YKID.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/_backup/YK/YKID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
-            print("cper_bot-YK-register: Uploaded YKID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(YKID)), ")")
+    if YKIDsFixedFlag:
 
-        # YK_TwitterID をアップロード
-        with open("YK/TwitterID.txt", "w") as f:
-            for id in YK_TwitterID:
-                f.write(str(id) + "\n")
-        with open("YK/TwitterID.txt", "rb") as f:
-            dbx.files_delete("/YK/TwitterID.txt")
-            dbx.files_upload(f.read(), "/YK/TwitterID.txt")
-            print("cper_bot-YK-register: Uploaded YK_TwitterID (size : ", str(len(YK_TwitterID)), ")")
-        with open("YK/TwitterID.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/_backup/YK/TwitterID/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
-            print("cper_bot-YK-register: Uploaded YK_TwitterID (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(YK_TwitterID)), ")")
-    
-# list 内の要素の添え字を返す（無い場合は -1）
-def myIndex(x, l):
-    if x in l:
-        return l.index(x)
-    else:
-        return -1
+        # YKIDs をアップロード
+        with open("YK/YKIDs.txt", "wb") as f:
+            pickle.dump(YKIDs, f)
+        with open("YK/YKIDs.txt", "rb") as f:
+            dbx.files_upload(f.read(), "/YK/YKIDs.txt", mode = dropbox.files.WriteMode.overwrite)
+            print("cper_bot-YK-register: Uploaded YKIDs (size : ", str(len(YKIDs)), ")")
+        with open("YK/YKIDs.txt", "rb") as f:
+            dbx.files_upload(f.read(), "/_backup/YK/YKIDs/" + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
+            print("cper_bot-YK-register: Uploaded YKIDs (for backup " + str(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(YKIDs)), ")")
 
 # YK ID 登録・解除
 def register(ykID, twitterID, flag):
@@ -97,9 +65,8 @@ def register(ykID, twitterID, flag):
     print("cper_bot-YK-register: ----- YK-register Start -----")
 
     # グローバル変数
-    global YKID
-    global YK_TwitterID
-    global YK_listFixedFlag
+    global YKIDs
+    global YKIDsFixedFlag
         
     # 時刻表示を作成
     timeStamp = datetime.datetime.today()
@@ -109,26 +76,28 @@ def register(ykID, twitterID, flag):
     downloadFromDropbox()
 
     # 登録・解除処理
-    YK_listFixedFlag = False
+    YKIDsFixedFlag = False
     tweetText = ""
     if flag == 0:
         if checkYKID(ykID):
-            YKID.append(ykID)
-            YK_TwitterID.append(twitterID)
-            tweetText = "@" + str(twitterID) + " yukicoder ID を登録しました！\n";
-            print("cper_bot-YK-register: Registered new YK ID : " + ykID)
-            YK_listFixedFlag = True
+            if (ykID, twitterID) not in YKIDs:
+                YKIDs.add((ykID, twitterID))
+                tweetText = "@" + str(twitterID) + " yukicoder ID を登録しました！\n";
+                print("cper_bot-YK-register: Registered new YK ID : " + ykID)
+                YKIDsFixedFlag = True
+            else:
+                tweetText = "@" + str(twitterID) + " この yukicoder ID は既に登録されています！\n"
+                print("cper_bot-AtCoder-register: Rejected to register YK ID : " + ykID)
         else:
             tweetText = "@" + str(twitterID) + " 正しい yukicoder ID ではありません！\n"
             print("cper_bot-YK-register: Rejected to YK-register new YK ID : " + ykID)
     if flag == 1:
         if checkYKID(ykID):
-            if myIndex(ykID, YKID) != -1 and myIndex(str(twitterID), YK_TwitterID) != -1 and myIndex(ykID, YKID) == myIndex(str(twitterID), YK_TwitterID):
-                YKID.pop(myIndex(str(twitterID), YK_TwitterID))
-                YK_TwitterID.pop(myIndex(str(twitterID), YK_TwitterID))
+            if (ykID, twitterID) in YKIDs:
+                YKIDs.remove((ykID, twitterID))
                 tweetText = "@" + str(twitterID) + " yukicoder ID を登録解除しました！\n"
                 print("cper_bot-YK-register: Unregistered YK ID : " + ykID)
-                YK_listFixedFlag = True
+                YKIDsFixedFlag = True
             else:
                 tweetText = "@" + str(twitterID) + " この yukicoder ID は登録されていません！\n"
                 print("cper_bot-YK-register: Rejected to unregister YK ID : " + ykID)

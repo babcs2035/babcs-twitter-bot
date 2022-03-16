@@ -10,16 +10,14 @@ import pickle
 import codecs
 
 # グローバル変数
-YKID = []
-TwitterID = []
+YKIDs = set()
 acCount = {}
 
 # Dropbox からダウンロード
 def downloadFromDropbox():
     
     # グローバル変数
-    global YKID
-    global TwitterID
+    global YKIDs
     global acCount
 
     # Dropbox オブジェクトの生成
@@ -27,20 +25,10 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # YKID をダウンロード
-    dbx.files_download_to_file("YKID.txt", "/YK/YKID.txt")
-    with codecs.open("YKID.txt", "r", "utf-8") as f:
-        YKID.clear()
-        for id in f:
-            YKID.append(id.rstrip("\n"))
-    print("cper_bot-YK-ranking: Downloaded YKID (size : ", str(len(YKID)), ")")
-    
-    # TwitterID をダウンロード
-    dbx.files_download_to_file("TwitterID.txt", "/YK/TwitterID.txt")
-    with open("TwitterID.txt", "r") as f:
-        TwitterID.clear()
-        for id in f:
-            TwitterID.append(id.rstrip("\n"))
-    print("cper_bot-YK-ranking: Downloaded TwitterID (size : ", str(len(TwitterID)), ")")
+    dbx.files_download_to_file("YK/YKIDs.txt", "/YK/YKIDs.txt")
+    with open("YK/YKIDs.txt", "rb") as f:
+        YKIDs = pickle.load(f)
+    print("cper_bot-YK-ranking: Downloaded YKIDs (size : ", str(len(YKIDs)), ")")
     
     # acCount をダウンロード
     dbx.files_download_to_file("acCount.txt", "/YK/acCount.txt")
@@ -62,20 +50,13 @@ def uploadToDropbox():
     with open("acCount.txt", "wb") as f:
         pickle.dump(acCount, f)
     with open("acCount.txt", "rb") as f:
-        dbx.files_delete("/YK/acCount.txt")
-        dbx.files_upload(f.read(), "/YK/acCount.txt")
+        dbx.files_upload(f.read(), "/YK/acCount.txt", mode = dropbox.files.WriteMode.overwrite)
     print("cper_bot-YK-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
-
-# list 内の要素の添え字を返す（無い場合は -1）
-def myIndex(x, l):
-    if x in l:
-        return l.index(x)
-    else:
-        return -1
 
 def ranking():
     
     # グローバル変数
+    global YKIDs
     global acCount
 
     # 各種キー設定
@@ -94,17 +75,20 @@ def ranking():
 
     # AC 数を取得
     nowACCount = {}
-    for user in YKID:
-        url = "https://yukicoder.me/api/v1/user/name/" + urllib.parse.quote_plus(user, encoding = "utf-8")
-        acCountJson = urllib.request.urlopen(url)
-        acCountData = json.loads(acCountJson.read().decode("utf-8"))
-        nowACCount[str(user)] = int(acCountData["Solved"])
+    for (ykID, twitterID) in YKIDs:
+        url = "https://yukicoder.me/api/v1/user/name/" + urllib.parse.quote_plus(ykID, encoding = "utf-8")
+        try:
+            acCountJson = urllib.request.urlopen(url)
+            acCountData = json.loads(acCountJson.read().decode("utf-8"))
+            nowACCount[str(ykID)] = int(acCountData["Solved"])
+        except:
+            print("cper_bot-YK-ranking: acCountJson Error (ykID = " + ykID + ")")
 
     newACCount = []
-    for user in YKID:
-        if user in acCount:
-            if nowACCount[user] - acCount[user] > 0:
-                newACCount.append(({"user_id" : user, "count" : nowACCount[user] - acCount[user]}))
+    for (ykID, twitterID) in YKIDs:
+        if ykID in acCount and ykID in nowACCount:
+            if nowACCount[ykID] - acCount[ykID] > 0:
+                newACCount.append(({"ykID" : ykID, "twitterID" : twitterID, "count" : nowACCount[ykID] - acCount[ykID]}))
     newACCount.sort(key = lambda x: x["count"], reverse = True)
     
     # 時刻表示を作成
@@ -121,9 +105,11 @@ def ranking():
     countRankNum = 1
     countNum = 1
     rankingFont = ImageFont.truetype("YK/data/fontR.ttc", 32)
+    rankingFontS = ImageFont.truetype("YK/data/fontB.ttc", 32)
     countRankingFirstImg = Image.open("YK/data/countRankingImg (first).jpg")
     countResImg = Image.new("RGB", (738, 65 + 63 * len(newACCount)))
     countResImg.paste(countRankingFirstImg, (0, 0))
+    awardsList = []
     for idx in range(len(newACCount)):
         countRankingImg = Image.open("YK/data/rankingImg (cell).jpg")
         countRankingDraw = ImageDraw.Draw(countRankingImg)
@@ -133,27 +119,20 @@ def ranking():
                 countNum = 1
             else:
                 countNum = countNum + 1
-        countRankingDraw.text((10, 7), str(countRankNum), fill = (0, 0, 0), font = rankingFont)
-        countRankingDraw.text((120, 7), newACCount[idx]["user_id"], fill = (0, 0, 0), font = rankingFont)
-        countRankingDraw.text((560, 7), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
+        if countRankNum <= 5:
+            awardsList.append("@" + newACCount[idx]["twitterID"])
+            countRankingDraw.text((10, 7), str(countRankNum), fill = (0, 0, 0), font = rankingFontS)
+            countRankingDraw.text((120, 7), newACCount[idx]["ykID"], fill = (0, 0, 0), font = rankingFontS)
+            countRankingDraw.text((560, 7), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFontS)
+        else:
+            countRankingDraw.text((10, 7), str(countRankNum), fill = (0, 0, 0), font = rankingFont)
+            countRankingDraw.text((120, 7), newACCount[idx]["ykID"], fill = (0, 0, 0), font = rankingFont)
+            countRankingDraw.text((560, 7), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
         countResImg.paste(countRankingImg, (0, 65 + 63 * idx))
     countResImg.save("YK/data/countRankingImg_fixed.jpg")
 
     # ランキングをツイート
-    countTweetText = "yukicoder Unique AC 数ランキング TOP " + str(countRankNum) + "\n"
-    countRankNum = 1
-    countNum = 1
-    for idx in range(len(newACCount)):
-        if idx > 0:
-            if int(newACCount[idx - 1]["count"]) > int(newACCount[idx]["count"]):
-                countRankNum = countRankNum + countNum
-                countNum = 1
-            else:
-                countNum = countNum + 1
-        if countRankNum + countNum - 1 <= 3:
-            countTweetText += str(countRankNum) + " 位 " + newACCount[idx]["user_id"] + " ( @" + str(TwitterID[myIndex(newACCount[idx]["user_id"],YKID)]) + " ) " + str(newACCount[idx]["count"]) + " Unique AC\n"
-        else:
-            break
+    countTweetText = "yukicoder Unique AC 数ランキング TOP " + str(countRankNum) + "\n入賞の " + " , ".join(awardsList) + " さん おめでとうございます！\n"
     api.update_with_media(filename = "YK/data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
     
     # データをアップロード

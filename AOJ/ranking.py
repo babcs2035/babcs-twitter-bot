@@ -49,8 +49,7 @@ def uploadToDropbox():
     with open("AOJ/acCount.txt", "wb") as f:
         pickle.dump(acCount, f)
     with open("AOJ/acCount.txt", "rb") as f:
-        dbx.files_delete("/AOJ/acCount.txt")
-        dbx.files_upload(f.read(), "/AOJ/acCount.txt")
+        dbx.files_upload(f.read(), "/AOJ/acCount.txt", mode = dropbox.files.WriteMode.overwrite)
     print("cper_bot-AOJ-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
 
 def ranking():
