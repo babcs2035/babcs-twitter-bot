@@ -23,8 +23,8 @@ def followBack():
     api = tweepy.API(auth)
     
     # フォロバ
-    followers = api.get_follower_ids("cper_bot")
-    friends = api.get_friend_ids("cper_bot")
+    followers = api.get_follower_ids(screen_name = "cper_bot")
+    friends = api.get_friend_ids(screen_name = "cper_bot")
     set_apr = set(followers) - set(friends)
     list_apr = list(set_apr)
     followedCnt = 0
@@ -39,7 +39,7 @@ def followBack():
             user_json = api_OAuth.get("https://api.twitter.com/1.1/users/show.json?user_id=" + str(user))
             user_data = json.loads(user_json.text)
             followedList.append({"user_name" : user_data["name"], "user_id" : user_data["screen_name"]})
-        except tweepy.error.TweepError:
+        except:
             print("cper_bot-followBack: Could not create friendship with %s" % user)
     followStr = "新しく " + str(followedCnt) + " 人をフォローしました：\n"
     for user in followedList:
@@ -62,8 +62,8 @@ def followBack():
     api = tweepy.API(auth)
     
     # フォロバ
-    followers = api.get_follower_ids("cpcontest_bot")
-    friends = api.get_friend_ids("cpcontest_bot")
+    followers = api.get_follower_ids(screen_name = "cpcontest_bot")
+    friends = api.get_friend_ids(screen_name = "cpcontest_bot")
     set_apr = set(followers) - set(friends)
     list_apr = list(set_apr)
     followedCnt = 0
@@ -78,7 +78,7 @@ def followBack():
             user_json = api_OAuth.get("https://api.twitter.com/1.1/users/show.json?user_id=" + str(user))
             user_data = json.loads(user_json.text)
             followedList.append({"user_name" : user_data["name"], "user_id" : user_data["screen_name"]})
-        except tweepy.error.TweepError:
+        except:
             print("cpcontest_bot-followBack: Could not create friendship with %s" % user)
     followStr = "新しく " + str(followedCnt) + " 人をフォローしました：\n"
     for user in followedList:
