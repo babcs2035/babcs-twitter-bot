@@ -127,7 +127,7 @@ def ranking():
 
     # ランキングをツイート
     countTweetText = "AOJ Unique AC 数ランキング TOP " + str(countRankNum) + "\n入賞の " + " , ".join(awardsList) + " さん おめでとうございます！\n"
-    api.update_with_media(filename = "AOJ/data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
+    api.update_staus_with_media(filename = "AOJ/data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
     
     # データをアップロード
     acCount = nowACCount
