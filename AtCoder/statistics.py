@@ -153,7 +153,7 @@ def statistics(type):
     if type == 1:
         prefix = "day"
     plt.savefig("AtCoder/subCount_" + prefix + ".png")
-    api.update_with_media(filename = "AtCoder/subCount_" + prefix + ".png", status = "AtCoder で " + str(xs[len(xs) - 1]).replace("\n", " ") + " の間に約 " + str(ys[len(ys) - 1]).replace("\n", " ") + " 回提出がありました．\n" + timeStamp)
+    api.update_status_with_media(filename = "AtCoder/subCount_" + prefix + ".png", status = "AtCoder で " + str(xs[len(xs) - 1]).replace("\n", " ") + " の間に約 " + str(ys[len(ys) - 1]).replace("\n", " ") + " 回提出がありました．\n" + timeStamp)
     print("cper_bot-AtCoder-statistics: Tweeted subCount_" + prefix + ".png")
 
     # データをアップロード

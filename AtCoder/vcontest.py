@@ -79,7 +79,7 @@ def vcontest():
 
     # リストをツイート
     listTweetText = "現在 " + str(idx) + " の AtCoder バーチャルコンテストが行われて or 予定されています．\nhttps://not-522.appspot.com/\n"
-    api.update_with_media(filename = "AtCoder/vcontestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
+    api.update_status_with_media(filename = "AtCoder/vcontestsListImg_fixed.jpg", status = listTweetText + "\n" + timeStamp)
     print("cper_bot-AtCoder-vcontest: Tweeted vcontestsListImg_fixed")
 
 if __name__ == '__main__':
