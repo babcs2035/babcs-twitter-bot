@@ -290,7 +290,7 @@ def cpcontest(contests):
                         else:
                             userName = userName + (" ( @" + userTwitterID + " ) " if flag else " ")
                         if succeedFlag:
-                            api.update_with_media(filename = "cpcontest_bot/data/resImg.jpg", status = "〔" + contestName + ("（チーム戦）" if teamFlag else "") + " 実況〕\n" + userName + "さんが " + str(rankings[contest + ("_team" if teamFlag else "")][rows["UserScreenName"]]) + " 位から " + str(rankNum) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
+                            api.update_status_with_media(filename = "cpcontest_bot/data/resImg.jpg", status = "〔" + contestName + ("（チーム戦）" if teamFlag else "") + " 実況〕\n" + userName + "さんが " + str(rankings[contest + ("_team" if teamFlag else "")][rows["UserScreenName"]]) + " 位から " + str(rankNum) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
                         else:
                             api.update_status("〔" + contestName + ("（チーム戦）" if teamFlag else "") + " 実況〕\n" + userName + "さんが " + str(rankings[contest + ("_team" if teamFlag else "")][rows["UserScreenName"]]) + " 位から " + str(rankNum) + " 位に浮上しました！\nhttps://atcoder.jp/contests/" + contest + "/standings\n" + timeStamp)
                         print("cpcontest_bot-ranking: detected ranking updated (" + rows["UserScreenName"] + ("_team" if teamFlag else "") + ")")
