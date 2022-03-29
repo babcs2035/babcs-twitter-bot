@@ -96,5 +96,10 @@ def scheduled_job():
     data = newData
     upload()
 
+    del newData
+    del pageHTML
+    del results
+    gc.collect()
+
 # Run
 sched.start()
