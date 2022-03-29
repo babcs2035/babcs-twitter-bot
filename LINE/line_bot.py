@@ -70,7 +70,9 @@ def scheduled_job():
         while index < nums:
             date = str(pageDates[index].contents[0])
             title = str(pageTitles[index].contents[0].contents[0])
-            url = "https://www.c.u-tokyo.ac.jp" + str(pageTitles[index].contents[0].attrs["href"])
+            url = str(pageTitles[index].contents[0].attrs["href"])
+            if url[0] != 'h':
+                url = "https://www.c.u-tokyo.ac.jp" + url
             newData.append((date, title, url))
             index += 1
 
@@ -85,8 +87,9 @@ def scheduled_job():
     line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
     for row in results:
         message = str("お知らせが更新されました：\n" + row[1] + "\n" + row[2])
-        line_bot_api.push_message(os.environ["LINE_GROUP_ID"], TextSendMessage(text = message))
-        # line_bot_api.broadcast(TextSendMessage(text = message))
+        line_bot_api.broadcast(TextSendMessage(text = message))
+        if os.environ["LINE_GROUP_ID"] != "NULL":
+            line_bot_api.push_message(os.environ["LINE_GROUP_ID"], TextSendMessage(text = message))
         print("line_bot: Detected new information (title : " + row[1] + ")\n")
 
     # Update the data
