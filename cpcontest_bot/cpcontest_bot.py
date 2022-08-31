@@ -16,6 +16,9 @@ sched = BlockingScheduler(
     }
 )
 
+log.log_init()
+log.logger.info("Started")
+
 liveContestIDs = []
 
 # 開催中のコンテストを取得
@@ -41,3 +44,4 @@ def scheduled_job():
 
 # おまじない
 sched.start()
+log.logger.info("Set up scheduler")

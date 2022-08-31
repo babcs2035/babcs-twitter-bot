@@ -17,6 +17,10 @@ sched = BlockingScheduler(
     }
 )
 
+log.log_init()
+log.logger.info("Started")
+
+
 # yukicoder AC 検出（1 分ごと）
 
 
@@ -50,3 +54,4 @@ def scheduled_job():
 
 # おまじない
 sched.start()
+log.logger.info("Set up scheduler")

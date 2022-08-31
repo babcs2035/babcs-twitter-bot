@@ -18,6 +18,10 @@ sched = BlockingScheduler(
     }
 )
 
+log.log_init()
+log.logger.info("Started")
+
+
 # Codeforces コンテスト一覧（毎日 0:00, 6:00, 12:00, 18:00）
 
 
@@ -61,3 +65,4 @@ def scheduled_job():
 
 # おまじない
 sched.start()
+log.logger.info("Set up scheduler")

@@ -16,6 +16,9 @@ sched = BlockingScheduler(
     }
 )
 
+log.log_init()
+log.logger.info("Started")
+
 
 # AOJ AC 検出（1 分ごと）
 @sched.scheduled_job('interval', minutes=1, executor='threadpool')
@@ -37,3 +40,4 @@ def scheduled_job():
 
 # おまじない
 sched.start()
+log.logger.info("Set up scheduler")

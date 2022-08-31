@@ -16,7 +16,7 @@ def log_init():
     global logger
 
     syslog = SysLogHandler(address=('logs5.papertrailapp.com', 28031))
-    format = '%(asctime)s logging: %(message)s'
+    format = '%(asctime)s CF: %(message)s'
     formatter = logging.Formatter(format, datefmt='%b %d %H:%M:%S')
     syslog.setFormatter(formatter)
     logger = logging.getLogger()
