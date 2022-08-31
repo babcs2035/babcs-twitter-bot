@@ -9,8 +9,7 @@ import datetime
 import tweepy
 import log
 import os
-import sys
-sys.path.append("../")
+
 
 # グローバル変数
 YKIDs = set()

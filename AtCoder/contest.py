@@ -11,8 +11,6 @@ import datetime
 import tweepy
 import log
 import os
-import sys
-sys.path.append("../")
 
 
 def epoch_to_datetime(epoch):

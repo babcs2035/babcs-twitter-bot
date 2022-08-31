@@ -5,8 +5,7 @@ import requests
 import dropbox
 import log
 import os
-import sys
-sys.path.append("../")
+
 
 # グローバル変数
 acCount = {}

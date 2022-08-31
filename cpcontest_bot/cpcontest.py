@@ -11,8 +11,6 @@ import dropbox
 import tweepy
 import log
 import os
-import sys
-sys.path.append("../")
 
 
 def sec_to_time(sec):

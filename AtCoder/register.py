@@ -5,8 +5,7 @@ import urllib.request
 import datetime
 import log
 import os
-import sys
-sys.path.append("../")
+
 
 # グローバル変数
 AtCoderIDsFixedFlag = False

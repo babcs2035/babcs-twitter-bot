@@ -10,8 +10,7 @@ from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from apscheduler.schedulers.blocking import BlockingScheduler
 import log
 import os
-import sys
-sys.path.append("../")
+
 
 data = []
 

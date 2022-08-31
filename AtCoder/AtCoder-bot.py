@@ -10,8 +10,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 import datetime
 import log
 import os
-import sys
-sys.path.append("../")
+
 
 # インスタンス化
 sched = BlockingScheduler(

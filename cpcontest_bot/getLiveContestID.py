@@ -6,8 +6,6 @@ import time
 import datetime
 import log
 import os
-import sys
-sys.path.append("../")
 
 
 def get():

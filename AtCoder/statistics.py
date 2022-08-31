@@ -12,8 +12,8 @@ import log
 import re
 import matplotlib.pyplot as plt
 import os
-import sys
-sys.path.append("../")
+
+
 matplotlib.use('Agg')
 
 # グローバル変数

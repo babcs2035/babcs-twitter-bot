@@ -6,8 +6,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 import getLiveContestID
 import cpcontest
-import sys
-sys.path.append("../")
+
 
 # インスタンス化
 sched = BlockingScheduler(
