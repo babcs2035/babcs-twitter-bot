@@ -15,8 +15,8 @@ sched = BlockingScheduler(
 )
 
 # Initialize logging
-log_init()
-logger.info("[bot] Logging initialized")
+log.log_init()
+log.logger.info("[bot] Logging initialized")
 
 
 # フォロバ（毎時 0, 20, 40 分）
