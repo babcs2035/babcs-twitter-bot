@@ -20,6 +20,8 @@ sched = BlockingScheduler(
     }
 )
 
+log.logger.info("[AtCoder-bot] Started")
+
 
 # AtCoder AC 全検出（毎時 0, 20, 40 分）
 @sched.scheduled_job('cron', minute='0, 20, 40', hour='*/1', executor='threadpool')
@@ -138,3 +140,4 @@ def scheduled_job():
 
 # おまじない
 sched.start()
+log.logger.info("[AtCoder-bot] Set up scheduler")
