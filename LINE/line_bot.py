@@ -1,19 +1,23 @@
-import os
-from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
-import dropbox
-from dropbox.files import WriteMode
-import pickle
-import requests
-from bs4 import BeautifulSoup
-from linebot import LineBotApi
-from linebot.models import TextSendMessage
 import gc
+from linebot.models import TextSendMessage
+from linebot import LineBotApi
+from bs4 import BeautifulSoup
+import requests
+import pickle
+from dropbox.files import WriteMode
+import dropbox
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+from apscheduler.schedulers.blocking import BlockingScheduler
+import log
+import os
+import sys
+sys.path.append("../")
 
 data = []
 
+
 def download():
-    
+
     global data
 
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
@@ -24,6 +28,7 @@ def download():
         data = pickle.load(f)
         del f
         gc.collect()
+
 
 def upload():
 
@@ -37,30 +42,34 @@ def upload():
         del f
         gc.collect()
     with open("LINE/data.txt", "rb") as f:
-        dbx.files_upload(f.read(), "/LINE/data.txt", mode = dropbox.files.WriteMode.overwrite)
+        dbx.files_upload(f.read(), "/LINE/data.txt",
+                         mode=dropbox.files.WriteMode.overwrite)
         del f
         gc.collect()
 
+
 sched = BlockingScheduler(
-    executors = {
-        'threadpool' : ThreadPoolExecutor(max_workers = 5),
-        'processpool' : ProcessPoolExecutor(max_workers = 1)
+    executors={
+        'threadpool': ThreadPoolExecutor(max_workers=5),
+        'processpool': ProcessPoolExecutor(max_workers=1)
     }
 )
 
-@sched.scheduled_job('interval', minutes = 5, executor = 'threadpool')
+
+@sched.scheduled_job('interval', minutes=5, executor='threadpool')
 def scheduled_job():
 
     global data
 
     # Detect updates
     download()
-    pageHTML = requests.get("https://www.c.u-tokyo.ac.jp/zenki/news/index.html")
+    pageHTML = requests.get(
+        "https://www.c.u-tokyo.ac.jp/zenki/news/index.html")
     results = []
     try:
         pageHTML.raise_for_status()
         pageData = BeautifulSoup(pageHTML.text, "html.parser")
-        pageDiv = pageData.find_all(id = "newslist2")
+        pageDiv = pageData.find_all(id="newslist2")
         pageDates = pageDiv[0].find_all("dt")
         pageTitles = pageDiv[0].find_all("dd")
 
@@ -80,17 +89,19 @@ def scheduled_job():
             if row not in data:
                 results.append(row)
     except:
-        print("line_bot: pageHTML Error")
+        log.logger.info("line_bot: pageHTML Error")
         return
 
     # Send LINE messages
     line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
     for row in results:
         message = str("お知らせが更新されました：\n" + row[1] + "\n" + row[2])
-        line_bot_api.broadcast(TextSendMessage(text = message))
+        line_bot_api.broadcast(TextSendMessage(text=message))
         if os.environ["LINE_GROUP_ID"] != "NULL":
-            line_bot_api.push_message(os.environ["LINE_GROUP_ID"], TextSendMessage(text = message))
-        print("line_bot: Detected new information (title : " + row[1] + ")\n")
+            line_bot_api.push_message(
+                os.environ["LINE_GROUP_ID"], TextSendMessage(text=message))
+        log.logger.info(
+            "line_bot: Detected new information (title : " + row[1] + ")\n")
 
     # Update the data
     data = newData
@@ -100,6 +111,7 @@ def scheduled_job():
     del pageHTML
     del results
     gc.collect()
+
 
 # Run
 sched.start()

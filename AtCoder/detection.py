@@ -1,15 +1,18 @@
 ﻿# import
-import os
-import tweepy
-import datetime
-import time
-import dropbox
-from dropbox.files import WriteMode
-import requests
-import pickle
-import json
-from bs4 import BeautifulSoup
 import gc
+from bs4 import BeautifulSoup
+import json
+import pickle
+import requests
+from dropbox.files import WriteMode
+import dropbox
+import time
+import datetime
+import tweepy
+import log
+import os
+import sys
+sys.path.append("../")
 
 # グローバル変数
 AtCoderIDs = []
@@ -17,12 +20,13 @@ lastSubID_All = {}
 lastSubID_Recent = {}
 noticeFlag = {}
 
+
 # Dropbox からダウンロード
 # type = 0 : all
 # type = 1 : recent only
 # type = 2 : noticeFlag only
 def downloadFromDropbox(type):
-    
+
     # グローバル変数
     global AtCoderIDs
     global lastSubID_All
@@ -32,9 +36,10 @@ def downloadFromDropbox(type):
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
-    
+
     # AtCoderIDs をダウンロード
-    dbx.files_download_to_file("AtCoder/AtCoderIDs.txt", "/AtCoder/AtCoderIDs.txt")
+    dbx.files_download_to_file(
+        "AtCoder/AtCoderIDs.txt", "/AtCoder/AtCoderIDs.txt")
     with open("AtCoder/AtCoderIDs.txt", "rb") as f:
         AtCoderIDs = pickle.load(f)
 
@@ -42,22 +47,26 @@ def downloadFromDropbox(type):
         del f
         gc.collect()
 
-    print("cper_bot-AtCoder-detection: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
+    log.logger.info(
+        "cper_bot-AtCoder-detection: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
 
     # noticeFlag をダウンロード
-    dbx.files_download_to_file("AtCoder/noticeFlag.txt", "/AtCoder/noticeFlag.txt")
+    dbx.files_download_to_file(
+        "AtCoder/noticeFlag.txt", "/AtCoder/noticeFlag.txt")
     with open("AtCoder/noticeFlag.txt", "rb") as f:
         noticeFlag = pickle.load(f)
-        
+
         # メモリ解放
         del f
         gc.collect()
-    print("cper_bot-AtCoder-detection: Downloaded noticeFlag (size : ", str(len(noticeFlag)), ")")
+    log.logger.info(
+        "cper_bot-AtCoder-detection: Downloaded noticeFlag (size : ", str(len(noticeFlag)), ")")
 
     if type == 0:
-        
+
         # lastSubID をダウンロード
-        dbx.files_download_to_file("AtCoder/lastSubID.txt", "/AtCoder/lastSubID.txt")
+        dbx.files_download_to_file(
+            "AtCoder/lastSubID.txt", "/AtCoder/lastSubID.txt")
         with open("AtCoder/lastSubID.txt", "rb") as f:
             lastSubID_All = pickle.load(f)
 
@@ -65,12 +74,14 @@ def downloadFromDropbox(type):
             del f
             gc.collect()
 
-        print("cper_bot-AtCoder-detection: Downloaded lastSubID (size : ", str(len(lastSubID_All)), ")")
+        log.logger.info(
+            "cper_bot-AtCoder-detection: Downloaded lastSubID (size : ", str(len(lastSubID_All)), ")")
 
     if type == 1:
-        
+
         # lastSubID_recent をダウンロード
-        dbx.files_download_to_file("AtCoder/lastSubID_recent.txt", "/AtCoder/lastSubID_recent.txt")
+        dbx.files_download_to_file(
+            "AtCoder/lastSubID_recent.txt", "/AtCoder/lastSubID_recent.txt")
         with open("AtCoder/lastSubID_recent.txt", "rb") as f:
             lastSubID_Recent = pickle.load(f)
 
@@ -78,14 +89,16 @@ def downloadFromDropbox(type):
             del f
             gc.collect()
 
-        print("cper_bot-AtCoder-detection: Downloaded lastSubID_recent (size : ", str(len(lastSubID_Recent)), ")")
+        log.logger.info(
+            "cper_bot-AtCoder-detection: Downloaded lastSubID_recent (size : ", str(len(lastSubID_Recent)), ")")
+
 
 # Dropbox にアップロード
 # type = 0 : all
 # type = 1 : recent only
 # type = 2 : noticeFlag only
 def uploadToDropbox(type):
-    
+
     # グローバル変数
     global lastSubID_All
     global lastSubID_Recent
@@ -94,7 +107,7 @@ def uploadToDropbox(type):
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
-    
+
     if type == 0:
 
         # lastSubID をアップロード
@@ -106,13 +119,15 @@ def uploadToDropbox(type):
             gc.collect()
 
         with open("AtCoder/lastSubID.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/AtCoder/lastSubID.txt", mode = dropbox.files.WriteMode.overwrite)
+            dbx.files_upload(f.read(), "/AtCoder/lastSubID.txt",
+                             mode=dropbox.files.WriteMode.overwrite)
 
             # メモリ解放
             del f
             gc.collect()
 
-        print("cper_bot-AtCoder-detection: Uploaded lastSubID (size : ", str(len(lastSubID_All)), ")")
+        log.logger.info(
+            "cper_bot-AtCoder-detection: Uploaded lastSubID (size : ", str(len(lastSubID_All)), ")")
 
     if type == 1:
 
@@ -125,13 +140,15 @@ def uploadToDropbox(type):
             gc.collect()
 
         with open("AtCoder/lastSubID_recent.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/AtCoder/lastSubID_recent.txt", mode = dropbox.files.WriteMode.overwrite)
+            dbx.files_upload(f.read(), "/AtCoder/lastSubID_recent.txt",
+                             mode=dropbox.files.WriteMode.overwrite)
 
             # メモリ解放
             del f
             gc.collect()
 
-        print("cper_bot-AtCoder-detection: Uploaded lastSubID_recent (size : ", str(len(lastSubID_Recent)), ")")
+        log.logger.info(
+            "cper_bot-AtCoder-detection: Uploaded lastSubID_recent (size : ", str(len(lastSubID_Recent)), ")")
 
     if type == 2:
 
@@ -144,13 +161,16 @@ def uploadToDropbox(type):
             gc.collect()
 
         with open("AtCoder/noticeFlag.txt", "rb") as f:
-            dbx.files_upload(f.read(), "/AtCoder/noticeFlag.txt", mode = dropbox.files.WriteMode.overwrite)
+            dbx.files_upload(f.read(), "/AtCoder/noticeFlag.txt",
+                             mode=dropbox.files.WriteMode.overwrite)
 
             # メモリ解放
             del f
             gc.collect()
 
-        print("cper_bot-AtCoder-detection: Uploaded noticeFlag (size : ", str(len(noticeFlag)), ")")
+        log.logger.info(
+            "cper_bot-AtCoder-detection: Uploaded noticeFlag (size : ", str(len(noticeFlag)), ")")
+
 
 # 通知の on/off 切り替え
 def setFlag(atcoderID, twitterID, f):
@@ -161,7 +181,7 @@ def setFlag(atcoderID, twitterID, f):
 
     downloadFromDropbox(2)
 
-    if (atcoderID, twitterID) in AtCoderIDs and (f == "on" or f == "off"): 
+    if (atcoderID, twitterID) in AtCoderIDs and (f == "on" or f == "off"):
         noticeFlag[str(atcoderID)] = str(f)
         uploadToDropbox(2)
         return "AtCoder での AC 通知を " + str(f) + " にしました！\n"
@@ -173,8 +193,10 @@ def setFlag(atcoderID, twitterID, f):
     del noticeFlag
     gc.collect()
 
+
 def epoch_to_datetime(epoch):
     return datetime.datetime(*time.localtime(epoch)[:6])
+
 
 # type = 0 : all
 # type = 1 : recent only
@@ -184,22 +206,22 @@ def detection(type):
     global AtCoderIDs
     global lastSubID_All
     global lastSubID_Recent
-    
+
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
     CS = os.environ["CONSUMER_SECRET"]
     AT = os.environ["ACCESS_TOKEN_KEY"]
     AS = os.environ["ACCESS_TOKEN_SECRET"]
-    
+
     # Twitter オブジェクトの生成
     auth = tweepy.OAuthHandler(CK, CS)
     auth.set_access_token(AT, AS)
     api = tweepy.API(auth)
-    
+
     # 時刻表示を作成
     timeStamp = datetime.datetime.today()
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
-    
+
     # データをダウンロード
     AtCoderIDs = []
     noticeFlag = {}
@@ -211,19 +233,22 @@ def detection(type):
         lastSubID = lastSubID_Recent
 
     # コンテストごとに提出を解析
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'}
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'}
     session = requests.Session()
-    request = session.get(url = "https://kenkoooo.com/atcoder/resources/contests.json", headers = headers)
+    request = session.get(
+        url="https://kenkoooo.com/atcoder/resources/contests.json", headers=headers)
     contestsJsonData = json.loads(request.text)
-    print("cper_bot-AtCoder-detection: Downloaded contestsJsonData")
-    
+    log.logger.info("cper_bot-AtCoder-detection: Downloaded contestsJsonData")
+
     checkContests = []
     exceptionContests = ["practice", "APG4b", "abs", "practice2"]
     border = datetime.datetime.today() - datetime.timedelta(14)
     for contest in contestsJsonData:
         if str(contest["id"]) in exceptionContests:
             continue
-        date = epoch_to_datetime(contest["start_epoch_second"] + contest["duration_second"])
+        date = epoch_to_datetime(
+            contest["start_epoch_second"] + contest["duration_second"])
         contest["title"] = contest["title"].replace("◉", "")
         contest["title"] = contest["title"].replace("\n", "")
         contest["title"] = contest["title"].replace("\t", "")
@@ -243,15 +268,18 @@ def detection(type):
         newLastSubID[str(contest["id"])] = -1
 
         while True:
-            sublistURL = "https://atcoder.jp/contests/" + str(contest["id"]) + "/submissions?page=" + str(sublistPageNum)
+            sublistURL = "https://atcoder.jp/contests/" + \
+                str(contest["id"]) + "/submissions?page=" + str(sublistPageNum)
             sublistHTML = requests.get(sublistURL)
             try:
                 sublistHTML.raise_for_status()
                 sublistData = BeautifulSoup(sublistHTML.text, "html.parser")
             except:
-                print("cper_bot-AtCoder-detection: sublistHTML Error")
+                log.logger.info(
+                    "cper_bot-AtCoder-detection: sublistHTML Error")
                 break
-            sublistTable = sublistData.find_all("table", class_ = "table table-bordered table-striped small th-center")
+            sublistTable = sublistData.find_all(
+                "table", class_="table table-bordered table-striped small th-center")
             if len(sublistTable) == 0:
                 break
 
@@ -312,19 +340,25 @@ def detection(type):
                             # imagePath = imagePath + ".png"
                             try:
                                 # api.update_status_with_media(filename = imagePath, status = atcoderID + " ( @" + twitterID + " ) さんが <AtCoder> " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\nhttps://atcoder.jp" + str(links[4].get("href")) + "\n" + timeStamp)
-                                api.update_status(atcoderID + " ( @" + twitterID + " ) さんが <AtCoder> " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\nhttps://atcoder.jp" + str(links[4].get("href")) + "\n" + timeStamp)
-                                print("cper_bot-AtCoder-detection: " + atcoderID + " ( @" + twitterID + " ) 's new AC submission (contest : " + str(contest["title"]) + ", problem : " + str(subData[1]) + ")")
+                                api.update_status(atcoderID + " ( @" + twitterID + " ) さんが <AtCoder> " + str(contest["title"]) + "：" + str(
+                                    subData[1]) + " を AC しました！\nhttps://atcoder.jp" + str(links[4].get("href")) + "\n" + timeStamp)
+                                log.logger.info("cper_bot-AtCoder-detection: " + atcoderID + " ( @" + twitterID +
+                                                " ) 's new AC submission (contest : " + str(contest["title"]) + ", problem : " + str(subData[1]) + ")")
                             except:
-                                print("cper_bot-AtCoder-detection: Tweet Error")
-                
+                                log.logger.info(
+                                    "cper_bot-AtCoder-detection: Tweet Error")
+
                 # エラーであれば無条件に報告
                 if subData[6] == "IE" or subData[6] == "NG":
                     try:
-                        api.update_status("AtCoder で " + subData[6]  + " となっている提出が検出されました！\nhttps://atcoder.jp" + str(links[3].get("href")) + "\n" + timeStamp)
-                        print("cper_bot-AtCoder-detection: detected " + subData[6] + " submission!")
+                        api.update_status("AtCoder で " + subData[6] + " となっている提出が検出されました！\nhttps://atcoder.jp" + str(
+                            links[3].get("href")) + "\n" + timeStamp)
+                        log.logger.info(
+                            "cper_bot-AtCoder-detection: detected " + subData[6] + " submission!")
                     except:
-                        print("cper_bot-AtCoder-detection: Tweet Error")
-                
+                        log.logger.info(
+                            "cper_bot-AtCoder-detection: Tweet Error")
+
                 # メモリ解放
                 del subData
                 gc.collect()
@@ -360,7 +394,8 @@ def detection(type):
     del newLastSubID
     gc.collect()
 
+
 if __name__ == '__main__':
-    print("cper_bot-AtCoder-detection: Running as debug...")
+    log.logger.info("cper_bot-AtCoder-detection: Running as debug...")
     detection(1)
-    print("cper_bot-AtCoder-detection: Debug finished")
+    log.logger.info("cper_bot-AtCoder-detection: Debug finished")

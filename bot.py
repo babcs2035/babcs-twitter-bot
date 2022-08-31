@@ -23,9 +23,9 @@ log.logger.info("[bot] Logging initialized")
 @sched.scheduled_job('cron', minute='0, 20, 40', hour='*/1', executor='threadpool')
 def scheduled_job():
 
-    print("bot: ----- followBack Start -----")
+    log.logger.info("bot: ----- followBack Start -----")
     followBack.followBack()
-    print("bot: ----- followBack End -----")
+    log.logger.info("bot: ----- followBack End -----")
 
 
 # 各 Bot を呼び出し
@@ -37,7 +37,7 @@ subprocess.Popen(["python", "YK/YK-bot.py"])
 subprocess.Popen(["python", "cpcontest_bot/cpcontest_bot.py"])
 subprocess.Popen(["python", "cpcontest_bot/twitter.py"])
 # subprocess.Popen(["python", "LINE/line_bot.py"])
-logger.info("[bot] Called All bots")
+log.logger.info("[bot] Called All bots")
 
 # おまじない
 sched.start()

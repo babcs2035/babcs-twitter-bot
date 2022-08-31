@@ -1,21 +1,26 @@
 ﻿# import
-import os
-import tweepy
-import datetime
-import json
-import urllib.request
-import dropbox
-from apscheduler.schedulers.blocking import BlockingScheduler
-from requests_oauthlib import OAuth1Session
 import register
+from requests_oauthlib import OAuth1Session
+from apscheduler.schedulers.blocking import BlockingScheduler
+import dropbox
+import urllib.request
+import json
+import datetime
+import tweepy
+import log
+import os
+import sys
+sys.path.append("../")
 
 # グローバル変数
 lastTweetID = 0
 idFixedFlag = False
 
 # Dropbox からダウンロード
+
+
 def downloadFromDropbox():
-    
+
     # グローバル変数
     global lastTweetID
 
@@ -24,14 +29,18 @@ def downloadFromDropbox():
     dbx.users_get_current_account()
 
     # lastTweetID をダウンロード
-    dbx.files_download_to_file("cpcontest_bot/lastTweetID.txt", "/cpcontest_bot/lastTweetID.txt")
+    dbx.files_download_to_file(
+        "cpcontest_bot/lastTweetID.txt", "/cpcontest_bot/lastTweetID.txt")
     with open("cpcontest_bot/lastTweetID.txt", "r") as f:
         lastTweetID = f.readline()
-    print("cpcontest_bot-twitter: Downloaded lastTweetID : ", str(lastTweetID))
+    log.logger.info(
+        "cpcontest_bot-twitter: Downloaded lastTweetID : ", str(lastTweetID))
 
 # Dropbox にアップロード
+
+
 def uploadToDropbox():
-    
+
     # グローバル変数
     global lastTweetID
     global idFixedFlag
@@ -39,7 +48,7 @@ def uploadToDropbox():
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
-    
+
     if idFixedFlag:
 
         # lastTweetID をアップロード
@@ -48,39 +57,43 @@ def uploadToDropbox():
         with open("cpcontest_bot/lastTweetID.txt", "rb") as f:
             dbx.files_delete("/cpcontest_bot/lastTweetID.txt")
             dbx.files_upload(f.read(), "/cpcontest_bot/lastTweetID.txt")
-        print("cpcontest_bot-twitter: Uploaded lastTweetID : ", str(lastTweetID))
+        log.logger.info(
+            "cpcontest_bot-twitter: Uploaded lastTweetID : ", str(lastTweetID))
+
 
 # インスタンス化
-sched = BlockingScheduler(job_defaults = {'max_instances' : 5})
+sched = BlockingScheduler(job_defaults={'max_instances': 5})
 
-@sched.scheduled_job('interval', seconds = 60)
+
+@sched.scheduled_job('interval', seconds=60)
 def scheduled_job():
 
     # グローバル変数
     global lastTweetID
     global idFixedFlag
 
-    print("cpcontest_bot-twitter: ----- twitter Start -----")
+    log.logger.info("cpcontest_bot-twitter: ----- twitter Start -----")
 
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY2"]
     CS = os.environ["CONSUMER_SECRET2"]
     AT = os.environ["ACCESS_TOKEN_KEY2"]
     AS = os.environ["ACCESS_TOKEN_SECRET2"]
-    
+
     # Twitter オブジェクトの生成
     auth = tweepy.OAuthHandler(CK, CS)
     auth.set_access_token(AT, AS)
     api = tweepy.API(auth)
-    
+
     # OAuth でツイートを取得
     api_OAuth = OAuth1Session(CK, CS, AT, AS)
-    timeline_json = api_OAuth.get("https://api.twitter.com/1.1/statuses/mentions_timeline.json")
-    
+    timeline_json = api_OAuth.get(
+        "https://api.twitter.com/1.1/statuses/mentions_timeline.json")
+
     # 時刻表示を作成
     timeStamp = datetime.datetime.today()
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
-    
+
     # データをダウンロード
     downloadFromDropbox()
 
@@ -96,31 +109,40 @@ def scheduled_job():
             idFixedFlag = True
             lastTweetID = int(timeline[0]["id_str"])
             tweetSplited = str(tweet["text"]).split()
-            userData_json = api_OAuth.get("https://api.twitter.com/1.1/users/show.json?user_id=" + tweet["user"]["id_str"])
+            userData_json = api_OAuth.get(
+                "https://api.twitter.com/1.1/users/show.json?user_id=" + tweet["user"]["id_str"])
             userData = json.loads(userData_json.text)
 
             if len(tweetSplited) >= 3:
-                    
+
                 # register
                 if tweetSplited[1] == "reg":
-                    tweetText = register.register(tweetSplited[2], str(userData["screen_name"]), 0)
-                    api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
-                    print("cpcontest_bot-twitter: Tweeted " + tweetText)
+                    tweetText = register.register(
+                        tweetSplited[2], str(userData["screen_name"]), 0)
+                    api.update_status(tweetText + timeStamp,
+                                      in_reply_to_status_id=tweet["id"])
+                    log.logger.info(
+                        "cpcontest_bot-twitter: Tweeted " + tweetText)
 
                 # unregister
                 if tweetSplited[1] == "del":
-                    tweetText = register.register(tweetSplited[2], str(userData["screen_name"]), 1)
-                    api.update_status(tweetText + timeStamp, in_reply_to_status_id = tweet["id"])
-                    print("cpcontest_bot-twitter: Tweeted " + tweetText)
+                    tweetText = register.register(
+                        tweetSplited[2], str(userData["screen_name"]), 1)
+                    api.update_status(tweetText + timeStamp,
+                                      in_reply_to_status_id=tweet["id"])
+                    log.logger.info(
+                        "cpcontest_bot-twitter: Tweeted " + tweetText)
 
         # 変更されたデータをアップロード
         lastTweetID = int(timeline[0]["id_str"])
         uploadToDropbox()
 
     else:
-        print("cpcontest_bot-twitter: Twitter API Error: %d" % timeline_json.status_code)
+        log.logger.info("cpcontest_bot-twitter: Twitter API Error: %d" %
+                        timeline_json.status_code)
 
-    print("cpcontest_bot-twitter: ----- twitter End -----")
+    log.logger.info("cpcontest_bot-twitter: ----- twitter End -----")
+
 
 # おまじない
 sched.start()

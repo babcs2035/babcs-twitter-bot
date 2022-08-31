@@ -1,21 +1,26 @@
 ﻿# import
-import os
-import tweepy
-import datetime
-import json
-import dropbox
-import urllib
-from PIL import Image, ImageDraw, ImageFont
-import pickle
 import codecs
+import pickle
+from PIL import Image, ImageDraw, ImageFont
+import urllib
+import dropbox
+import json
+import datetime
+import tweepy
+import log
+import os
+import sys
+sys.path.append("../")
 
 # グローバル変数
 YKIDs = set()
 acCount = {}
 
 # Dropbox からダウンロード
+
+
 def downloadFromDropbox():
-    
+
     # グローバル変数
     global YKIDs
     global acCount
@@ -28,33 +33,40 @@ def downloadFromDropbox():
     dbx.files_download_to_file("YK/YKIDs.txt", "/YK/YKIDs.txt")
     with open("YK/YKIDs.txt", "rb") as f:
         YKIDs = pickle.load(f)
-    print("cper_bot-YK-ranking: Downloaded YKIDs (size : ", str(len(YKIDs)), ")")
-    
+    log.logger.info(
+        "cper_bot-YK-ranking: Downloaded YKIDs (size : ", str(len(YKIDs)), ")")
+
     # acCount をダウンロード
     dbx.files_download_to_file("acCount.txt", "/YK/acCount.txt")
     with open("acCount.txt", "rb") as f:
         acCount = pickle.load(f)
-    print("cper_bot-YK-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
+    log.logger.info(
+        "cper_bot-YK-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
 
 # Dropbox にアップロード
+
+
 def uploadToDropbox():
-    
+
     # グローバル変数
     global acCount
-    
+
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
-    
+
     # acCount をアップロード
     with open("acCount.txt", "wb") as f:
         pickle.dump(acCount, f)
     with open("acCount.txt", "rb") as f:
-        dbx.files_upload(f.read(), "/YK/acCount.txt", mode = dropbox.files.WriteMode.overwrite)
-    print("cper_bot-YK-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
+        dbx.files_upload(f.read(), "/YK/acCount.txt",
+                         mode=dropbox.files.WriteMode.overwrite)
+    log.logger.info(
+        "cper_bot-YK-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
+
 
 def ranking():
-    
+
     # グローバル変数
     global YKIDs
     global acCount
@@ -76,27 +88,31 @@ def ranking():
     # AC 数を取得
     nowACCount = {}
     for (ykID, twitterID) in YKIDs:
-        url = "https://yukicoder.me/api/v1/user/name/" + urllib.parse.quote_plus(ykID, encoding = "utf-8")
+        url = "https://yukicoder.me/api/v1/user/name/" + \
+            urllib.parse.quote_plus(ykID, encoding="utf-8")
         try:
             acCountJson = urllib.request.urlopen(url)
             acCountData = json.loads(acCountJson.read().decode("utf-8"))
             nowACCount[str(ykID)] = int(acCountData["Solved"])
         except:
-            print("cper_bot-YK-ranking: acCountJson Error (ykID = " + ykID + ")")
+            log.logger.info(
+                "cper_bot-YK-ranking: acCountJson Error (ykID = " + ykID + ")")
 
     newACCount = []
     for (ykID, twitterID) in YKIDs:
         if ykID in acCount and ykID in nowACCount:
             if nowACCount[ykID] - acCount[ykID] > 0:
-                newACCount.append(({"ykID" : ykID, "twitterID" : twitterID, "count" : nowACCount[ykID] - acCount[ykID]}))
-    newACCount.sort(key = lambda x: x["count"], reverse = True)
-    
+                newACCount.append(
+                    ({"ykID": ykID, "twitterID": twitterID, "count": nowACCount[ykID] - acCount[ykID]}))
+    newACCount.sort(key=lambda x: x["count"], reverse=True)
+
     # 時刻表示を作成
     timeStamp = datetime.datetime.today()
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
 
     if len(newACCount) == 0:
-        api.update_status("yukicoder Unique AC 数ランキング\n（該当ユーザーはいませんでした・・・）" + "\n" + timeStamp)
+        api.update_status(
+            "yukicoder Unique AC 数ランキング\n（該当ユーザーはいませんでした・・・）" + "\n" + timeStamp)
         acCount = nowACCount
         uploadToDropbox()
         return
@@ -121,25 +137,35 @@ def ranking():
                 countNum = countNum + 1
         if countRankNum <= 5:
             awardsList.append("@" + newACCount[idx]["twitterID"])
-            countRankingDraw.text((10, 7), str(countRankNum), fill = (0, 0, 0), font = rankingFontS)
-            countRankingDraw.text((120, 7), newACCount[idx]["ykID"], fill = (0, 0, 0), font = rankingFontS)
-            countRankingDraw.text((560, 7), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFontS)
+            countRankingDraw.text((10, 7), str(
+                countRankNum), fill=(0, 0, 0), font=rankingFontS)
+            countRankingDraw.text(
+                (120, 7), newACCount[idx]["ykID"], fill=(0, 0, 0), font=rankingFontS)
+            countRankingDraw.text((560, 7), str(
+                newACCount[idx]["count"]), fill=(0, 0, 0), font=rankingFontS)
         else:
-            countRankingDraw.text((10, 7), str(countRankNum), fill = (0, 0, 0), font = rankingFont)
-            countRankingDraw.text((120, 7), newACCount[idx]["ykID"], fill = (0, 0, 0), font = rankingFont)
-            countRankingDraw.text((560, 7), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
+            countRankingDraw.text((10, 7), str(
+                countRankNum), fill=(0, 0, 0), font=rankingFont)
+            countRankingDraw.text(
+                (120, 7), newACCount[idx]["ykID"], fill=(0, 0, 0), font=rankingFont)
+            countRankingDraw.text((560, 7), str(
+                newACCount[idx]["count"]), fill=(0, 0, 0), font=rankingFont)
         countResImg.paste(countRankingImg, (0, 65 + 63 * idx))
     countResImg.save("YK/data/countRankingImg_fixed.jpg")
 
     # ランキングをツイート
-    countTweetText = "yukicoder Unique AC 数ランキング TOP " + str(countRankNum) + "\n入賞の " + " , ".join(awardsList) + " さん おめでとうございます！\n"
-    api.update_status_with_media(filename = "YK/data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
-    
+    countTweetText = "yukicoder Unique AC 数ランキング TOP " + \
+        str(countRankNum) + "\n入賞の " + \
+        " , ".join(awardsList) + " さん おめでとうございます！\n"
+    api.update_status_with_media(
+        filename="YK/data/countRankingImg_fixed.jpg", status=countTweetText + "\n" + timeStamp)
+
     # データをアップロード
     acCount = nowACCount
     uploadToDropbox()
 
+
 if __name__ == '__main__':
-    print("cper_bot-YK-ranking: Running as debug...")
+    log.logger.info("cper_bot-YK-ranking: Running as debug...")
     ranking()
-    print("cper_bot-YK-ranking: Debug finished")
+    log.logger.info("cper_bot-YK-ranking: Debug finished")

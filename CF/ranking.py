@@ -1,20 +1,25 @@
 ﻿# import
-import os
-import tweepy
-import datetime
-import json
-import dropbox
-import urllib
-from PIL import Image, ImageDraw, ImageFont
 import pickle
+from PIL import Image, ImageDraw, ImageFont
+import urllib
+import dropbox
+import json
+import datetime
+import tweepy
+import log
+import os
+import sys
+sys.path.append("../")
 
 # グローバル変数
 CFIDs = set()
 acCount = {}
 
 # Dropbox からダウンロード
+
+
 def downloadFromDropbox():
-    
+
     # グローバル変数
     global CFIDs
     global acCount
@@ -27,33 +32,40 @@ def downloadFromDropbox():
     dbx.files_download_to_file("CF/CFIDs.txt", "/CF/CFIDs.txt")
     with open("CF/CFIDs.txt", "rb") as f:
         CFIDs = pickle.load(f)
-    print("cper_bot-CF-ranking: Downloaded CFIDs (size : ", str(len(CFIDs)), ")")
+    log.logger.info(
+        "cper_bot-CF-ranking: Downloaded CFIDs (size : ", str(len(CFIDs)), ")")
 
     # acCount をダウンロード
     dbx.files_download_to_file("CF/acCount.txt", "/CF/acCount.txt")
     with open("CF/acCount.txt", "rb") as f:
         acCount = pickle.load(f)
-    print("cper_bot-CF-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
+    log.logger.info(
+        "cper_bot-CF-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
 
 # Dropbox にアップロード
+
+
 def uploadToDropbox():
-    
+
     # グローバル変数
     global acCount
-    
+
     # Dropbox オブジェクトの生成
     dbx = dropbox.Dropbox(os.environ["DROPBOX_KEY"])
     dbx.users_get_current_account()
-    
+
     # acCount をアップロード
     with open("CF/acCount.txt", "wb") as f:
         pickle.dump(acCount, f)
     with open("CF/acCount.txt", "rb") as f:
-        dbx.files_upload(f.read(), "/CF/acCount.txt", mode = dropbox.files.WriteMode.overwrite)
-    print("cper_bot-CF-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
+        dbx.files_upload(f.read(), "/CF/acCount.txt",
+                         mode=dropbox.files.WriteMode.overwrite)
+    log.logger.info(
+        "cper_bot-CF-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
+
 
 def ranking():
-    
+
     # グローバル変数
     global CFIDs
     global acCount
@@ -68,7 +80,7 @@ def ranking():
     auth = tweepy.OAuthHandler(CK, CS)
     auth.set_access_token(AT, AS)
     api = tweepy.API(auth)
-    
+
     # データをダウンロード
     downloadFromDropbox()
 
@@ -77,9 +89,10 @@ def ranking():
     newACCount = []
     for (cfID, twitterID) in CFIDs:
         try:
-            acCountJson = urllib.request.urlopen("https://codeforces.com/api/user.status?handle=" + str(cfID))
+            acCountJson = urllib.request.urlopen(
+                "https://codeforces.com/api/user.status?handle=" + str(cfID))
         except:
-            print("cper_bot-CF-ranking: acCountJson Error")
+            log.logger.info("cper_bot-CF-ranking: acCountJson Error")
             continue
         acCountData = json.loads(acCountJson.read().decode("utf-8"))
         cnt = 0
@@ -90,15 +103,17 @@ def ranking():
     for (cfID, twitterID) in CFIDs:
         if cfID in acCount and cfID in nowACCount:
             if nowACCount[cfID] - acCount[cfID] > 0:
-                newACCount.append(({"cfID" : cfID, "twitterID" : twitterID, "count" : nowACCount[cfID] - acCount[cfID]}))
-    newACCount.sort(key = lambda x: x["count"], reverse = True)
-    
+                newACCount.append(
+                    ({"cfID": cfID, "twitterID": twitterID, "count": nowACCount[cfID] - acCount[cfID]}))
+    newACCount.sort(key=lambda x: x["count"], reverse=True)
+
     # 時刻表示を作成
     timeStamp = datetime.datetime.today()
     timeStamp = str(timeStamp.strftime("%Y/%m/%d %H:%M"))
 
     if len(newACCount) == 0:
-        api.update_status("Codeforces AC 提出数ランキング\n（該当ユーザーはいませんでした・・・）" + "\n" + timeStamp)
+        api.update_status(
+            "Codeforces AC 提出数ランキング\n（該当ユーザーはいませんでした・・・）" + "\n" + timeStamp)
         acCount = nowACCount
         uploadToDropbox()
         return
@@ -123,25 +138,35 @@ def ranking():
                 countNum = countNum + 1
         if countRankNum <= 5:
             awardsList.append("@" + newACCount[idx]["twitterID"])
-            countRankingDraw.text((10, 7), str(countRankNum), fill = (0, 0, 0), font = rankingFontS)
-            countRankingDraw.text((120, 7), newACCount[idx]["cfID"], fill = (0, 0, 0), font = rankingFontS)
-            countRankingDraw.text((560, 7), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFontS)
+            countRankingDraw.text((10, 7), str(
+                countRankNum), fill=(0, 0, 0), font=rankingFontS)
+            countRankingDraw.text(
+                (120, 7), newACCount[idx]["cfID"], fill=(0, 0, 0), font=rankingFontS)
+            countRankingDraw.text((560, 7), str(
+                newACCount[idx]["count"]), fill=(0, 0, 0), font=rankingFontS)
         else:
-            countRankingDraw.text((10, 7), str(countRankNum), fill = (0, 0, 0), font = rankingFont)
-            countRankingDraw.text((120, 7), newACCount[idx]["cfID"], fill = (0, 0, 0), font = rankingFont)
-            countRankingDraw.text((560, 7), str(newACCount[idx]["count"]), fill = (0, 0, 0), font = rankingFont)
+            countRankingDraw.text((10, 7), str(
+                countRankNum), fill=(0, 0, 0), font=rankingFont)
+            countRankingDraw.text(
+                (120, 7), newACCount[idx]["cfID"], fill=(0, 0, 0), font=rankingFont)
+            countRankingDraw.text((560, 7), str(
+                newACCount[idx]["count"]), fill=(0, 0, 0), font=rankingFont)
         countResImg.paste(countRankingImg, (0, 65 + 63 * idx))
     countResImg.save("CF/data/countRankingImg_fixed.jpg")
 
     # ランキングをツイート
-    countTweetText = "Codeforces AC 提出数ランキング TOP " + str(countRankNum) + "\n入賞の " + " , ".join(awardsList) + " さん おめでとうございます！\n"
-    api.update_status_with_media(filename = "CF/data/countRankingImg_fixed.jpg", status = countTweetText + "\n" + timeStamp)
-    
+    countTweetText = "Codeforces AC 提出数ランキング TOP " + \
+        str(countRankNum) + "\n入賞の " + \
+        " , ".join(awardsList) + " さん おめでとうございます！\n"
+    api.update_status_with_media(
+        filename="CF/data/countRankingImg_fixed.jpg", status=countTweetText + "\n" + timeStamp)
+
     # データをアップロード
     acCount = nowACCount
     uploadToDropbox()
 
+
 if __name__ == '__main__':
-    print("cper_bot-CF-ranking: Running as debug...")
+    log.logger.info("cper_bot-CF-ranking: Running as debug...")
     ranking()
-    print("cper_bot-CF-ranking: Debug finished")
+    log.logger.info("cper_bot-CF-ranking: Debug finished")
