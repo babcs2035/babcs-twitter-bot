@@ -110,15 +110,20 @@ def detection():
         # １行ずつ解析
         skipFlag = False
         for row in sublistRows:
-            subID = int(row.contents[1].contents[0].contents[0])
-            userID = str(row.contents[7].contents[1].contents[1])
-            problemName = str(row.contents[9].contents[0].contents[0])
-            status = str(row.contents[13].contents[1].contents[0])
-            if newLastSubID == -1:
-                newLastSubID = subID
-            if subID <= int(lastSubID) or int(lastSubID) == -1:
-                skipFlag = True
-                break
+            try:
+                subID = int(row.contents[1].contents[0].contents[0])
+                userID = str(row.contents[7].contents[1].contents[1])
+                problemName = str(row.contents[9].contents[0].contents[0])
+                status = str(row.contents[13].contents[1].contents[0])
+                if newLastSubID == -1:
+                    newLastSubID = subID
+                if subID <= int(lastSubID) or int(lastSubID) == -1:
+                    skipFlag = True
+                    break
+            except:
+                print("cper_bot-YK-detection: row Error")
+                continue
+            
             subCount = subCount + 1
 
             # ユーザーの AC 提出かどうか判定
