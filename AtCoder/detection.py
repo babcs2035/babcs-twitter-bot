@@ -9,7 +9,6 @@ import dropbox
 import time
 import datetime
 import tweepy
-import log
 import os
 
 
@@ -46,7 +45,7 @@ def downloadFromDropbox(type):
         del f
         gc.collect()
 
-    log.logger.info(
+    print(
         "cper_bot-AtCoder-detection: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
 
     # noticeFlag をダウンロード
@@ -58,7 +57,7 @@ def downloadFromDropbox(type):
         # メモリ解放
         del f
         gc.collect()
-    log.logger.info(
+    print(
         "cper_bot-AtCoder-detection: Downloaded noticeFlag (size : ", str(len(noticeFlag)), ")")
 
     if type == 0:
@@ -73,7 +72,7 @@ def downloadFromDropbox(type):
             del f
             gc.collect()
 
-        log.logger.info(
+        print(
             "cper_bot-AtCoder-detection: Downloaded lastSubID (size : ", str(len(lastSubID_All)), ")")
 
     if type == 1:
@@ -88,7 +87,7 @@ def downloadFromDropbox(type):
             del f
             gc.collect()
 
-        log.logger.info(
+        print(
             "cper_bot-AtCoder-detection: Downloaded lastSubID_recent (size : ", str(len(lastSubID_Recent)), ")")
 
 
@@ -125,7 +124,7 @@ def uploadToDropbox(type):
             del f
             gc.collect()
 
-        log.logger.info(
+        print(
             "cper_bot-AtCoder-detection: Uploaded lastSubID (size : ", str(len(lastSubID_All)), ")")
 
     if type == 1:
@@ -146,7 +145,7 @@ def uploadToDropbox(type):
             del f
             gc.collect()
 
-        log.logger.info(
+        print(
             "cper_bot-AtCoder-detection: Uploaded lastSubID_recent (size : ", str(len(lastSubID_Recent)), ")")
 
     if type == 2:
@@ -167,7 +166,7 @@ def uploadToDropbox(type):
             del f
             gc.collect()
 
-        log.logger.info(
+        print(
             "cper_bot-AtCoder-detection: Uploaded noticeFlag (size : ", str(len(noticeFlag)), ")")
 
 
@@ -238,7 +237,7 @@ def detection(type):
     request = session.get(
         url="https://kenkoooo.com/atcoder/resources/contests.json", headers=headers)
     contestsJsonData = json.loads(request.text)
-    log.logger.info("cper_bot-AtCoder-detection: Downloaded contestsJsonData")
+    print("cper_bot-AtCoder-detection: Downloaded contestsJsonData")
 
     checkContests = []
     exceptionContests = ["practice", "APG4b", "abs", "practice2"]
@@ -274,7 +273,7 @@ def detection(type):
                 sublistHTML.raise_for_status()
                 sublistData = BeautifulSoup(sublistHTML.text, "html.parser")
             except:
-                log.logger.info(
+                print(
                     "cper_bot-AtCoder-detection: sublistHTML Error")
                 break
             sublistTable = sublistData.find_all(
@@ -341,10 +340,10 @@ def detection(type):
                                 # api.update_status_with_media(filename = imagePath, status = atcoderID + " ( @" + twitterID + " ) さんが <AtCoder> " + str(contest["title"]) + "：" + str(subData[1]) + " を AC しました！\nhttps://atcoder.jp" + str(links[4].get("href")) + "\n" + timeStamp)
                                 api.update_status(atcoderID + " ( @" + twitterID + " ) さんが <AtCoder> " + str(contest["title"]) + "：" + str(
                                     subData[1]) + " を AC しました！\nhttps://atcoder.jp" + str(links[4].get("href")) + "\n" + timeStamp)
-                                log.logger.info("cper_bot-AtCoder-detection: " + atcoderID + " ( @" + twitterID +
+                                print("cper_bot-AtCoder-detection: " + atcoderID + " ( @" + twitterID +
                                                 " ) 's new AC submission (contest : " + str(contest["title"]) + ", problem : " + str(subData[1]) + ")")
                             except:
-                                log.logger.info(
+                                print(
                                     "cper_bot-AtCoder-detection: Tweet Error")
 
                 # エラーであれば無条件に報告
@@ -352,10 +351,10 @@ def detection(type):
                     try:
                         api.update_status("AtCoder で " + subData[6] + " となっている提出が検出されました！\nhttps://atcoder.jp" + str(
                             links[3].get("href")) + "\n" + timeStamp)
-                        log.logger.info(
+                        print(
                             "cper_bot-AtCoder-detection: detected " + subData[6] + " submission!")
                     except:
-                        log.logger.info(
+                        print(
                             "cper_bot-AtCoder-detection: Tweet Error")
 
                 # メモリ解放
@@ -395,6 +394,6 @@ def detection(type):
 
 
 if __name__ == '__main__':
-    log.logger.info("cper_bot-AtCoder-detection: Running as debug...")
+    print("cper_bot-AtCoder-detection: Running as debug...")
     detection(1)
-    log.logger.info("cper_bot-AtCoder-detection: Debug finished")
+    print("cper_bot-AtCoder-detection: Debug finished")

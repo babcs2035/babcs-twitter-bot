@@ -16,28 +16,26 @@ sched = BlockingScheduler(
     }
 )
 
-log.log_init()
-log.logger.info("Started")
-
+print("Started")
 
 # AOJ AC 検出（1 分ごと）
 @sched.scheduled_job('interval', minutes=1, executor='threadpool')
 def scheduled_job():
 
-    log.logger.info("cper_bot-AOJ-bot: ----- AOJ-detection Start -----")
+    print("cper_bot-AOJ-bot: ----- AOJ-detection Start -----")
     detection.detection()
-    log.logger.info("cper_bot-AOJ-bot: ----- AOJ-detection End -----")
+    print("cper_bot-AOJ-bot: ----- AOJ-detection End -----")
 
 
 # AOJ ランキング（毎日 0:00）
 @sched.scheduled_job('cron', minute='0', hour='0', executor='threadpool')
 def scheduled_job():
 
-    log.logger.info("cper_bot-AOJ-bot: ----- AOJ-ranking Start -----")
+    print("cper_bot-AOJ-bot: ----- AOJ-ranking Start -----")
     ranking.ranking()
-    log.logger.info("cper_bot-AOJ-bot: ----- AOJ-ranking End -----")
+    print("cper_bot-AOJ-bot: ----- AOJ-ranking End -----")
 
 
 # おまじない
 sched.start()
-log.logger.info("Set up scheduler")
+print("Set up scheduler")

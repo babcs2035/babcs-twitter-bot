@@ -14,7 +14,6 @@ import urllib.request
 import json
 import datetime
 import tweepy
-import log
 import os
 
 # グローバル変数
@@ -37,7 +36,7 @@ def downloadFromDropbox():
     dbx.files_download_to_file("lastTweetID.txt", "/lastTweetID.txt")
     with open("lastTweetID.txt", "r") as f:
         lastTweetID = f.readline()
-    log.logger.info(
+    print(
         "cper_bot-twitter: Downloaded lastTweetID : ", str(lastTweetID))
 
 # Dropbox にアップロード
@@ -61,7 +60,7 @@ def uploadToDropbox():
         with open("lastTweetID.txt", "rb") as f:
             dbx.files_delete("/lastTweetID.txt")
             dbx.files_upload(f.read(), "/lastTweetID.txt")
-        log.logger.info(
+        print(
             "cper_bot-twitter: Uploaded lastTweetID : ", str(lastTweetID))
 
 
@@ -81,7 +80,7 @@ def scheduled_job():
     global lastTweetID
     global idFixedFlag
 
-    log.logger.info("cper_bot-twitter: ----- twitter Start -----")
+    print("cper_bot-twitter: ----- twitter Start -----")
 
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY"]
@@ -131,7 +130,7 @@ def scheduled_job():
                         tweetSplited[2], str(userData["screen_name"]), tweetSplited[3])
                     api.update_status(tweetText + timeStamp,
                                       in_reply_to_status_id=tweet["id"])
-                    log.logger.info("cper_bot-twitter: Tweeted " +
+                    print("cper_bot-twitter: Tweeted " +
                                     tweetSplited[2] + "'s AtCoder detection flag change")
 
             if len(tweetSplited) >= 3:
@@ -142,7 +141,7 @@ def scheduled_job():
                     tweetText += AtCoder.status.status(tweetSplited[2])
                     api.update_status(tweetText + timeStamp,
                                       in_reply_to_status_id=tweet["id"])
-                    log.logger.info("cper_bot-twitter: Tweeted " +
+                    print("cper_bot-twitter: Tweeted " +
                                     tweetSplited[2] + "'s AtCoder status")
 
                 # AtCoder-register (register)
@@ -151,7 +150,7 @@ def scheduled_job():
                         tweetSplited[2], str(userData["screen_name"]), 0)
                     api.update_status(tweetText + timeStamp,
                                       in_reply_to_status_id=tweet["id"])
-                    log.logger.info("cper_bot-twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
                 # AtCoder-register (unregister)
                 if tweetSplited[1] == "del_atcoder":
@@ -159,7 +158,7 @@ def scheduled_job():
                         tweetSplited[2], str(userData["screen_name"]), 1)
                     api.update_status(tweetText + timeStamp,
                                       in_reply_to_status_id=tweet["id"])
-                    log.logger.info("cper_bot-twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
                 # AOJ-register (register)
                 if tweetSplited[1] == "reg_aoj":
@@ -167,7 +166,7 @@ def scheduled_job():
                         tweetSplited[2], str(userData["screen_name"]), 0)
                     api.update_status(tweetText + timeStamp,
                                       in_reply_to_status_id=tweet["id"])
-                    log.logger.info("cper_bot-twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
                 # AOJ-register (unregister)
                 if tweetSplited[1] == "del_aoj":
@@ -175,7 +174,7 @@ def scheduled_job():
                         tweetSplited[2], str(userData["screen_name"]), 1)
                     api.update_status(tweetText + timeStamp,
                                       in_reply_to_status_id=tweet["id"])
-                    log.logger.info("cper_bot-twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
                 # CF-register (register)
                 if tweetSplited[1] == "reg_cf":
@@ -183,7 +182,7 @@ def scheduled_job():
                         tweetSplited[2], str(userData["screen_name"]), 0)
                     api.update_status(tweetText + timeStamp,
                                       in_reply_to_status_id=tweet["id"])
-                    log.logger.info("cper_bot-twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
                 # CF-register (unregister)
                 if tweetSplited[1] == "del_cf":
@@ -191,7 +190,7 @@ def scheduled_job():
                         tweetSplited[2], str(userData["screen_name"]), 1)
                     api.update_status(tweetText + timeStamp,
                                       in_reply_to_status_id=tweet["id"])
-                    log.logger.info("cper_bot-twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
                 # YK-register (register)
                 if tweetSplited[1] == "reg_yk":
@@ -199,7 +198,7 @@ def scheduled_job():
                         tweetSplited[2], str(userData["screen_name"]), 0)
                     api.update_status(tweetText + timeStamp,
                                       in_reply_to_status_id=tweet["id"])
-                    log.logger.info("cper_bot-twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
                 # YK-register (unregister)
                 if tweetSplited[1] == "del_yk":
@@ -207,7 +206,7 @@ def scheduled_job():
                         tweetSplited[2], str(userData["screen_name"]), 1)
                     api.update_status(tweetText + timeStamp,
                                       in_reply_to_status_id=tweet["id"])
-                    log.logger.info("cper_bot-twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
             if len(tweetSplited) == 2:
 
@@ -216,17 +215,17 @@ def scheduled_job():
                     tweetText = info.info()
                     api.update_status(tweetText + timeStamp,
                                       in_reply_to_status_id=tweet["id"])
-                    log.logger.info("cper_bot-twitter: Tweeted " + tweetText)
+                    print("cper_bot-twitter: Tweeted " + tweetText)
 
         # 変更されたデータをアップロード
         lastTweetID = int(timeline[0]["id_str"])
         uploadToDropbox()
 
     else:
-        log.logger.info("cper_bot-twitter: Twitter API Error: %d" %
+        print("cper_bot-twitter: Twitter API Error: %d" %
                         timeline_json.status_code)
 
-    log.logger.info("cper_bot-twitter: ----- twitter End -----")
+    print("cper_bot-twitter: ----- twitter End -----")
 
 
 # おまじない

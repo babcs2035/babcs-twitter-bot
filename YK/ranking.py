@@ -7,7 +7,6 @@ import dropbox
 import json
 import datetime
 import tweepy
-import log
 import os
 
 
@@ -32,14 +31,14 @@ def downloadFromDropbox():
     dbx.files_download_to_file("YK/YKIDs.txt", "/YK/YKIDs.txt")
     with open("YK/YKIDs.txt", "rb") as f:
         YKIDs = pickle.load(f)
-    log.logger.info(
+    print(
         "cper_bot-YK-ranking: Downloaded YKIDs (size : ", str(len(YKIDs)), ")")
 
     # acCount をダウンロード
     dbx.files_download_to_file("acCount.txt", "/YK/acCount.txt")
     with open("acCount.txt", "rb") as f:
         acCount = pickle.load(f)
-    log.logger.info(
+    print(
         "cper_bot-YK-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
 
 # Dropbox にアップロード
@@ -60,7 +59,7 @@ def uploadToDropbox():
     with open("acCount.txt", "rb") as f:
         dbx.files_upload(f.read(), "/YK/acCount.txt",
                          mode=dropbox.files.WriteMode.overwrite)
-    log.logger.info(
+    print(
         "cper_bot-YK-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
 
 
@@ -94,7 +93,7 @@ def ranking():
             acCountData = json.loads(acCountJson.read().decode("utf-8"))
             nowACCount[str(ykID)] = int(acCountData["Solved"])
         except:
-            log.logger.info(
+            print(
                 "cper_bot-YK-ranking: acCountJson Error (ykID = " + ykID + ")")
 
     newACCount = []
@@ -165,6 +164,6 @@ def ranking():
 
 
 if __name__ == '__main__':
-    log.logger.info("cper_bot-YK-ranking: Running as debug...")
+    print("cper_bot-YK-ranking: Running as debug...")
     ranking()
-    log.logger.info("cper_bot-YK-ranking: Debug finished")
+    print("cper_bot-YK-ranking: Debug finished")

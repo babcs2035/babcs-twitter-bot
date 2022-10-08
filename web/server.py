@@ -1,4 +1,3 @@
-import log
 import http.server
 import os
 

@@ -4,7 +4,6 @@ import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 import followBack
-import log
 
 # インスタンス化
 sched = BlockingScheduler(
@@ -15,17 +14,16 @@ sched = BlockingScheduler(
 )
 
 # Initialize logging
-log.log_init()
-log.logger.info("[bot] Logging initialized")
+print("[bot] Logging initialized")
 
 
 # フォロバ（毎時 0, 20, 40 分）
 @sched.scheduled_job('cron', minute='0, 20, 40', hour='*/1', executor='threadpool')
 def scheduled_job():
 
-    log.logger.info("bot: ----- followBack Start -----")
+    print("bot: ----- followBack Start -----")
     followBack.followBack()
-    log.logger.info("bot: ----- followBack End -----")
+    print("bot: ----- followBack End -----")
 
 
 # 各 Bot を呼び出し
@@ -37,7 +35,7 @@ subprocess.Popen(["python", "YK/YK-bot.py"])
 subprocess.Popen(["python", "cpcontest_bot/cpcontest_bot.py"])
 subprocess.Popen(["python", "cpcontest_bot/twitter.py"])
 # subprocess.Popen(["python", "LINE/line_bot.py"])
-log.logger.info("[bot] Called All bots")
+print("[bot] Called All bots")
 
 # おまじない
 sched.start()

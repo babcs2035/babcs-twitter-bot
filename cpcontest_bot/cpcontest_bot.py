@@ -16,8 +16,7 @@ sched = BlockingScheduler(
     }
 )
 
-log.log_init()
-log.logger.info("Started")
+print("Started")
 
 liveContestIDs = []
 
@@ -29,9 +28,9 @@ def scheduled_job():
 
     global liveContestIDs
 
-    log.logger.info("cpcontest_bot: ----- getLiveContestID Start -----")
+    print("cpcontest_bot: ----- getLiveContestID Start -----")
     liveContestIDs = getLiveContestID.get()
-    log.logger.info("cpcontest_bot: ----- getLiveContestID End -----")
+    print("cpcontest_bot: ----- getLiveContestID End -----")
 
 
 @sched.scheduled_job('interval', seconds=60, executor='threadpool')
@@ -44,4 +43,4 @@ def scheduled_job():
 
 # おまじない
 sched.start()
-log.logger.info("Set up scheduler")
+print("Set up scheduler")

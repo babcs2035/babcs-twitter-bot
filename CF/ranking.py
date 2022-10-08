@@ -6,7 +6,6 @@ import dropbox
 import json
 import datetime
 import tweepy
-import log
 import os
 
 
@@ -31,14 +30,14 @@ def downloadFromDropbox():
     dbx.files_download_to_file("CF/CFIDs.txt", "/CF/CFIDs.txt")
     with open("CF/CFIDs.txt", "rb") as f:
         CFIDs = pickle.load(f)
-    log.logger.info(
+    print(
         "cper_bot-CF-ranking: Downloaded CFIDs (size : ", str(len(CFIDs)), ")")
 
     # acCount をダウンロード
     dbx.files_download_to_file("CF/acCount.txt", "/CF/acCount.txt")
     with open("CF/acCount.txt", "rb") as f:
         acCount = pickle.load(f)
-    log.logger.info(
+    print(
         "cper_bot-CF-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
 
 # Dropbox にアップロード
@@ -59,7 +58,7 @@ def uploadToDropbox():
     with open("CF/acCount.txt", "rb") as f:
         dbx.files_upload(f.read(), "/CF/acCount.txt",
                          mode=dropbox.files.WriteMode.overwrite)
-    log.logger.info(
+    print(
         "cper_bot-CF-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
 
 
@@ -91,7 +90,7 @@ def ranking():
             acCountJson = urllib.request.urlopen(
                 "https://codeforces.com/api/user.status?handle=" + str(cfID))
         except:
-            log.logger.info("cper_bot-CF-ranking: acCountJson Error")
+            print("cper_bot-CF-ranking: acCountJson Error")
             continue
         acCountData = json.loads(acCountJson.read().decode("utf-8"))
         cnt = 0
@@ -166,6 +165,6 @@ def ranking():
 
 
 if __name__ == '__main__':
-    log.logger.info("cper_bot-CF-ranking: Running as debug...")
+    print("cper_bot-CF-ranking: Running as debug...")
     ranking()
-    log.logger.info("cper_bot-CF-ranking: Debug finished")
+    print("cper_bot-CF-ranking: Debug finished")

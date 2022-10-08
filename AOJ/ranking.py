@@ -6,7 +6,6 @@ import dropbox
 import json
 import datetime
 import tweepy
-import log
 import os
 
 
@@ -30,14 +29,14 @@ def downloadFromDropbox():
     dbx.files_download_to_file("AOJ/AOJIDs.txt", "/AOJ/AOJIDs.txt")
     with open("AOJ/AOJIDs.txt", "rb") as f:
         AOJIDs = pickle.load(f)
-    log.logger.info(
+    print(
         "cper_bot-AOJ-ranking: Downloaded AOJIDs (size : ", str(len(AOJIDs)), ")")
 
     # acCount をダウンロード
     dbx.files_download_to_file("AOJ/acCount.txt", "/AOJ/acCount.txt")
     with open("AOJ/acCount.txt", "rb") as f:
         acCount = pickle.load(f)
-    log.logger.info(
+    print(
         "cper_bot-AOJ-ranking: Downloaded acCount (size : ", str(len(acCount)), ")")
 
 
@@ -57,7 +56,7 @@ def uploadToDropbox():
     with open("AOJ/acCount.txt", "rb") as f:
         dbx.files_upload(f.read(), "/AOJ/acCount.txt",
                          mode=dropbox.files.WriteMode.overwrite)
-    log.logger.info(
+    print(
         "cper_bot-AOJ-ranking: Uploaded acCount (size : ", str(len(acCount)), ")")
 
 
@@ -156,6 +155,6 @@ def ranking():
 
 
 if __name__ == '__main__':
-    log.logger.info("cper_bot-AOJ-ranking: Running as debug...")
+    print("cper_bot-AOJ-ranking: Running as debug...")
     ranking()
-    log.logger.info("cper_bot-AOJ-ranking: Debug finished")
+    print("cper_bot-AOJ-ranking: Debug finished")

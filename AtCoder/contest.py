@@ -9,7 +9,6 @@ import json
 import time
 import datetime
 import tweepy
-import log
 import os
 
 
@@ -43,7 +42,7 @@ def contest():
         contestsHTML.raise_for_status()
         contestsData = BeautifulSoup(contestsHTML.text, "html.parser")
     except:
-        log.logger.info("cper_bot-AtCoder-contest: contestsHTML Error")
+        print("cper_bot-AtCoder-contest: contestsHTML Error")
         return
     contestsTable = contestsData.find_all(
         "table", class_="table table-default table-striped table-hover table-condensed table-bordered small")
@@ -116,7 +115,7 @@ def contest():
         " 件の AtCoder コンテストが予定されています．\nhttps://atcoder.jp/contests/\n"
     api.update_status_with_media(
         filename="AtCoder/contestsListImg_fixed.jpg", status=listTweetText + "\n" + timeStamp)
-    log.logger.info("cper_bot-AtCoder-contest: Tweeted contestsListImg_fixed")
+    print("cper_bot-AtCoder-contest: Tweeted contestsListImg_fixed")
 
     # Release memory
     del contestsList
@@ -128,6 +127,6 @@ def contest():
 
 
 if __name__ == '__main__':
-    log.logger.info("cper_bot-AtCoder-contest: Running as debug...")
+    print("cper_bot-AtCoder-contest: Running as debug...")
     contest()
-    log.logger.info("cper_bot-AtCoder-contest: Debug finished")
+    print("cper_bot-AtCoder-contest: Debug finished")

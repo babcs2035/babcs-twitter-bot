@@ -10,7 +10,6 @@ import dropbox
 import time
 import datetime
 import tweepy
-import log
 import os
 
 
@@ -37,14 +36,14 @@ def downloadFromDropbox():
         "AtCoder/AtCoderIDs.txt", "/AtCoder/AtCoderIDs.txt")
     with open("AtCoder/AtCoderIDs.txt", "rb") as f:
         AtCoderIDs = pickle.load(f)
-    log.logger.info(
+    print(
         "cper_bot-AtCoder-result: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
 
     # ratings をダウンロード
     dbx.files_download_to_file("AtCoder/ratings.txt", "/AtCoder/ratings.txt")
     with open("AtCoder/ratings.txt", "rb") as f:
         ratings = pickle.load(f)
-    log.logger.info(
+    print(
         "cper_bot-AtCoder-result: Downloaded ratings (size : ", str(len(ratings)), ")")
 
 # Dropbox にアップロード
@@ -65,7 +64,7 @@ def uploadToDropbox():
     with open("AtCoder/ratings.txt", "rb") as f:
         dbx.files_upload(f.read(), "/AtCoder/ratings.txt",
                          mode=dropbox.files.WriteMode.overwrite)
-    log.logger.info(
+    print(
         "cper_bot-AtCoder-result: Uploaded ratings (size : ", str(len(ratings)), ")")
 
 
@@ -86,7 +85,7 @@ def downloadImage(url, dst_path):
         with urllib.request.urlopen(url) as web_file, open(dst_path, 'wb') as local_file:
             local_file.write(web_file.read())
     except:
-        log.logger.info("cper_bot-AtCoder-result: downloadImage Error (url = " +
+        print("cper_bot-AtCoder-result: downloadImage Error (url = " +
                         url + ", dst_path = " + dst_path + ")")
 
 
@@ -158,7 +157,7 @@ def makeRanking(type, listData, unit):
             rankingImg.paste(Image.open(
                 "AtCoder/data/" + listData[idx]["atcoderID"] + ".png").resize((59, 59)), (105, 2))
         except:
-            log.logger.info(
+            print(
                 "cper_bot-AtCoder-result: userpageData Error (atcoderID = " + listData[idx]["atcoderID"] + ")")
         resImg.paste(
             rankingImg, (738 * int(idx / rows), 65 + 63 * (idx % rows)))
@@ -202,9 +201,9 @@ def result():
             profileHTML.raise_for_status()
             profileData = BeautifulSoup(profileHTML.text, "html.parser")
         except:
-            log.logger.info("cper_bot-AtCoder-result: profileHTML Error")
+            print("cper_bot-AtCoder-result: profileHTML Error")
             continue
-        log.logger.info("cper_bot-AtCoder-result: Downloaded " +
+        print("cper_bot-AtCoder-result: Downloaded " +
                         atcoderID + "'s profileData")
         profileTable = profileData.find_all("table", class_="dl-table")
         try:
@@ -220,7 +219,7 @@ def result():
                 if ratings[str(atcoderID)] < border * 400 and border * 400 <= nowRating:
                     api.update_status(atcoderID + " ( @" + twitterID + " ) さんの AtCoder レートが " + str(ratings[atcoderID]) + " -> " + str(
                         nowRating) + " となり，" + strs[border] + "コーダーになりました！おめでとうございます！！！\n" + profileURL + "\n" + timeStamp)
-                    log.logger.info("cper_bot-AtCoder-result: Tweeted " +
+                    print("cper_bot-AtCoder-result: Tweeted " +
                                     atcoderID + " ( @" + twitterID + " )'s rating change")
                     break
         ratings[atcoderID] = nowRating
@@ -233,7 +232,7 @@ def result():
     request = session.get(
         url="https://kenkoooo.com/atcoder/resources/contests.json", headers=headers)
     contestsJsonData = json.loads(request.text)
-    log.logger.info("cper_bot-AtCoder-result: Downloaded contestsJsonData")
+    print("cper_bot-AtCoder-result: Downloaded contestsJsonData")
     newcontests = []
     yesterday = datetime.datetime.today() - datetime.timedelta(1)
     for contest in contestsJsonData:
@@ -260,9 +259,9 @@ def result():
                 reslistHTML.raise_for_status()
                 reslistData = BeautifulSoup(reslistHTML.text, "html.parser")
             except:
-                log.logger.info("cper_bot-AtCoder-result: reslistHTML Error")
+                print("cper_bot-AtCoder-result: reslistHTML Error")
                 continue
-            log.logger.info(
+            print(
                 "cper_bot-AtCoder-result: Downloaded " + atcoderID + "'s reslistData")
             reslistTable = reslistData.find_all("table")
             if len(reslistTable) == 0:
@@ -285,7 +284,7 @@ def result():
                             diffList.append({"atcoderID": atcoderID, "twitterID": twitterID, "diff": int(
                                 row.contents[11].contents[0])})
                     break
-        log.logger.info("cper_bot-AtCoder-result: Checked " +
+        print("cper_bot-AtCoder-result: Checked " +
                         str(contest) + " result")
 
         # ランキングを作成
@@ -296,7 +295,7 @@ def result():
                 makeRanking("rank", rankList, "位")
             api.update_status_with_media(
                 filename="AtCoder/data/result/rankRankingImg_fixed.jpg", status=tweetText + "\n" + timeStamp)
-            log.logger.info("cper_bot-AtCoder-result: Tweeted " +
+            print("cper_bot-AtCoder-result: Tweeted " +
                             str(contest) + " rankRanking")
             canPassDL = True
         if len(perfList) > 0:
@@ -305,7 +304,7 @@ def result():
                 makeRanking("perf", perfList, "perf.")
             api.update_status_with_media(
                 filename="AtCoder/data/result/perfRankingImg_fixed.jpg", status=tweetText + "\n" + timeStamp)
-            log.logger.info("cper_bot-AtCoder-result: Tweeted " +
+            print("cper_bot-AtCoder-result: Tweeted " +
                             str(contest) + " perfRanking")
             canPassDL = True
         if len(diffList) > 0:
@@ -314,7 +313,7 @@ def result():
                 makeRanking("diff", diffList, "")
             api.update_status_with_media(
                 filename="AtCoder/data/result/diffRankingImg_fixed.jpg", status=tweetText + "\n" + timeStamp)
-            log.logger.info("cper_bot-AtCoder-result: Tweeted " +
+            print("cper_bot-AtCoder-result: Tweeted " +
                             str(contest) + " diffRanking")
             canPassDL = True
 
@@ -323,6 +322,6 @@ def result():
 
 
 if __name__ == '__main__':
-    log.logger.info("cper_bot-AtCoder-result: Running as debug...")
+    print("cper_bot-AtCoder-result: Running as debug...")
     result()
-    log.logger.info("cper_bot-AtCoder-result: Debug finished")
+    print("cper_bot-AtCoder-result: Debug finished")

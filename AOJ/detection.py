@@ -7,7 +7,6 @@ import urllib
 import dropbox
 import datetime
 import tweepy
-import log
 import os
 
 
@@ -32,14 +31,14 @@ def downloadFromDropbox():
     dbx.files_download_to_file("AOJ/AOJIDs.txt", "/AOJ/AOJIDs.txt")
     with open("AOJ/AOJIDs.txt", "rb") as f:
         AOJIDs = pickle.load(f)
-    log.logger.info(
+    print(
         "cper_bot-AOJ-detection: Downloaded AOJIDs (size : ", str(len(AOJIDs)), ")")
 
     # lastSubID をダウンロード
     dbx.files_download_to_file("AOJ/lastSubID.txt", "/AOJ/lastSubID.txt")
     with open("AOJ/lastSubID.txt", "r") as f:
         lastSubID = f.readline()
-    log.logger.info(
+    print(
         "cper_bot-AOJ-detection: Downloaded lastSubID : ", str(lastSubID))
 
 
@@ -61,7 +60,7 @@ def uploadToDropbox():
         with open("AOJ/lastSubID.txt", "rb") as f:
             dbx.files_upload(f.read(), "/AOJ/lastSubID.txt",
                              mode=dropbox.files.WriteMode.overwrite)
-        log.logger.info(
+        print(
             "cper_bot-AOJ-detection: Uploaded lastSubID : ", str(lastSubID))
 
 
@@ -120,10 +119,10 @@ def detection():
         try:
             api.update_status(AOJID + " ( @" + twitterID + " ) さんが <AOJ> " +
                               problemName + " を AC しました！\n" + subURL + "\n" + timeStamp)
-            log.logger.info("cper_bot-AOJ-detection: " + AOJID + " ( @" + twitterID +
+            print("cper_bot-AOJ-detection: " + AOJID + " ( @" + twitterID +
                             " ) 's new AC submission (problem : " + problemName + ")")
         except:
-            log.logger.info("cper_bot-AOJ-detection: Tweet Error")
+            print("cper_bot-AOJ-detection: Tweet Error")
 
     # データをアップロード
     lastSubID = int(subs_jsonData[0]["judgeId"])
@@ -131,6 +130,6 @@ def detection():
 
 
 if __name__ == '__main__':
-    log.logger.info("cper_bot-AOJ-detection: Running as debug...")
+    print("cper_bot-AOJ-detection: Running as debug...")
     detection()
-    log.logger.info("cper_bot-AOJ-detection: Debug finished")
+    print("cper_bot-AOJ-detection: Debug finished")

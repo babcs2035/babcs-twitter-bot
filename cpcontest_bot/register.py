@@ -3,7 +3,6 @@ import pickle
 import dropbox
 import urllib.request
 import datetime
-import log
 import os
 
 
@@ -18,11 +17,11 @@ def checkAtCoderID(atcoderID):
 
     try:
         html = urllib.request.urlopen("https://atcoder.jp/users/" + atcoderID)
-        log.logger.info("cpcontest_bot-register: " +
+        print("cpcontest_bot-register: " +
                         atcoderID + " is correct AtCoder ID")
         return True
     except:
-        log.logger.info("cpcontest_bot-register: " +
+        print("cpcontest_bot-register: " +
                         atcoderID + " is not correct AtCoder ID")
         return False
 
@@ -43,7 +42,7 @@ def downloadFromDropbox():
         "cpcontest_bot/AtCoderIDs.txt", "/cpcontest_bot/AtCoderIDs.txt")
     with open("cpcontest_bot/AtCoderIDs.txt", "rb") as f:
         AtCoderIDs = pickle.load(f)
-    log.logger.info(
+    print(
         "cpcontest_bot-register: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
 
 # Dropbox にアップロード
@@ -67,7 +66,7 @@ def uploadToDropbox():
         with open("cpcontest_bot/AtCoderIDs.txt", "rb") as f:
             dbx.files_delete("/cpcontest_bot/AtCoderIDs.txt")
             dbx.files_upload(f.read(), "/cpcontest_bot/AtCoderIDs.txt")
-        log.logger.info(
+        print(
             "cpcontest_bot-register: Uploaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
 
 # AtCoder ID 登録・解除
@@ -75,7 +74,7 @@ def uploadToDropbox():
 
 def register(atcoderID, twitterID, flag):
 
-    log.logger.info("cpcontest_bot-register: ----- register Start -----")
+    print("cpcontest_bot-register: ----- register Start -----")
 
     # グローバル変数
     global AtCoderIDs
@@ -96,38 +95,38 @@ def register(atcoderID, twitterID, flag):
             if (atcoderID, twitterID) not in AtCoderIDs:
                 AtCoderIDs.append((atcoderID, twitterID))
                 tweetText = "@" + str(twitterID) + " AtCoder ID を登録しました！\n"
-                log.logger.info(
+                print(
                     "cpcontest_bot-register: Registered new AtCoder ID : " + atcoderID)
                 AtCoderIDsFixedFlag = True
             else:
                 tweetText = "@" + str(twitterID) + \
                     " この AtCoder ID は既に登録されています！\n"
-                log.logger.info(
+                print(
                     "cpcontest_bot-register: Rejected to register AtCoder ID : " + atcoderID)
         else:
             tweetText = "@" + str(twitterID) + " 正しい AtCoder ID ではありません！\n"
-            log.logger.info(
+            print(
                 "cpcontest_bot-register: Rejected to register new AtCoder ID : " + atcoderID)
     if flag == 1:
         if checkAtCoderID(atcoderID):
             if (atcoderID, twitterID) in AtCoderIDs:
                 AtCoderIDs.remove((atcoderID, twitterID))
                 tweetText = "@" + str(twitterID) + " AtCoder ID を登録解除しました！\n"
-                log.logger.info(
+                print(
                     "cpcontest_bot-register: Unregistered AtCoder ID : " + atcoderID)
                 AtCoderIDsFixedFlag = True
             else:
                 tweetText = "@" + str(twitterID) + \
                     " この AtCoder ID は登録されていません！\n"
-                log.logger.info(
+                print(
                     "cpcontest_bot-register: Rejected to unregister AtCoder ID : " + atcoderID)
         else:
             tweetText = "@" + str(twitterID) + " 正しい AtCoder ID ではありません！\n"
-            log.logger.info(
+            print(
                 "cpcontest_bot-register: Rejected to unregister AtCoder ID : " + atcoderID)
 
     # 変更されたデータをアップロード
     uploadToDropbox()
 
-    log.logger.info("cpcontest_bot-register: ----- register End -----")
+    print("cpcontest_bot-register: ----- register End -----")
     return tweetText

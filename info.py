@@ -1,7 +1,6 @@
 # import
 import pickle
 import dropbox
-import log
 import os
 
 AtCoderIDs = []
@@ -29,7 +28,7 @@ def downloadFromDropbox():
         "AtCoder/AtCoderIDs.txt", "/AtCoder/AtCoderIDs.txt")
     with open("AtCoder/AtCoderIDs.txt", "rb") as f:
         AtCoderIDs = pickle.load(f)
-    log.logger.info(
+    print(
         "cper_bot-info: Downloaded AtCoderIDs (size : ", str(len(AtCoderIDs)), ")")
 
     # AOJID をダウンロード
@@ -38,7 +37,7 @@ def downloadFromDropbox():
         AOJID.clear()
         for id in f:
             AOJID.append(id.rstrip("\n"))
-    log.logger.info(
+    print(
         "cper_bot-info: Downloaded AOJID (size : ", str(len(AOJID)), ")")
 
     # CFID をダウンロード
@@ -47,7 +46,7 @@ def downloadFromDropbox():
         CFID.clear()
         for id in f:
             CFID.append(id.rstrip("\n"))
-    log.logger.info(
+    print(
         "cper_bot-info: Downloaded CFID (size : ", str(len(CFID)), ")")
 
     # YKID をダウンロード
@@ -56,7 +55,7 @@ def downloadFromDropbox():
         YKID.clear()
         for id in f:
             YKID.append(id.rstrip("\n"))
-    log.logger.info(
+    print(
         "cper_bot-info: Downloaded YKID (size : ", str(len(YKID)), ")")
 
 
@@ -79,6 +78,6 @@ def info():
 
 
 if __name__ == '__main__':
-    log.logger.info("cper_bot-info: Running as debug...")
+    print("cper_bot-info: Running as debug...")
     info()
-    log.logger.info("cper_bot-info: Debug finished")
+    print("cper_bot-info: Debug finished")

@@ -9,7 +9,6 @@ import pickle
 import dropbox
 import datetime
 import tweepy
-import log
 import os
 
 
@@ -32,7 +31,7 @@ def downloadFromDropbox():
     dbx.files_download_to_file("CF/CFIDs.txt", "/CF/CFIDs.txt")
     with open("CF/CFIDs.txt", "rb") as f:
         CFIDs = pickle.load(f)
-    log.logger.info(
+    print(
         "cper_bot-CF-result: Downloaded CFIDs (size : ", str(len(CFIDs)), ")")
 
 
@@ -120,7 +119,7 @@ def result():
     contestsJsonRes = urllib.request.urlopen(
         "https://codeforces.com/api/contest.list")
     contestsJsonData = json.loads(contestsJsonRes.read().decode("utf-8"))
-    log.logger.info("cper_bot-CF-result: Downloaded contestsJsonData")
+    print("cper_bot-CF-result: Downloaded contestsJsonData")
     newcontests = []
     yesterday = datetime.datetime.today() - datetime.timedelta(1)
     for contest in contestsJsonData["result"]:
@@ -139,10 +138,10 @@ def result():
                 reslistJsonRes = urllib.request.urlopen(
                     "https://codeforces.com/api/user.rating?handle=" + str(cfID))
             except:
-                log.logger.info("cper_bot-CF-result: reslistJsonRes Error")
+                print("cper_bot-CF-result: reslistJsonRes Error")
                 continue
             reslistJsonData = json.loads(reslistJsonRes.read().decode("utf-8"))
-            log.logger.info("cper_bot-CF-result: Downloaded " +
+            print("cper_bot-CF-result: Downloaded " +
                             str(cfID) + "'s reslistData")
             for row in reslistJsonData["result"]:
                 if str(contest) == str(row["contestName"]):
@@ -151,7 +150,7 @@ def result():
                     diffList.append({"cfID": str(cfID), "twitterID": str(
                         twitterID), "diff": (int(row["newRating"]) - int(row["oldRating"]))})
                     break
-        log.logger.info("cper_bot-CF-result: Checked " +
+        print("cper_bot-CF-result: Checked " +
                         str(contest) + " result")
 
         # ランキングを作成
@@ -160,7 +159,7 @@ def result():
             tweetText = str(contest) + " 順位表" + makeRanking("rank", rankList)
             api.update_status_with_media(
                 filename="CF/data/result/rankRankingImg_fixed.jpg", status=tweetText + "\n" + timeStamp)
-            log.logger.info("cper_bot-CF-result: Tweeted " +
+            print("cper_bot-CF-result: Tweeted " +
                             str(contest) + " rankRanking")
         if len(diffList) > 0:
             diffList.sort(key=lambda x: x["diff"], reverse=True)
@@ -168,11 +167,11 @@ def result():
                 makeRanking("diff", diffList)
             api.update_status_with_media(
                 filename="CF/data/result/diffRankingImg_fixed.jpg", status=tweetText + "\n" + timeStamp)
-            log.logger.info("cper_bot-CF-result: Tweeted " +
+            print("cper_bot-CF-result: Tweeted " +
                             str(contest) + " diffRanking")
 
 
 if __name__ == '__main__':
-    log.logger.info("cper_bot-CF-result: Running as debug...")
+    print("cper_bot-CF-result: Running as debug...")
     result()
-    log.logger.info("cper_bot-CF-result: Debug finished")
+    print("cper_bot-CF-result: Debug finished")

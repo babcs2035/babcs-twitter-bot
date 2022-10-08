@@ -6,7 +6,6 @@ import urllib
 import time
 import datetime
 import tweepy
-import log
 import os
 
 
@@ -32,7 +31,7 @@ def vcontest():
     listHTML = requests.get(listURL)
     listHTML.raise_for_status()
     listData = BeautifulSoup(listHTML.text, "html.parser")
-    log.logger.info("cper_bot-AtCoder-vcontest: Downloaded listData")
+    print("cper_bot-AtCoder-vcontest: Downloaded listData")
 
     listTable = listData.find_all("tbody")
     list1 = []
@@ -96,11 +95,11 @@ def vcontest():
         str(idx) + " の AtCoder バーチャルコンテストが行われて or 予定されています．\nhttps://not-522.appspot.com/\n"
     api.update_status_with_media(
         filename="AtCoder/vcontestsListImg_fixed.jpg", status=listTweetText + "\n" + timeStamp)
-    log.logger.info(
+    print(
         "cper_bot-AtCoder-vcontest: Tweeted vcontestsListImg_fixed")
 
 
 if __name__ == '__main__':
-    log.logger.info("cper_bot-AtCoder-vcontest: Running as debug...")
+    print("cper_bot-AtCoder-vcontest: Running as debug...")
     vcontest()
-    log.logger.info("cper_bot-AtCoder-vcontest: Debug finished")
+    print("cper_bot-AtCoder-vcontest: Debug finished")

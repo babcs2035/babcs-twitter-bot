@@ -6,7 +6,6 @@ import json
 import time
 import datetime
 import tweepy
-import log
 import os
 
 
@@ -78,6 +77,6 @@ def contest():
 
 
 if __name__ == '__main__':
-    log.logger.info("cper_bot-YK-contest: Running as debug...")
+    print("cper_bot-YK-contest: Running as debug...")
     contest()
-    log.logger.info("cper_bot-YK-contest: Debug finished")
+    print("cper_bot-YK-contest: Debug finished")

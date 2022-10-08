@@ -3,7 +3,6 @@ import pickle
 import dropbox
 import urllib.request
 import datetime
-import log
 import os
 
 
@@ -18,11 +17,11 @@ def checkAOJIDs(AOJID):
     try:
         html = urllib.request.urlopen(
             "https://judgeapi.u-aizu.ac.jp/users/" + AOJID)
-        log.logger.info("cper_bot-AOJ-register: " +
+        print("cper_bot-AOJ-register: " +
                         AOJID + " is correct AOJ ID")
         return True
     except:
-        log.logger.info("cper_bot-AOJ-register: " +
+        print("cper_bot-AOJ-register: " +
                         AOJID + " is not correct AOJ ID")
         return False
 
@@ -41,7 +40,7 @@ def downloadFromDropbox():
     dbx.files_download_to_file("AOJ/AOJIDs.txt", "/AOJ/AOJIDs.txt")
     with open("AOJ/AOJIDs.txt", "rb") as f:
         AOJIDs = pickle.load(f)
-    log.logger.info(
+    print(
         "cper_bot-AOJ-register: Downloaded AOJIDs (size : ", str(len(AOJIDs)), ")")
 
 
@@ -64,19 +63,19 @@ def uploadToDropbox():
         with open("AOJ/AOJIDs.txt", "rb") as f:
             dbx.files_upload(f.read(), "/AOJ/AOJIDs.txt",
                              mode=dropbox.files.WriteMode.overwrite)
-            log.logger.info(
+            print(
                 "cper_bot-AOJ-register: Uploaded AOJIDs (size : ", str(len(AOJIDs)), ")")
         with open("AOJ/AOJIDs.txt", "rb") as f:
             dbx.files_upload(f.read(), "/_backup/AOJ/AOJIDs/" + str(
                 datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ".txt")
-            log.logger.info("cper_bot-AOJ-register: Uploaded AOJIDs (for backup " + str(
+            print("cper_bot-AOJ-register: Uploaded AOJIDs (for backup " + str(
                 datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")) + ") (size : ", str(len(AOJIDs)), ")")
 
 
 # AOJ ID 登録・解除
 def register(AOJID, twitterID, flag):
 
-    log.logger.info("AOJ-register: ----- AOJ-register Start -----")
+    print("AOJ-register: ----- AOJ-register Start -----")
 
     # グローバル変数
     global AOJIDs
@@ -97,36 +96,36 @@ def register(AOJID, twitterID, flag):
             if (AOJID, twitterID) not in AOJIDs:
                 AOJIDs.add((AOJID, twitterID))
                 tweetText = "@" + str(twitterID) + " AOJ ID を登録しました！\n"
-                log.logger.info(
+                print(
                     "cper_bot-AOJ-register: Registered new AOJ ID : " + AOJID)
                 AOJIDsFixedFlag = True
             else:
                 tweetText = "@" + str(twitterID) + " この AOJ ID は既に登録されています！\n"
-                log.logger.info(
+                print(
                     "cper_bot-AtCoder-register: Rejected to register AOJ ID : " + AOJID)
         else:
             tweetText = "@" + str(twitterID) + " 正しい AOJ ID ではありません！\n"
-            log.logger.info(
+            print(
                 "cper_bot-AOJ-register: Rejected to AOJ-register new AOJ ID : " + AOJID)
     if flag == 1:
         if checkAOJIDs(AOJID):
             if (AOJID, twitterID) in AOJIDs:
                 AOJIDs.remove((AOJID, twitterID))
                 tweetText = "@" + str(twitterID) + " AOJ ID を登録解除しました！\n"
-                log.logger.info(
+                print(
                     "cper_bot-AOJ-register: Unregistered AOJ ID : " + AOJID)
                 AOJIDsFixedFlag = True
             else:
                 tweetText = "@" + str(twitterID) + " この AOJ ID は登録されていません！\n"
-                log.logger.info(
+                print(
                     "cper_bot-AOJ-register: Rejected to unregister AOJ ID : " + AOJID)
         else:
             tweetText = "@" + str(twitterID) + " 正しい AOJ ID ではありません！\n"
-            log.logger.info(
+            print(
                 "cper_bot-AOJ-register: Rejected to unregister AOJ ID : " + AOJID)
 
     # 変更されたデータをアップロード
     uploadToDropbox()
 
-    log.logger.info("cper_bot-AOJ-register: ----- AOJ-register End -----")
+    print("cper_bot-AOJ-register: ----- AOJ-register End -----")
     return tweetText

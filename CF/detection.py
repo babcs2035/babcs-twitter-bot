@@ -6,7 +6,6 @@ import dropbox
 import json
 import datetime
 import tweepy
-import log
 import os
 
 
@@ -31,14 +30,14 @@ def downloadFromDropbox():
     dbx.files_download_to_file("CF/CFIDs.txt", "/CF/CFIDs.txt")
     with open("CF/CFIDs.txt", "rb") as f:
         CFIDs = pickle.load(f)
-    log.logger.info(
+    print(
         "cper_bot-CF-detection: Downloaded CFIDs (size : ", str(len(CFIDs)), ")")
 
     # lastSubID をダウンロード
     dbx.files_download_to_file("CF/lastSubID.txt", "/CF/lastSubID.txt")
     with open("CF/lastSubID.txt", "rb") as f:
         lastSubID = pickle.load(f)
-    log.logger.info(
+    print(
         "cper_bot-CF-detection: Downloaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 # Dropbox にアップロード
@@ -59,7 +58,7 @@ def uploadToDropbox():
     with open("CF/lastSubID.txt", "rb") as f:
         dbx.files_upload(f.read(), "/CF/lastSubID.txt",
                          mode=dropbox.files.WriteMode.overwrite)
-    log.logger.info(
+    print(
         "cper_bot-CF-detection: Uploaded lastSubID (size : ", str(len(lastSubID)), ")")
 
 
@@ -94,7 +93,7 @@ def detection():
             subsJsonRes = urllib.request.urlopen(
                 "https://codeforces.com/api/user.status?handle=" + str(cfID))
         except:
-            log.logger.info("cper_bot-CF-deteciton: subsJsonRes Error")
+            print("cper_bot-CF-deteciton: subsJsonRes Error")
             continue
         subsJsonData = json.loads(subsJsonRes.read().decode("utf-8"))
         if cfID in lastSubID:
@@ -106,10 +105,10 @@ def detection():
                         try:
                             api.update_status(cfID + " ( @" + twitterID + " ) さんが <Codeforces> " + str(
                                 sub["problem"]["name"]) + " を AC しました！\n" + "https://codeforces.com/contest/" + str(sub["contestId"]) + "/submission/" + str(sub["id"]) + "\n" + timeStamp)
-                            log.logger.info("cper_bot-CF-detection: " + cfID + " ( @" + twitterID +
+                            print("cper_bot-CF-detection: " + cfID + " ( @" + twitterID +
                                             " ) 's new AC submission (problem : " + str(sub["problem"]["name"]) + ")")
                         except:
-                            log.logger.info(
+                            print(
                                 "cper_bot-CF-detection: Tweet Error")
         if len(subsJsonData["result"]) > 0:
             lastSubID[cfID] = int(subsJsonData["result"][0]["id"])
@@ -120,6 +119,6 @@ def detection():
 
 
 if __name__ == '__main__':
-    log.logger.info("cper_bot-CF-detection: Running as debug...")
+    print("cper_bot-CF-detection: Running as debug...")
     detection()
-    log.logger.info("cper_bot-CF-detection: Debug finished")
+    print("cper_bot-CF-detection: Debug finished")

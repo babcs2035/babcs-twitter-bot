@@ -7,7 +7,6 @@ import dropbox
 import json
 import datetime
 import tweepy
-import log
 import os
 
 
@@ -32,14 +31,14 @@ def downloadFromDropbox():
     dbx.files_download_to_file("YK/YKIDs.txt", "/YK/YKIDs.txt")
     with open("YK/YKIDs.txt", "rb") as f:
         YKIDs = pickle.load(f)
-    log.logger.info(
+    print(
         "cper_bot-YK-detection: Downloaded YKIDs (size : ", str(len(YKIDs)), ")")
 
     # lastSubID をダウンロード
     dbx.files_download_to_file("YK/lastSubID.txt", "/YK/lastSubID.txt")
     with open("YK/lastSubID.txt", "r") as f:
         lastSubID = f.readline()
-    log.logger.info(
+    print(
         "cper_bot-YK-detection: Downloaded lastSubID : ", str(lastSubID))
 
 # Dropbox にアップロード
@@ -60,7 +59,7 @@ def uploadToDropbox():
     with open("YK/lastSubID.txt", "rb") as f:
         dbx.files_upload(f.read(), "/YK/lastSubID.txt",
                          mode=dropbox.files.WriteMode.overwrite)
-    log.logger.info(
+    print(
         "cper_bot-YK-detection: Uploaded lastSubID : ", str(lastSubID))
 
 
@@ -100,7 +99,7 @@ def detection():
             sublistHTML.raise_for_status()
             sublistData = BeautifulSoup(sublistHTML.text, "html.parser")
         except:
-            log.logger.info("cper_bot-YK-detection: sublistHTML Error")
+            print("cper_bot-YK-detection: sublistHTML Error")
             break
         sublistRows = sublistData.find_all("tr")
         del sublistRows[0]
@@ -133,10 +132,10 @@ def detection():
                         try:
                             api.update_status(userID + " ( @" + twitterID + " ) さんが <yukicoder> " + str(
                                 problemName) + " を AC しました！\n" + "https://yukicoder.me/submissions/" + str(subID) + "\n" + timeStamp)
-                            log.logger.info("cper_bot-YK-detection: " + userID + " ( @" + twitterID +
+                            print("cper_bot-YK-detection: " + userID + " ( @" + twitterID +
                                             " ) 's new AC submission (problem : " + str(problemName) + ")")
                         except:
-                            log.logger.info(
+                            print(
                                 "cper_bot-YK-detection: Tweet Error")
         if skipFlag:
             break
@@ -148,6 +147,6 @@ def detection():
 
 
 if __name__ == '__main__':
-    log.logger.info("cper_bot-YK-detection: Running as debug...")
+    print("cper_bot-YK-detection: Running as debug...")
     detection()
-    log.logger.info("cper_bot-YK-detection: Debug finished")
+    print("cper_bot-YK-detection: Debug finished")

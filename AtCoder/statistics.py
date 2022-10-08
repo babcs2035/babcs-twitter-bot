@@ -8,7 +8,6 @@ import requests
 import dropbox
 import datetime
 import tweepy
-import log
 import re
 import matplotlib.pyplot as plt
 import os
@@ -40,7 +39,7 @@ def downloadFromDropbox(type):
             "AtCoder/subCount_hour.txt", "/AtCoder/subCount_hour.txt")
         with open("AtCoder/subCount_hour.txt", "rb") as f:
             subCount = pickle.load(f)
-        log.logger.info(
+        print(
             "cper_bot-AtCoder-statistics: Downloaded subCount_hour (size : ", str(len(subCount)), ")")
 
     if type == 1:
@@ -50,7 +49,7 @@ def downloadFromDropbox(type):
             "AtCoder/subCount_day.txt", "/AtCoder/subCount_day.txt")
         with open("AtCoder/subCount_day.txt", "rb") as f:
             subCount = pickle.load(f)
-        log.logger.info(
+        print(
             "cper_bot-AtCoder-statistics: Downloaded subCount_day (size : ", str(len(subCount)), ")")
 
 # Dropbox にアップロード
@@ -75,7 +74,7 @@ def uploadToDropbox(type):
         with open("AtCoder/subCount_hour.txt", "rb") as f:
             dbx.files_upload(f.read(), "/AtCoder/subCount_hour.txt",
                              mode=dropbox.files.WriteMode.overwrite)
-        log.logger.info(
+        print(
             "cper_bot-AtCoder-statistics: Uploaded subCount_hour (size : ", str(len(subCount)), ")")
 
     if type == 1:
@@ -86,7 +85,7 @@ def uploadToDropbox(type):
         with open("AtCoder/subCount_day.txt", "rb") as f:
             dbx.files_upload(f.read(), "/AtCoder/subCount_day.txt",
                              mode=dropbox.files.WriteMode.overwrite)
-        log.logger.info(
+        print(
             "cper_bot-AtCoder-statistics: Uploaded subCount_day (size : ", str(len(subCount)), ")")
 
 # type = 0 : 1 hour
@@ -123,7 +122,7 @@ def statistics(type):
     request = session.get(
         url="https://kenkoooo.com/atcoder/resources/contests.json", headers=headers)
     contestsJsonData = json.loads(request.text)
-    log.logger.info("cper_bot-AtCoder-statistics: Downloaded contestsJsonData")
+    print("cper_bot-AtCoder-statistics: Downloaded contestsJsonData")
     maxSubID = -1
     for contest in contestsJsonData:
 
@@ -135,7 +134,7 @@ def statistics(type):
             sublistHTML.raise_for_status()
             sublistData = BeautifulSoup(sublistHTML.text, "html.parser")
         except:
-            log.logger.info("cper_bot-AtCoder-statistics: sublistHTML Error")
+            print("cper_bot-AtCoder-statistics: sublistHTML Error")
             continue
         sublistTable = sublistData.find_all(
             "table", class_="table table-bordered table-striped small th-center")
@@ -178,7 +177,7 @@ def statistics(type):
     plt.savefig("AtCoder/subCount_" + prefix + ".png")
     api.update_status_with_media(filename="AtCoder/subCount_" + prefix + ".png", status="AtCoder で " + str(xs[len(
         xs) - 1]).replace("\n", " ") + " の間に約 " + str(ys[len(ys) - 1]).replace("\n", " ") + " 回提出がありました．\n" + timeStamp)
-    log.logger.info(
+    print(
         "cper_bot-AtCoder-statistics: Tweeted subCount_" + prefix + ".png")
 
     # データをアップロード
@@ -186,6 +185,6 @@ def statistics(type):
 
 
 if __name__ == '__main__':
-    log.logger.info("cper_bot-AtCoder-statistics: Running as debug...")
+    print("cper_bot-AtCoder-statistics: Running as debug...")
     statistics(0)
-    log.logger.info("cper_bot-AtCoder-statistics: Debug finished")
+    print("cper_bot-AtCoder-statistics: Debug finished")

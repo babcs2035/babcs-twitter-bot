@@ -8,7 +8,6 @@ from dropbox.files import WriteMode
 import dropbox
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from apscheduler.schedulers.blocking import BlockingScheduler
-import log
 import os
 
 
@@ -88,7 +87,7 @@ def scheduled_job():
             if row not in data:
                 results.append(row)
     except:
-        log.logger.info("line_bot: pageHTML Error")
+        print("line_bot: pageHTML Error")
         return
 
     # Send LINE messages
@@ -99,8 +98,7 @@ def scheduled_job():
         if os.environ["LINE_GROUP_ID"] != "NULL":
             line_bot_api.push_message(
                 os.environ["LINE_GROUP_ID"], TextSendMessage(text=message))
-        log.logger.info(
-            "line_bot: Detected new information (title : " + row[1] + ")\n")
+        print("line_bot: Detected new information (title : " + row[1] + ")\n")
 
     # Update the data
     data = newData

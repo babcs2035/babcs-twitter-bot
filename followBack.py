@@ -3,7 +3,6 @@ import json
 from requests_oauthlib import OAuth1Session
 import datetime
 import tweepy
-import log
 import os
 
 
@@ -34,7 +33,7 @@ def followBack():
     for user in list_apr:
         try:
             api.create_friendship(user)
-            log.logger.info(
+            print(
                 "cper_bot-followBack: Created friendship with %s" % user)
             followedCnt = followedCnt + 1
             # OAuth でツイートを取得
@@ -45,7 +44,7 @@ def followBack():
             followedList.append(
                 {"user_name": user_data["name"], "user_id": user_data["screen_name"]})
         except:
-            log.logger.info(
+            print(
                 "cper_bot-followBack: Could not create friendship with %s" % user)
     followStr = "新しく " + str(followedCnt) + " 人をフォローしました：\n"
     for user in followedList:
@@ -55,7 +54,7 @@ def followBack():
     # ツイート
     if followedCnt > 0:
         api.update_status(followStr + "\n" + timeStamp)
-    log.logger.info("cper_bot-followBack: 新規フォロー " + str(followedCnt) + " 人")
+    print("cper_bot-followBack: 新規フォロー " + str(followedCnt) + " 人")
 
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY2"]
@@ -78,7 +77,7 @@ def followBack():
     for user in list_apr:
         try:
             api.create_friendship(user)
-            log.logger.info(
+            print(
                 "cpcontest_bot-followBack: Created friendship with %s" % user)
             followedCnt = followedCnt + 1
             # OAuth でツイートを取得
@@ -89,7 +88,7 @@ def followBack():
             followedList.append(
                 {"user_name": user_data["name"], "user_id": user_data["screen_name"]})
         except:
-            log.logger.info(
+            print(
                 "cpcontest_bot-followBack: Could not create friendship with %s" % user)
     followStr = "新しく " + str(followedCnt) + " 人をフォローしました：\n"
     for user in followedList:
@@ -99,11 +98,11 @@ def followBack():
     # ツイート
     if followedCnt > 0:
         api.update_status(followStr + "\n" + timeStamp)
-    log.logger.info("cpcontest_bot-followBack: 新規フォロー " +
+    print("cpcontest_bot-followBack: 新規フォロー " +
                     str(followedCnt) + " 人")
 
 
 if __name__ == '__main__':
-    log.logger.info("followBack: Running as debug...")
+    print("followBack: Running as debug...")
     followBack()
-    log.logger.info("followBack: Debug finished")
+    print("followBack: Debug finished")

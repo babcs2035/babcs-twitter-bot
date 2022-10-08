@@ -7,7 +7,6 @@ import urllib.request
 import json
 import datetime
 import tweepy
-import log
 import os
 
 
@@ -32,7 +31,7 @@ def downloadFromDropbox():
         "cpcontest_bot/lastTweetID.txt", "/cpcontest_bot/lastTweetID.txt")
     with open("cpcontest_bot/lastTweetID.txt", "r") as f:
         lastTweetID = f.readline()
-    log.logger.info(
+    print(
         "cpcontest_bot-twitter: Downloaded lastTweetID : ", str(lastTweetID))
 
 # Dropbox にアップロード
@@ -56,7 +55,7 @@ def uploadToDropbox():
         with open("cpcontest_bot/lastTweetID.txt", "rb") as f:
             dbx.files_delete("/cpcontest_bot/lastTweetID.txt")
             dbx.files_upload(f.read(), "/cpcontest_bot/lastTweetID.txt")
-        log.logger.info(
+        print(
             "cpcontest_bot-twitter: Uploaded lastTweetID : ", str(lastTweetID))
 
 
@@ -71,7 +70,7 @@ def scheduled_job():
     global lastTweetID
     global idFixedFlag
 
-    log.logger.info("cpcontest_bot-twitter: ----- twitter Start -----")
+    print("cpcontest_bot-twitter: ----- twitter Start -----")
 
     # 各種キー設定
     CK = os.environ["CONSUMER_KEY2"]
@@ -120,7 +119,7 @@ def scheduled_job():
                         tweetSplited[2], str(userData["screen_name"]), 0)
                     api.update_status(tweetText + timeStamp,
                                       in_reply_to_status_id=tweet["id"])
-                    log.logger.info(
+                    print(
                         "cpcontest_bot-twitter: Tweeted " + tweetText)
 
                 # unregister
@@ -129,7 +128,7 @@ def scheduled_job():
                         tweetSplited[2], str(userData["screen_name"]), 1)
                     api.update_status(tweetText + timeStamp,
                                       in_reply_to_status_id=tweet["id"])
-                    log.logger.info(
+                    print(
                         "cpcontest_bot-twitter: Tweeted " + tweetText)
 
         # 変更されたデータをアップロード
@@ -137,10 +136,10 @@ def scheduled_job():
         uploadToDropbox()
 
     else:
-        log.logger.info("cpcontest_bot-twitter: Twitter API Error: %d" %
+        print("cpcontest_bot-twitter: Twitter API Error: %d" %
                         timeline_json.status_code)
 
-    log.logger.info("cpcontest_bot-twitter: ----- twitter End -----")
+    print("cpcontest_bot-twitter: ----- twitter End -----")
 
 
 # おまじない

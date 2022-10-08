@@ -18,9 +18,7 @@ sched = BlockingScheduler(
     }
 )
 
-log.log_init()
-log.logger.info("Started")
-
+print("Started")
 
 # Codeforces コンテスト一覧（毎日 0:00, 6:00, 12:00, 18:00）
 
@@ -28,9 +26,9 @@ log.logger.info("Started")
 @sched.scheduled_job('cron', minute='0', hour='0, 6, 12, 18', executor='threadpool')
 def scheduled_job():
 
-    log.logger.info("cper_bot-CF-bot: ----- CF-contest Start -----")
+    print("cper_bot-CF-bot: ----- CF-contest Start -----")
     contest.contest()
-    log.logger.info("cper_bot-CF-bot: ----- CF-contest End -----")
+    print("cper_bot-CF-bot: ----- CF-contest End -----")
 
 # Codeforces AC 検出（毎時 10, 25, 40, 55 分）
 
@@ -38,9 +36,9 @@ def scheduled_job():
 @sched.scheduled_job('cron', minute='10, 25, 40, 55', hour='*/1', executor='threadpool')
 def scheduled_job():
 
-    log.logger.info("cper_bot-CF-bot: ----- CF-detection Start -----")
+    print("cper_bot-CF-bot: ----- CF-detection Start -----")
     detection.detection()
-    log.logger.info("cper_bot-CF-bot: ----- CF-detection End -----")
+    print("cper_bot-CF-bot: ----- CF-detection End -----")
 
 # Codeforces AC 提出数ランキング（毎日 0:00）
 
@@ -48,9 +46,9 @@ def scheduled_job():
 @sched.scheduled_job('cron', minute='0', hour='0', executor='threadpool')
 def scheduled_job():
 
-    log.logger.info("cper_bot-CF-bot: ----- CF-ranking Start -----")
+    print("cper_bot-CF-bot: ----- CF-ranking Start -----")
     ranking.ranking()
-    log.logger.info("cper_bot-CF-bot: ----- CF-ranking End -----")
+    print("cper_bot-CF-bot: ----- CF-ranking End -----")
 
 # Codeforces コンテスト成績（毎日 6:00）
 
@@ -58,11 +56,11 @@ def scheduled_job():
 @sched.scheduled_job('cron', minute='0', hour='6', executor='threadpool')
 def scheduled_job():
 
-    log.logger.info("cper_bot-CF-bot: ----- CF-result Start -----")
+    print("cper_bot-CF-bot: ----- CF-result Start -----")
     result.result()
-    log.logger.info("cper_bot-CF-bot: ----- CF-result End -----")
+    print("cper_bot-CF-bot: ----- CF-result End -----")
 
 
 # おまじない
 sched.start()
-log.logger.info("Set up scheduler")
+print("Set up scheduler")

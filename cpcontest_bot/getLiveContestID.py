@@ -4,7 +4,6 @@ import json
 import requests
 import time
 import datetime
-import log
 import os
 
 
@@ -30,7 +29,7 @@ def get():
         contestsHTML.raise_for_status()
         contestsData = BeautifulSoup(contestsHTML.text, "html.parser")
     except:
-        log.logger.info("cpcontest_bot-getLiveContestID: contestsHTML Error")
+        print("cpcontest_bot-getLiveContestID: contestsHTML Error")
         return
     divs = contestsData.find_all("div", class_="col-lg-9 col-md-8")
     if str(divs[0].contents[1].contents[1].contents[0]) == "開催中のコンテスト":
@@ -46,12 +45,12 @@ def get():
                 continue
             results.append(contestID + "_team")
 
-    log.logger.info("cpcontest_bot-getLiveContestID: found " +
+    print("cpcontest_bot-getLiveContestID: found " +
                     str(len(results)) + " contests")
     return results
 
 
 if __name__ == '__main__':
-    log.logger.info("cpcontest_bot-getLiveContestID: Running as debug...")
-    log.logger.info(get())
-    log.logger.info("cpcontest_bot-getLiveContestID: Debug finished")
+    print("cpcontest_bot-getLiveContestID: Running as debug...")
+    print(get())
+    print("cpcontest_bot-getLiveContestID: Debug finished")
