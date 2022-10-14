@@ -5,6 +5,9 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 import followBack
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # インスタンス化
 sched = BlockingScheduler(
     executors={
